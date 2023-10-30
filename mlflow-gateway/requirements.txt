@@ -6,3 +6,6 @@ uvicorn[standard]<1
 watchfiles<1
 aiohttp<4
 boto3<2,>=1.28.56
+
+# BUG: gateway actually required psutil
+psutil
