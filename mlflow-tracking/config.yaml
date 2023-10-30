@@ -1,6 +1,6 @@
 name: "mlflow-tracking"
 description: "MLflow Tracking Server for managing models + prompts"
-version: "0.0.4"
+version: "0.0.5"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-tracking"
 slug: "mlflow-tracking"
 init: false
@@ -9,9 +9,13 @@ arch:
   - amd64
 startup: services
 homeassistant_api: true
-ingress: true
-panel_icon: mdi:console
+panel_icon: mdi:flask
 panel_title: MLflow
+ingress: true
 ports:
   8099/tcp: 8099
+map:
+  - share:rw # Used for artifacts storage, expects "tracking" share in HA
+environment:
+  FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
 image: "ghcr.io/akshaya-a/{arch}-mlflow-hass-tracking"
