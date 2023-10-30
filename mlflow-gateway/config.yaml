@@ -1,0 +1,23 @@
+name: "mlflow-gateway"
+description: "MLflow Gateway for managing model providers"
+version: "0.0.5"
+url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-gateway"
+slug: "mlflow-gateway"
+init: false
+arch:
+  - aarch64
+  - amd64
+startup: services
+homeassistant_api: true
+panel_icon: mdi:flask
+panel_title: MLflow Gateway
+ingress: true
+ports:
+  8099/tcp: 8099
+environment:
+  FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
+image: "ghcr.io/akshaya-a/{arch}-mlflow-hass-gateway"
+options:
+  OPENAI_API_KEY: ""
+schema:
+  OPENAI_API_KEY: str
