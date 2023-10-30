@@ -14,3 +14,4 @@ panel_icon: mdi:console
 panel_title: MLflow
 ports:
   8099/tcp: 8099
+image: "ghcr.io/akshaya-a/{arch}-mlflow-hass-tracking"

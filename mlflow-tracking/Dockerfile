@@ -1,4 +1,5 @@
-FROM ghcr.io/mlflow/mlflow:v2.7.1
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
 # Copy data for add-on
 COPY run.sh /
