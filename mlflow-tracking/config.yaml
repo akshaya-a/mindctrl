@@ -1,6 +1,6 @@
 name: "mlflow-tracking"
 description: "MLflow Tracking Server for managing models + prompts"
-version: "0.0.5"
+version: "0.0.6"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-tracking"
 slug: "mlflow-tracking"
 init: false
@@ -12,8 +12,9 @@ homeassistant_api: true
 panel_icon: mdi:flask
 panel_title: MLflow
 ingress: true
+ingress_port: 5000
 ports:
-  8099/tcp: 8099
+  5000/tcp: 5000
 map:
   - share:rw # Used for artifacts storage, expects "tracking" share in HA
 environment:
