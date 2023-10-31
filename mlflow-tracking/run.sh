@@ -2,7 +2,9 @@
 
 echo "Starting MLflow server script"
 
-bashio::addons
+bashio::log.info "Querying addons for gateway"
+bashio::addons.installed
+
 bashio::log.info "Starting MLflow server"
 
 # TODO: convert this to Supervisor REPO_SLUG format via addon discovery
