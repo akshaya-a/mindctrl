@@ -1,10 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bashio
 
 echo "Starting MLflow server"
 
 echo "Calling supervisor"
 addons = $(curl -X GET -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" -H "Content-Type: application/json" http://supervisor/addons)
 echo $addons
+
+bashio::supervisor.addons
+
+bashio::api.supervisor GET /addons
 
 # TODO: convert this to Supervisor REPO_SLUG format via addon discovery
 export MLFLOW_GATEWAY_URI="http://localhost:5001"
