@@ -36,6 +36,6 @@ RUN chmod a+x /run.sh
 
 COPY route-config.yaml /
 # Patch psutil as a temporary fix for lack of aarch64 wheel
-COPY utils.py.patch /usr/local/lib/python3.10/site-packages/mlflow/gateway/utils.py
+COPY utils.py.patch /venv/lib/python3.11/site-packages/mlflow/gateway/utils.py
 
 CMD [ "/run.sh" ]
