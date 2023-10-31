@@ -2,7 +2,8 @@
 
 bashio::log.info "Starting MLflow tracking server script"
 
-export MLFLOW_GATEWAY_URI="http://05657f25_mlflowgateway:5001"
+# repo_slug -> repo-slug!
+export MLFLOW_GATEWAY_URI="http://05657f25-mlflowgateway:5001"
 
 bashio::log.info "Querying MLflow gateway health: ${MLFLOW_GATEWAY_URI}/health"
 curl -i "${MLFLOW_GATEWAY_URI}/health"
