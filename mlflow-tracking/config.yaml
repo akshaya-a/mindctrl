@@ -9,6 +9,7 @@ arch:
   - amd64
 startup: services
 homeassistant_api: true
+hassio_api: true # Discover gateway
 panel_icon: mdi:flask
 panel_title: MLflow
 ingress: true
