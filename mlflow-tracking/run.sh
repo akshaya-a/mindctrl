@@ -1,14 +1,11 @@
 #!/usr/bin/env bashio
 
-echo "Starting MLflow server script"
+bashio::log.info "Starting MLflow tracking server script"
 
-bashio::log.info "Querying addons for gateway"
-bashio::addons.installed
+export MLFLOW_GATEWAY_URI="http://05657f25_mlflowgateway:5001"
 
-bashio::log.info "Starting MLflow server"
-
-# TODO: convert this to Supervisor REPO_SLUG format via addon discovery
-export MLFLOW_GATEWAY_URI="http://localhost:5001"
+bashio::log.info "Querying MLflow gateway health: ${MLFLOW_GATEWAY_URI}/health"
+curl -i "${MLFLOW_GATEWAY_URI}/health"
 
 mlflow server \
   --backend-store-uri sqlite:///data/mydb.sqlite \

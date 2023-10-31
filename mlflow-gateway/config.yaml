@@ -1,8 +1,8 @@
-name: "mlflow-gateway"
+name: "MLflow Gateway"
 description: "MLflow Gateway for managing model providers"
-version: "0.0.13"
+version: "0.0.16"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-gateway"
-slug: "mlflow-gateway"
+slug: "mlflowgateway"
 init: false
 arch:
   - aarch64

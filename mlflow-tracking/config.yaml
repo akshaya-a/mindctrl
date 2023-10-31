@@ -1,8 +1,8 @@
-name: "mlflow-tracking"
+name: "MLflow Tracking"
 description: "MLflow Tracking Server for managing models + prompts"
-version: "0.0.15"
+version: "0.0.16"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-tracking"
-slug: "mlflow-tracking"
+slug: "mlflowtracking"
 init: false
 arch:
   - aarch64
