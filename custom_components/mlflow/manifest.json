@@ -1,0 +1,25 @@
+{
+    "domain": "mlflow",
+    "name": "MLflow",
+    "codeowners": [
+        "@akshaya-a"
+    ],
+    "dependencies": [
+        "configurator",
+        "http"
+    ],
+    "loggers": [
+        "mlflow",
+        "azureml"
+    ],
+    "documentation": "https://github.com/akshaya-a/mlflow-hass",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/akshaya-a/mlflow-hass/issues",
+    "requirements": [
+        "mlflow==2.7.1",
+        "azureml-mlflow"
+    ],
+    "version": "v0.0.1",
+    "integration_type": "hub",
+    "config_flow": true
+}
