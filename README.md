@@ -24,6 +24,8 @@ LLMs are excellent reasoning agents with unstructured input. Someone familiar wi
 LLMs can be used to reason about state changes more naturally. Can we send the state of multiple sensors and ask the LLM to decide a higher level status in the home?
 - (motion, time of day, device usage) -> "is AK asleep?"
 
+### Wait what about Langchain?
+You heard about Langchain but not this whole MLflow business - what's up with that? [Read more about how all this fits together!](/docs/prompt-techniques.md)
 ## How?
 
 ### Getting Started

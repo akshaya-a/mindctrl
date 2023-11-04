@@ -1,0 +1,37 @@
+name: "MLflow"
+description: "LLMOps for Homeassistant"
+version: "0.0.1"
+url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-addon"
+slug: "mlflow"
+init: false
+arch:
+  - aarch64
+  - amd64
+startup: services
+homeassistant_api: true
+hassio_api: true # Discover gateway
+panel_icon: mdi:flask
+panel_title: MLflow
+ingress: true
+ingress_port: 5000
+ports:
+  5000/tcp: 5000 # tracking server
+  5001/tcp: 5001 # ai gateway
+map:
+  - share:rw # Used for artifacts storage, expects "tracking" share in HA
+environment:
+  FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
+image: "ghcr.io/akshaya-a/{arch}-mlflow-hass"
+options:
+  OPENAI_API_KEY: ""
+  server_pip_packages: # TODO: not working for debugging, figure out later
+    - mlflow==2.7.1
+    - azureml-mlflow
+    - fastapi
+    - uvicorn[standard]
+    - openai
+    - homeassistant
+schema:
+  OPENAI_API_KEY: str
+  server_pip_packages:
+    - "match(.*)" # TODO: figure out a better regex for version specifiers

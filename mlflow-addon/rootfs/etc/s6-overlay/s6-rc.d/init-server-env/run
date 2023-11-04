@@ -1,0 +1,24 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Example
+# Example init script, runs before any other service
+# ==============================================================================
+
+bashio::log.info "Creating multiserver python env"
+
+
+packages=$(bashio::config 'server_pip_packages')
+bashio::log.info "Configured server packages:\n${packages}"
+
+# bashio::log.info "Creating server requirements.txt"
+# echo "${packages}" > server-requirements.txt
+
+# bashio::log.info "Creating server env"
+# python -m venv /usr/local/serverenv
+
+# bashio::log.info "Activating server environment"
+# source /usr/local/serverenv/bin/activate
+
+# bashio::log.info "Installing server packages"
+# python3 -m pip install -r server-requirements.txt

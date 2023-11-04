@@ -1,0 +1,12 @@
+# https://raw.githubusercontent.com/mlflow/mlflow/master/requirements/gateway-requirements.txt
+
+mlflow==2.7.1
+pydantic<3,>=1.0
+fastapi<1
+uvicorn[standard]<1
+watchfiles<1
+aiohttp<4
+boto3<2,>=1.28.56
+openai
+homeassistant
+azureml-mlflow
