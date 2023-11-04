@@ -23,12 +23,9 @@ RUN set -eux; \
     \
     python3 --version
 
-RUN python3 -m venv /venv
-ENV PATH /venv/bin:$PATH
-
 COPY requirements.txt /
 
-RUN pip install --no-cache -r /requirements.txt
+RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 COPY rootfs /
 
