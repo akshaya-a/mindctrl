@@ -17,6 +17,7 @@ RUN set -eux; \
     tzdata \
     python3-full \
     python3-pip \
+    python3-ciso8601 \
     ; \
     rm -rf /var/lib/apt/lists/*; \
     \
