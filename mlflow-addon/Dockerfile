@@ -35,6 +35,9 @@ RUN chmod a+x /usr/bin/run_gateway.sh
 RUN chmod a+x /usr/bin/run_multiserver.sh
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/init-server-env/run
 
+# Patch psutil as a temporary fix for lack of aarch64 wheel
+COPY utils.py.patch /usr/local/lib/python3.11/dist-packages/mlflow/gateway/utils.py
+
 LABEL \
     io.hass.name="${BUILD_NAME}" \
     io.hass.description="${BUILD_DESCRIPTION}" \
