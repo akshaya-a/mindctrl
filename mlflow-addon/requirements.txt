@@ -8,8 +8,6 @@ watchfiles<1
 aiohttp<4
 boto3<2,>=1.28.56
 openai
-homeassistant
+# homeassistant>2023.11 # TODO: I need to switch to Arch from debian :(
+# https://aur.archlinux.org/packages/python-mlflow
 azureml-mlflow
-# Force pip requirements to pick up the apt-installed packages
-ciso8601==2.2.0
-python-slugify==4.0.0
