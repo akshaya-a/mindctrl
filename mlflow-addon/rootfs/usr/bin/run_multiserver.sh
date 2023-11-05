@@ -14,4 +14,4 @@ export NOTIFY_FD="${notifyfd}"
 pyloc=$(which python3)
 bashio::log.info "pyloc: ${pyloc}"
 cd /usr/bin
-python3 -m uvicorn multiserver:app
+python3 -m uvicorn multiserver:app --host 0.0.0.0 --port 5002

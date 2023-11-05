@@ -1,6 +1,6 @@
 name: "MLflow"
 description: "LLMOps for Homeassistant"
-version: "0.0.1"
+version: "0.0.2"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-addon"
 slug: "mlflow"
 init: false
@@ -17,6 +17,7 @@ ingress_port: 5000
 ports:
   5000/tcp: 5000 # tracking server
   5001/tcp: 5001 # ai gateway
+  5002/tcp: 5002 # multiserver
 map:
   - share:rw # Used for artifacts storage, expects "tracking" share in HA
 environment:

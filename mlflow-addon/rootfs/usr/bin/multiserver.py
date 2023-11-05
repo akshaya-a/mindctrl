@@ -1,10 +1,30 @@
 import os
 from typing import Union
 
+# Eventing - move this to plugin
+from contextlib import asynccontextmanager
+import asyncio
+
+# Core functionality
 from fastapi import FastAPI
 import mlflow
 
-app = FastAPI()
+
+# TODO: Add webhooks/eventing to MLflow OSS server. AzureML has eventgrid support
+# In its absence, we poll the MLflow server for changes to the model registry
+async def poll_registry(delay_seconds: float = 10.0):
+    while True:
+        print("Polling registry for changes")
+        await asyncio.sleep(delay=delay_seconds)
+
+
+@asynccontextmanager
+async def registry_syncer(app: FastAPI):
+    asyncio.create_task(poll_registry(10.0))
+    yield
+
+
+app = FastAPI(lifespan=registry_syncer)
 
 tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
 if tracking_uri is not None:
@@ -19,8 +39,9 @@ def read_root():
     }
 
 
-@app.get("/models")
-def list_models():
+# This logic is obviously wrong, stub impl
+@app.get("/deployed-models")
+def list_deployed_models():
     models = mlflow.search_registered_models()
     return {model.name: model.last_updated_timestamp for model in models}
 
