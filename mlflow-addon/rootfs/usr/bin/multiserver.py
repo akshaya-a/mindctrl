@@ -30,6 +30,9 @@ tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
 if tracking_uri is not None:
     mlflow.set_tracking_uri(tracking_uri)
 
+print(f"Tracking URI: {mlflow.get_tracking_uri()}")
+print(f"Model Registry URI: {mlflow.get_registry_uri()}")
+
 
 @app.get("/")
 def read_root():
