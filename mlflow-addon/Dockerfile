@@ -17,7 +17,9 @@ RUN set -eux; \
     tzdata \
     python3-full \
     python3-pip \
+    # The more I put here the easier x-plat becomes for aarch64
     python3-ciso8601 \
+    python3-slugify \
     ; \
     rm -rf /var/lib/apt/lists/*; \
     \
@@ -25,6 +27,7 @@ RUN set -eux; \
 
 COPY requirements.txt /
 
+RUN pip3 freeze
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 COPY rootfs /

@@ -10,3 +10,6 @@ boto3<2,>=1.28.56
 openai
 homeassistant
 azureml-mlflow
+# Force pip requirements to pick up the apt-installed packages
+ciso8601==2.2.0
+python-slugify==4.0.0
