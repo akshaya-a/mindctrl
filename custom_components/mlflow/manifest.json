@@ -18,8 +18,8 @@
         "azureml"
     ],
     "requirements": [
-        "mlflow==2.7.1",
+        "mlflow-skinny",
         "azureml-mlflow"
     ],
-    "version": "v0.0.1"
+    "version": "v0.0.2"
 }
