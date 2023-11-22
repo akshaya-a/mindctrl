@@ -17,4 +17,4 @@ bashio::log.info "pyloc: ${pyloc}"
 
 # change directory, otherwise uvicorn will not find multiserver.py
 cd /usr/bin
-python3 -m uvicorn multiserver:app --host 0.0.0.0 --port 5002
+python3 -m uvicorn multiserver.main:app --host 0.0.0.0 --port 5002

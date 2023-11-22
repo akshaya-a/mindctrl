@@ -3,7 +3,7 @@ name: Builder
 # TODO: figure out a more wildcard-y way to do this
 env:
   BUILD_ARGS: "--test"
-  MONITORED_FILES: "build.yaml config.yaml Dockerfile run_tracking.sh run_gateway.sh run_multiserver.sh requirements.txt config.py route-config.yaml multiserver.py"
+  MONITORED_FILES: "build.yaml config.yaml Dockerfile run_tracking.sh run_gateway.sh run_multiserver.sh requirements.txt config.py route-config.yaml main.py"
 
 on:
   push:
