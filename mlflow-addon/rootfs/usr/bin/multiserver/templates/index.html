@@ -1,0 +1,324 @@
+<html lang="en">
+
+<head>
+    <title>Real time streaming</title>
+    <meta charset="utf-8" />
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<style>
+    details>details {
+        padding-left: 20px;
+    }
+
+    body {
+        background-color: #2b2b2b;
+        color: #a9b7c6;
+        font-family: Arial, sans-serif;
+        display: flex;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        border: 1px solid #565656;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #3c3f41;
+        color: #a9b7c6;
+    }
+
+    tr:nth-child(even) {
+        background-color: #323232;
+    }
+
+    tr:hover {
+        background-color: #464646;
+    }
+
+    #pauseButton {
+        background-color: #3c3f41;
+        color: #a9b7c6;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        transition-duration: 0.4s;
+    }
+
+    #pauseButton:hover {
+        background-color: #464646;
+        color: white;
+    }
+
+    #container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    #chatcontainer {
+        flex: 1;
+    }
+
+    #table {
+        flex: 1;
+        margin-right: 20px;
+        margin-right: 10px;
+    }
+
+    #chatbox {
+        height: 400px;
+        padding: 10px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        font-family: Arial, sans-serif;
+    }
+
+    #inputContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    #messages li {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    .user-message {
+        align-self: flex-end;
+        background-color: #0b93f6;
+        color: white;
+    }
+
+    .reply-message {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+        color: black;
+    }
+
+    #messages {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        list-style-type: none;
+        padding-left: unset;
+    }
+
+    /* Style for the scrollbar */
+    #messages::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+        background: #333;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+        background: #666;
+    }
+
+    #messages::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    #messageInput {
+        margin-bottom: 10px;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #444;
+        color: white;
+        outline: none;
+    }
+
+    #sendButton {
+        padding: 10px;
+        background-color: #0b93f6;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #sendButton:hover {
+        background-color: #444;
+    }
+</style>
+
+<body>
+    <div id="chatcontainer">
+        <div id="chatbox">
+            <ul id="messages"></ul>
+        </div>
+        <div id="inputContainer">
+            <input type="text" id="messageInput" placeholder="Type your message here...">
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('sendButton').addEventListener('click', function () {
+            const messageInput = document.getElementById('messageInput');
+            const messages = document.getElementById('messages');
+
+            // Check if the input is empty
+            if (messageInput.value.trim() === '') {
+                return;
+            }
+
+            // Add the user's message to the chatbox
+            const userLi = document.createElement('li');
+            userLi.className = 'user-message';
+            userLi.innerHTML = `<strong>User:</strong> ${messageInput.value}`;
+            messages.appendChild(userLi);
+
+            const query = `${messageInput.value}`;
+            const payload = {
+                "dataframe_split": {
+                    "data": [[query]],
+                    "columns": ["query"],
+                    "index": [0]
+                }
+            };
+
+            // Clear the input field
+            messageInput.value = '';
+
+            // Send the message
+            const chat_url = '{{ chat_url }}';
+            console.debug(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
+            fetch(chat_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.debug(data);
+                    const replyLi = document.createElement('li');
+                    replyLi.className = 'reply-message';
+                    replyLi.innerHTML = `<strong>Mindctrl:</strong> ${data[0]}`;
+                    messages.appendChild(replyLi);
+                });
+        });
+        document.getElementById('messageInput').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents the default action (form submission in this case)
+                document.getElementById('sendButton').click();
+            }
+        });
+    </script>
+    <br />
+    <div id="table">
+        <br />
+        <button id="pauseButton">Pause Listening</button>
+        <br />
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+
+        let eventData = [];
+        const tbody = d3.select("tbody");
+        let paused = false;
+
+        const update = (data) => {
+            // If paused, don't update the table
+            if (paused) return;
+
+            const rows = tbody.selectAll("tr").data(data, (d) => d.time);
+            const rowsEnter = rows.enter().append("tr");
+            rows.exit().remove();
+            // Merge the enter and update selections
+            const rowsMerge = rowsEnter.merge(rows);
+
+            const cellsEnter = rowsMerge.selectAll("td").data((d) => Object.values(d)).enter().append("td");
+
+            // Recursive function to handle nested JSON objects
+            function createDetails(json) {
+                let details = "";
+                for (const [key, value] of Object.entries(json)) {
+                    if (typeof value === "object" && value !== null) {
+                        // If the value is another JSON object, call this function with that object
+                        details += `<details><summary>${key}</summary>${createDetails(value)}</details>`;
+                    } else {
+                        details += `<details><summary>${key}</summary>${value}</details>`;
+                    }
+                }
+                return details;
+            }
+
+            function findEntityId(json) {
+                for (const [key, value] of Object.entries(json)) {
+                    if (key === "entity_id") {
+                        return value;
+                    } else if (typeof value === "object" && value !== null) {
+                        const found = findEntityId(value);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            }
+
+            cellsEnter.each(function (d, i) {
+                const cell = d3.select(this);
+                if (i === 1) { // If this is a "value" cell
+                    try {
+                        const json = JSON.parse(d);
+                        const eventType = json.event_type || "unknown_event";
+                        const entityId = findEntityId(json) || "unknown_entity";
+                        const details = `<details><summary>${eventType}: ${entityId}</summary>${createDetails(json)}</details>`;
+                        cell.html(details); // Use the html function to set the cell content
+                    } catch (e) {
+                        console.log(e);
+                        console.log(d);
+                        cell.text(d);
+                    }
+                } else { // If this is not a "value" cell
+                    cell.text(d);
+                }
+            });
+        };
+
+        const ws = new WebSocket("{{ ws_url }}");
+        ws.onmessage = function (event) {
+            // const eventPayload = JSON.parse(event.data);
+            eventData.push({ time: new Date().toISOString(), value: event.data });
+            // Rolling window debug view
+            if (eventData.length > 10) {
+                eventData = eventData.slice(1);
+            }
+            update(eventData);
+        };
+
+        // Add an event listener to the pause button
+        document.getElementById("pauseButton").addEventListener("click", function () {
+            paused = !paused; // Toggle the paused state
+            this.textContent = paused ? "Resume Listening" : "Pause Listening"; // Update the button text
+        });
+
+    </script>
+</body>
+
+</html>
