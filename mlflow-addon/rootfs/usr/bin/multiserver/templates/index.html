@@ -95,6 +95,7 @@
         padding: 10px;
         margin-bottom: 10px;
         border-radius: 20px;
+        max-width: 50%;
     }
 
     .user-message {
@@ -221,6 +222,9 @@
                 document.getElementById('sendButton').click();
             }
         });
+        window.onload = function () {
+            document.getElementById('messageInput').focus();
+        };
     </script>
     <br />
     <div id="table">

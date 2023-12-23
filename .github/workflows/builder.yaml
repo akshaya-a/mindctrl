@@ -23,7 +23,7 @@ jobs:
 
       - name: Get changed files
         id: changed_files
-        uses: jitterbit/get-changed-files@v1
+        uses: masesgroup/retrieve-changed-files@v3
 
       - name: Find add-on directories
         id: addons
@@ -34,14 +34,10 @@ jobs:
         run: |
           declare -a changed_addons
           for addon in ${{ steps.addons.outputs.addons }}; do
-            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon ]]; then
-              for file in ${{ env.MONITORED_FILES }}; do
-                  if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/$file ]]; then
-                    if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
-                      changed_addons+=("\"${addon}\",");
-                    fi
-                  fi
-              done
+            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/ ]]; then
+              if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
+                changed_addons+=("\"${addon}\",");
+              fi
             fi
           done
 
