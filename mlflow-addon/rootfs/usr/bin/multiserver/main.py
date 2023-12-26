@@ -92,6 +92,10 @@ async def lifespan(app: FastAPI):
         elif event_type == "call_service":
             if data["event_data"]["domain"] != "system_log":
                 state_ring_buffer.append(data)
+        elif event_type == "automation_triggered":
+            state_ring_buffer.append(data)
+        elif event_type == "recorder_5min_statistics_generated":
+            return
         else:
             print("UNKNOWN EVENT TYPE:")
             print(data)

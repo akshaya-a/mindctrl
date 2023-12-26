@@ -1,7 +1,7 @@
 name: "MLflow"
 description: "LLMOps for Homeassistant"
-version: "0.0.10"
-url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-addon"
+version: "0.0.11"
+url: "https://github.com/akshaya-a/mindctrl/tree/main/mlflow-addon"
 slug: "mlflow"
 init: false
 arch:
@@ -13,7 +13,7 @@ hassio_api: true # Discover gateway
 panel_icon: mdi:flask
 panel_title: MLflow
 ingress: true
-ingress_port: 5000
+ingress_port: 5002
 ports:
   5000/tcp: 5000 # tracking server
   5001/tcp: 5001 # ai gateway
@@ -26,7 +26,7 @@ image: "ghcr.io/akshaya-a/{arch}-mlflow-hass"
 options:
   OPENAI_API_KEY: ""
   MQTT_BROKER: "localhost"
-  MQTT_PORT: "1833"
+  MQTT_PORT: "1883"
   MQTT_USERNAME: ""
   MQTT_PASSWORD: ""
   server_pip_packages: # TODO: not working for debugging, figure out later
