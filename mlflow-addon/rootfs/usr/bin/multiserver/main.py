@@ -117,7 +117,7 @@ BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))
 
 tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
-if tracking_uri is not None:
+if tracking_uri:
     mlflow.set_tracking_uri(tracking_uri)
 
 print(f"Tracking URI: {mlflow.get_tracking_uri()}")
