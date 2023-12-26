@@ -1,6 +1,6 @@
 name: "MLflow"
 description: "LLMOps for Homeassistant"
-version: "0.0.7"
+version: "0.0.8"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-addon"
 slug: "mlflow"
 init: false
@@ -23,7 +23,7 @@ map:
 environment:
   FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
   MQTT_BROKER: "localhost"
-  MQTT_PORT: 1833
+  MQTT_PORT: "1833"
   MQTT_USERNAME: ""
   MQTT_PASSWORD: ""
   GIT_PYTHON_REFRESH: "quiet"
