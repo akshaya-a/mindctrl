@@ -15,6 +15,13 @@ export NOTIFY_FD="${notifyfd}"
 pyloc=$(which python3)
 bashio::log.info "pyloc: ${pyloc}"
 
+export MQTT_BROKER="$(bashio::config 'MQTT_BROKER')"
+export MQTT_PORT="$(bashio::config 'MQTT_PORT')"
+export MQTT_USERNAME="$(bashio::config 'MQTT_USERNAME')"
+export MQTT_PASSWORD="$(bashio::config 'MQTT_PASSWORD')"
+
+export GIT_PYTHON_REFRESH=quiet
+
 # change directory, otherwise uvicorn will not find multiserver.py
 cd /usr/bin
 python3 -m uvicorn multiserver.main:app --host 0.0.0.0 --port 5002

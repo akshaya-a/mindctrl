@@ -1,6 +1,6 @@
 name: "MLflow"
 description: "LLMOps for Homeassistant"
-version: "0.0.9"
+version: "0.0.10"
 url: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-addon"
 slug: "mlflow"
 init: false
@@ -29,7 +29,6 @@ options:
   MQTT_PORT: "1833"
   MQTT_USERNAME: ""
   MQTT_PASSWORD: ""
-  GIT_PYTHON_REFRESH: "quiet"
   server_pip_packages: # TODO: not working for debugging, figure out later
     - mlflow==2.7.1
     - azureml-mlflow
@@ -39,5 +38,9 @@ options:
     - homeassistant
 schema:
   OPENAI_API_KEY: str
+  MQTT_BROKER: str
+  MQTT_PORT: int
+  MQTT_USERNAME: str
+  MQTT_PASSWORD: str
   server_pip_packages:
     - "match(.*)" # TODO: figure out a better regex for version specifiers
