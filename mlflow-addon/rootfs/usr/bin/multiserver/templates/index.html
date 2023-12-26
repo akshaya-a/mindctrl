@@ -157,171 +157,228 @@
     #sendButton:hover {
         background-color: #444;
     }
+
+    #tabBar {
+        display: flex;
+        justify-content: start;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .tabButton {
+        cursor: pointer;
+        padding: 10px;
+        border: none;
+        background-color: #ddd;
+        margin-right: 10px;
+        /* Add some space between the buttons */
+        flex-grow: 0;
+        /* Prevent the buttons from growing */
+    }
+
+    .tabButton.active {
+        background-color: #bbb;
+    }
+
+    .tabContent {
+        width: 100%;
+        height: calc(100vh - 50px);
+        /* Adjust as needed */
+    }
 </style>
 
 <body>
-    <div id="chatcontainer">
-        <div id="chatbox">
-            <ul id="messages"></ul>
-        </div>
-        <div id="inputContainer">
-            <input type="text" id="messageInput" placeholder="Type your message here...">
-            <button id="sendButton">Send</button>
-        </div>
+    <div id="tabBar">
+        <button id="debugButton" class="tabButton active">Debug</button>
+        <button id="mlflowButton" class="tabButton">MLflow</button>
     </div>
-    <script>
-        document.getElementById('sendButton').addEventListener('click', function () {
-            const messageInput = document.getElementById('messageInput');
-            const messages = document.getElementById('messages');
+    <div id="debugContent" class="tabContent">
 
-            // Check if the input is empty
-            if (messageInput.value.trim() === '') {
-                return;
-            }
+        <div id="chatcontainer">
+            <div id="chatbox">
+                <ul id="messages"></ul>
+            </div>
+            <div id="inputContainer">
+                <input type="text" id="messageInput" placeholder="Type your message here...">
+                <button id="sendButton">Send</button>
+            </div>
+        </div>
+        <script>
+            document.getElementById('sendButton').addEventListener('click', function () {
+                const messageInput = document.getElementById('messageInput');
+                const messages = document.getElementById('messages');
 
-            // Add the user's message to the chatbox
-            const userLi = document.createElement('li');
-            userLi.className = 'user-message';
-            userLi.innerHTML = `<strong>User:</strong> ${messageInput.value}`;
-            messages.appendChild(userLi);
-
-            const query = `${messageInput.value}`;
-            const payload = {
-                "dataframe_split": {
-                    "data": [[query]],
-                    "columns": ["query"],
-                    "index": [0]
+                // Check if the input is empty
+                if (messageInput.value.trim() === '') {
+                    return;
                 }
-            };
 
-            // Clear the input field
-            messageInput.value = '';
+                // Add the user's message to the chatbox
+                const userLi = document.createElement('li');
+                userLi.className = 'user-message';
+                userLi.innerHTML = `<strong>User:</strong> ${messageInput.value}`;
+                messages.appendChild(userLi);
 
-            // Send the message
-            const chat_url = '{{ chat_url }}';
-            console.debug(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
-            fetch(chat_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.debug(data);
-                    const replyLi = document.createElement('li');
-                    replyLi.className = 'reply-message';
-                    replyLi.innerHTML = `<strong>Mindctrl:</strong> ${data[0]}`;
-                    messages.appendChild(replyLi);
-                });
-        });
-        document.getElementById('messageInput').addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevents the default action (form submission in this case)
-                document.getElementById('sendButton').click();
-            }
-        });
-        window.onload = function () {
-            document.getElementById('messageInput').focus();
-        };
-    </script>
-    <br />
-    <div id="table">
-        <br />
-        <button id="pauseButton">Pause Listening</button>
-        <br />
-        <table>
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Event</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <script>
-
-        let eventData = [];
-        const tbody = d3.select("tbody");
-        let paused = false;
-
-        const update = (data) => {
-            // If paused, don't update the table
-            if (paused) return;
-
-            const rows = tbody.selectAll("tr").data(data, (d) => d.time);
-            const rowsEnter = rows.enter().append("tr");
-            rows.exit().remove();
-            // Merge the enter and update selections
-            const rowsMerge = rowsEnter.merge(rows);
-
-            const cellsEnter = rowsMerge.selectAll("td").data((d) => Object.values(d)).enter().append("td");
-
-            // Recursive function to handle nested JSON objects
-            function createDetails(json) {
-                let details = "";
-                for (const [key, value] of Object.entries(json)) {
-                    if (typeof value === "object" && value !== null) {
-                        // If the value is another JSON object, call this function with that object
-                        details += `<details><summary>${key}</summary>${createDetails(value)}</details>`;
-                    } else {
-                        details += `<details><summary>${key}</summary>${value}</details>`;
+                const query = `${messageInput.value}`;
+                const payload = {
+                    "dataframe_split": {
+                        "data": [[query]],
+                        "columns": ["query"],
+                        "index": [0]
                     }
-                }
-                return details;
-            }
+                };
 
-            function findEntityId(json) {
-                for (const [key, value] of Object.entries(json)) {
-                    if (key === "entity_id") {
-                        return value;
-                    } else if (typeof value === "object" && value !== null) {
-                        const found = findEntityId(value);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            }
+                // Clear the input field
+                messageInput.value = '';
 
-            cellsEnter.each(function (d, i) {
-                const cell = d3.select(this);
-                if (i === 1) { // If this is a "value" cell
-                    try {
-                        const json = JSON.parse(d);
-                        const eventType = json.event_type || "unknown_event";
-                        const entityId = findEntityId(json) || "unknown_entity";
-                        const details = `<details><summary>${eventType}: ${entityId}</summary>${createDetails(json)}</details>`;
-                        cell.html(details); // Use the html function to set the cell content
-                    } catch (e) {
-                        console.log(e);
-                        console.log(d);
-                        cell.text(d);
-                    }
-                } else { // If this is not a "value" cell
-                    cell.text(d);
+                // Send the message
+                const chat_url = '{{ chat_url }}';
+                console.debug(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
+                fetch(chat_url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.debug(data);
+                        const replyLi = document.createElement('li');
+                        replyLi.className = 'reply-message';
+                        replyLi.innerHTML = `<strong>Mindctrl:</strong> ${data[0]}`;
+                        messages.appendChild(replyLi);
+                    });
+            });
+            document.getElementById('messageInput').addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevents the default action (form submission in this case)
+                    document.getElementById('sendButton').click();
                 }
             });
-        };
+            window.onload = function () {
+                document.getElementById('messageInput').focus();
+            };
+        </script>
+        <br />
+        <div id="table">
+            <br />
+            <button id="pauseButton">Pause Listening</button>
+            <br />
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <script>
 
-        const ws = new WebSocket("{{ ws_url }}");
-        ws.onmessage = function (event) {
-            // const eventPayload = JSON.parse(event.data);
-            eventData.push({ time: new Date().toISOString(), value: event.data });
-            // Rolling window debug view
-            if (eventData.length > 10) {
-                eventData = eventData.slice(1);
-            }
-            update(eventData);
-        };
+            let eventData = [];
+            const tbody = d3.select("tbody");
+            let paused = false;
 
-        // Add an event listener to the pause button
-        document.getElementById("pauseButton").addEventListener("click", function () {
-            paused = !paused; // Toggle the paused state
-            this.textContent = paused ? "Resume Listening" : "Pause Listening"; // Update the button text
+            const update = (data) => {
+                // If paused, don't update the table
+                if (paused) return;
+
+                const rows = tbody.selectAll("tr").data(data, (d) => d.time);
+                const rowsEnter = rows.enter().append("tr");
+                rows.exit().remove();
+                // Merge the enter and update selections
+                const rowsMerge = rowsEnter.merge(rows);
+
+                const cellsEnter = rowsMerge.selectAll("td").data((d) => Object.values(d)).enter().append("td");
+
+                // Recursive function to handle nested JSON objects
+                function createDetails(json) {
+                    let details = "";
+                    for (const [key, value] of Object.entries(json)) {
+                        if (typeof value === "object" && value !== null) {
+                            // If the value is another JSON object, call this function with that object
+                            details += `<details><summary>${key}</summary>${createDetails(value)}</details>`;
+                        } else {
+                            details += `<details><summary>${key}</summary>${value}</details>`;
+                        }
+                    }
+                    return details;
+                }
+
+                function findEntityId(json) {
+                    for (const [key, value] of Object.entries(json)) {
+                        if (key === "entity_id") {
+                            return value;
+                        } else if (typeof value === "object" && value !== null) {
+                            const found = findEntityId(value);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+
+                cellsEnter.each(function (d, i) {
+                    const cell = d3.select(this);
+                    if (i === 1) { // If this is a "value" cell
+                        try {
+                            const json = JSON.parse(d);
+                            const eventType = json.event_type || "unknown_event";
+                            const entityId = findEntityId(json) || "unknown_entity";
+                            const details = `<details><summary>${eventType}: ${entityId}</summary>${createDetails(json)}</details>`;
+                            cell.html(details); // Use the html function to set the cell content
+                        } catch (e) {
+                            console.log(e);
+                            console.log(d);
+                            cell.text(d);
+                        }
+                    } else { // If this is not a "value" cell
+                        cell.text(d);
+                    }
+                });
+            };
+
+            const ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
+            ws.onmessage = function (event) {
+                // const eventPayload = JSON.parse(event.data);
+                eventData.push({ time: new Date().toISOString(), value: event.data });
+                // Rolling window debug view
+                if (eventData.length > 10) {
+                    eventData = eventData.slice(1);
+                }
+                update(eventData);
+            };
+
+            // Add an event listener to the pause button
+            document.getElementById("pauseButton").addEventListener("click", function () {
+                paused = !paused; // Toggle the paused state
+                this.textContent = paused ? "Resume Listening" : "Pause Listening"; // Update the button text
+            });
+
+        </script>
+    </div>
+    <div id="mlflowContent" class="tabContent" style="display: none;">
+        <iframe src="http://localhost:5000" width="100%" height="100%"></iframe>
+    </div>
+    <script>
+        document.getElementById('debugButton').addEventListener('click', function () {
+            document.getElementById('debugContent').style.display = 'block';
+            document.getElementById('mlflowContent').style.display = 'none';
+            this.classList.add('active');
+            document.getElementById('mlflowButton').classList.remove('active');
         });
 
+        document.getElementById('mlflowButton').addEventListener('click', function () {
+            document.getElementById('debugContent').style.display = 'none';
+            document.getElementById('mlflowContent').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('debugButton').classList.remove('active');
+        });
     </script>
 </body>
 

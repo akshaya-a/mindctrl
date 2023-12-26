@@ -22,6 +22,9 @@ export MQTT_PASSWORD="$(bashio::config 'MQTT_PASSWORD')"
 
 export GIT_PYTHON_REFRESH=quiet
 
+ingress_entry=$(bashio::addon.ingress_entry)
+bashio::log.info "ingress_entry: ${ingress_entry}"
+
 # change directory, otherwise uvicorn will not find multiserver.py
 cd /usr/bin
 python3 -m uvicorn multiserver.main:app --host 0.0.0.0 --port 5002
