@@ -175,6 +175,7 @@ def read_root(request: Request, response_class=HTMLResponse):
     print(ingress_header)
     ws_url = f"{request.url_for('websocket_endpoint')}"
     # chat_url = f"{request.url_for('invoke_labeled_model_version', model_name='chat', model_label='latest')}"
+    ingress_header = ingress_header or ""
     chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
     mlflow_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
 
