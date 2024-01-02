@@ -170,12 +170,13 @@ log_model(
 
 @app.get("/")
 def read_root(request: Request, response_class=HTMLResponse):
-    my_header = request.headers.get("X-Ingress-Path")
+    ingress_header = request.headers.get("X-Ingress-Path")
     print("INGRESS PATH:")
-    print(my_header)
+    print(ingress_header)
     ws_url = f"{request.url_for('websocket_endpoint')}"
     # chat_url = f"{request.url_for('invoke_labeled_model_version', model_name='chat', model_label='latest')}"
-    chat_url = f"/deployed-models/chat/labels/latest/invocations"
+    chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
+    mlflow_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
 
     return templates.TemplateResponse(
         "index.html",
@@ -185,6 +186,7 @@ def read_root(request: Request, response_class=HTMLResponse):
             "model_registry": mlflow.get_registry_uri(),
             "ws_url": ws_url,
             "chat_url": chat_url,
+            "mlflow_url": mlflow_url,
         },
     )
 
