@@ -27,4 +27,8 @@ bashio::log.info "ingress_entry: ${ingress_entry}"
 
 # change directory, otherwise uvicorn will not find multiserver.py
 cd /usr/bin
+
+# TODO: this should be replaced with mlflow gateway usage
+export OPENAI_API_KEY="$(bashio::config 'OPENAI_API_KEY')"
+
 python3 -m uvicorn multiserver.main:app --host 0.0.0.0 --port 5002
