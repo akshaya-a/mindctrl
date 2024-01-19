@@ -1,1 +1,14 @@
-{} 
+{
+    "services": {
+        "invoke_model": {
+            "name": "Invoke Model",
+            "description": "invokes model with given prompt",
+            "fields": {
+                "prompt": {
+                    "name": "Prompt",
+                    "description": "The model prompt"
+                }
+            }
+        }
+    }
+}
