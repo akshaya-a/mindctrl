@@ -5,4 +5,3 @@ invoke_model:
       example: "Hello, who are you?"
       default: "Hello, who are you?"
       required: true
-      type: string
