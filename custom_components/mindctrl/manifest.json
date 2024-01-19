@@ -1,6 +1,6 @@
 {
-    "domain": "mlflow",
-    "name": "MLflow",
+    "domain": "mindctrl",
+    "name": "mindctrl",
     "codeowners": [
         "@akshaya-a"
     ],
@@ -9,17 +9,17 @@
         "configurator",
         "http"
     ],
-    "documentation": "https://github.com/akshaya-a/mlflow-hass",
+    "documentation": "https://github.com/akshaya-a/mindctrl",
     "integration_type": "hub",
     "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/akshaya-a/mlflow-hass/issues",
+    "issue_tracker": "https://github.com/akshaya-a/mindctrl/issues",
     "loggers": [
         "mlflow",
         "azureml"
     ],
     "requirements": [
-        "mlflow-skinny",
+        "mlflow",
         "azureml-mlflow"
     ],
-    "version": "v0.0.2"
+    "version": "v0.0.3"
 }

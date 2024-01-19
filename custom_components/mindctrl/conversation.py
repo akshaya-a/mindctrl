@@ -1,101 +1,20 @@
-"""MLflow integration for Home Assistant"""
-# started from homeassistant/components/openai_conversation
-
-from __future__ import annotations
-
-from functools import partial
-import logging
-from typing import Literal
-
-import mlflow as mlflowlib
-
-import voluptuous as vol
-
 from homeassistant.components import conversation
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_API_KEY, MATCH_ALL
+from homeassistant.const import MATCH_ALL
 from homeassistant.core import (
     HomeAssistant,
-    ServiceCall,
-    ServiceResponse,
-    SupportsResponse,
 )
+from homeassistant.config_entries import ConfigEntry
+from typing import Literal
+from homeassistant.util import ulid
+from homeassistant.helpers import intent, template
 from homeassistant.exceptions import (
-    ConfigEntryNotReady,
-    HomeAssistantError,
     TemplateError,
 )
-from homeassistant.helpers import config_validation as cv, intent, selector, template
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.util import ulid
+import mlflow
+import logging
 
-from .const import (
-    DOMAIN,
-)
 
 _LOGGER = logging.getLogger(__name__)
-SERVICE_INVOKE_MODEL = "invoke_model"
-
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-
-
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up MLflow."""
-
-    async def invoke_model(call: ServiceCall) -> ServiceResponse:
-        """Render an image with dall-e."""
-        try:
-            print("invoke model API")
-        except mlflowlib.MlflowException as err:
-            raise HomeAssistantError(f"Error invoking model: {err}") from err
-
-        return None
-
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_INVOKE_MODEL,
-        invoke_model,
-        schema=vol.Schema(
-            {
-                vol.Required("config_entry"): selector.ConfigEntrySelector(
-                    {
-                        "integration": DOMAIN,
-                    }
-                ),
-                vol.Required("prompt"): cv.string,
-            }
-        ),
-        supports_response=SupportsResponse.ONLY,
-    )
-    return True
-
-
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up MLflow from a config entry."""
-    try:
-        await hass.async_add_executor_job(
-            partial(
-                print,
-                "setup entry"
-            )
-        )
-    except mlflowlib.exceptions.RestException as err:
-        _LOGGER.error("Invalid API key: %s", err)
-        return False
-    except mlflowlib.exceptions.ExecutionException as err:
-        raise ConfigEntryNotReady(err) from err
-
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = entry.data[CONF_API_KEY]
-
-    conversation.async_set_agent(hass, entry, MLflowAgent(hass, entry))
-    return True
-
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload MLflow."""
-    hass.data[DOMAIN].pop(entry.entry_id)
-    conversation.async_unset_agent(hass, entry)
-    return True
 
 
 class MLflowAgent(conversation.AbstractConversationAgent):
@@ -142,7 +61,7 @@ class MLflowAgent(conversation.AbstractConversationAgent):
 
         try:
             print("invoke the model")
-        except mlflowlib.MlflowException as err:
+        except mlflow.MlflowException as err:
             intent_response = intent.IntentResponse(language=user_input.language)
             intent_response.async_set_error(
                 intent.IntentResponseErrorCode.UNKNOWN,
