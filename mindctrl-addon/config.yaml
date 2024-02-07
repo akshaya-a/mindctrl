@@ -1,0 +1,53 @@
+name: "Mindctrl"
+description: "LLMOps for Homeassistant"
+version: "0.0.23"
+url: "https://github.com/akshaya-a/mindctrl/tree/main/mindctrl-addon"
+slug: "mindctrl"
+init: false
+arch:
+  - aarch64
+  - amd64
+startup: services
+homeassistant_api: true
+hassio_api: true # Discover gateway
+hassio_role: manager
+panel_icon: mdi:flask
+panel_title: Mindctrl
+ingress: true
+ingress_port: 5002
+ports:
+  5000/tcp: 5000 # tracking server
+  5001/tcp: 5001 # ai gateway
+  5002/tcp: 5002 # multiserver
+ports_description:
+  5000/tcp: "MLflow Tracking Server"
+  5001/tcp: "AI Gateway"
+  5002/tcp: "MultiServer"
+discovery:
+  - mindctrl
+map:
+  - share:rw # Used for artifacts storage, expects "tracking" share in HA.
+environment:
+  FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
+image: "ghcr.io/akshaya-a/{arch}-mindctrl"
+options:
+  OPENAI_API_KEY: ""
+  MQTT_BROKER: "localhost"
+  MQTT_PORT: "1883"
+  MQTT_USERNAME: ""
+  MQTT_PASSWORD: ""
+  server_pip_packages: # TODO: not working for debugging, figure out later
+    - mlflow==2.7.1
+    - azureml-mlflow
+    - fastapi
+    - uvicorn[standard]
+    - openai
+    - homeassistant
+schema:
+  OPENAI_API_KEY: str
+  MQTT_BROKER: str
+  MQTT_PORT: int
+  MQTT_USERNAME: str
+  MQTT_PASSWORD: str
+  server_pip_packages:
+    - "match(.*)" # TODO: figure out a better regex for version specifiers

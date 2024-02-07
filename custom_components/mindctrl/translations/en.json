@@ -1,0 +1,36 @@
+{
+    "services": {
+        "invoke_model": {
+            "name": "Invoke Model",
+            "description": "invokes model with given prompt",
+            "fields": {
+                "prompt": {
+                    "name": "Prompt",
+                    "description": "The model prompt"
+                },
+                "model": {
+                    "name": "Model",
+                    "description": "The model name"
+                },
+                "label": {
+                    "name": "Label",
+                    "description": "The model label"
+                }
+            }
+        }
+    },
+    "config": {
+        "step": {
+            "user": {
+                "title": "Mindctrl server configuration",
+                "description": "Some description",
+                "data": {
+                    "uri": "Server uri"
+                },
+                "data_description": {
+                    "uri": "uri for the server"
+                }
+            }
+        }
+    }
+}

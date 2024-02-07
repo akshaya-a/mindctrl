@@ -1,0 +1,24 @@
+invoke_model:
+  fields:
+    prompt:
+      description: The prompt to use for the model.
+      example: "Hello, who are you?"
+      default: "Hello, who are you?"
+      required: true
+      selector:
+        text:
+          multiline: true
+    model:
+      description: The model name to invoke.
+      example: "chat"
+      default: "chat"
+      required: false
+      selector:
+        text:
+    label:
+      description: The model label in the name lineage, such as 'latest' or 'prod'
+      example: "latest"
+      default: "latest"
+      required: false
+      selector:
+        text:

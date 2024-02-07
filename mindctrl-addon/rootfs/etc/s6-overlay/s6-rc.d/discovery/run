@@ -1,0 +1,29 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Mindctrl
+# https://github.com/hassio-addons/addon-adguard-home/blob/main/adguard/rootfs/etc/s6-overlay/s6-rc.d/discovery/run
+# Sends discovery information to Home Assistant.
+# ==============================================================================
+declare config
+bashio::log.info "Running discovery script"
+
+# Wait for mindctrl to become available
+bashio::log.info "Waiting for mindctrl to become available..."
+bashio::net.wait_for 5002 0.0.0.0 300
+bashio::log.info "...done!"
+
+
+config=$(\
+    bashio::var.json \
+        host "127.0.0.1" \
+        port "^5002" \
+)
+
+bashio::log.info "Sending discovery information to Home Assistant: ${config}"
+
+if bashio::discovery "mindctrl" "${config}" > /dev/null; then
+    bashio::log.info "Successfully send discovery information to Home Assistant."
+else
+    bashio::log.error "Discovery message to Home Assistant failed!"
+fi

@@ -1,0 +1,9 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
+build_from:
+  aarch64: "ghcr.io/hassio-addons/debian-base:7.2.0"
+  amd64: "ghcr.io/hassio-addons/debian-base:7.2.0"
+labels:
+  org.opencontainers.image.title: "LLMOps for Home Assistant"
+  org.opencontainers.image.description: "MLflow Store+Gateway+Model Server"
+  org.opencontainers.image.source: "https://github.com/akshaya-a/mindctrl/tree/main/mindctrl-addon"
+  org.opencontainers.image.licenses: "Apache License 2.0"
