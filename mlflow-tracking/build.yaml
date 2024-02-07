@@ -1,9 +1,0 @@
-# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-build_from:
-  aarch64: "ghcr.io/hassio-addons/debian-base:7.2.0"
-  amd64: "ghcr.io/hassio-addons/debian-base:7.2.0"
-labels:
-  org.opencontainers.image.title: "MLflow Tracking Server for Home Assistant"
-  org.opencontainers.image.description: "MLflow Tracking Server for managing models + prompts"
-  org.opencontainers.image.source: "https://github.com/akshaya-a/mlflow-hass/tree/main/mlflow-tracking"
-  org.opencontainers.image.licenses: "Apache License 2.0"
