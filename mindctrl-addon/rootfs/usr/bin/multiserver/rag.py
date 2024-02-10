@@ -48,3 +48,26 @@ def extract_timestamps(query_range_response: str) -> tuple[datetime, datetime]:
 
     obj = json.loads(match.lastgroup)
     return obj["start"], obj["end"]
+
+
+# https://cookbook.openai.com/examples/embedding_long_inputs
+from itertools import islice
+
+def batched(iterable, n):
+    """Batch data into tuples of length n. The last batch may be shorter."""
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    if n < 1:
+        raise ValueError('n must be at least one')
+    it = iter(iterable)
+    while (batch := tuple(islice(it, n))):
+        yield batch
+
+# TODO: Need to enable this to avoid truncation for embedding
+# Batched tokenization makes this a bit more interesting
+# from sentence_transformers import SentenceTransformer
+# def chunked_tokens(text, sentence_transformer: SentenceTransformer):
+#     tokens = sentence_transformer.tokenize(text)
+#     encoding = tiktoken.get_encoding(encoding_name)
+#     tokens = encoding.encode(text)
+#     chunks_iterator = batched(tokens, chunk_length)
+#     yield from chunks_iterator

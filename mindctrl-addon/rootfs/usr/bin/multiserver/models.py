@@ -1,7 +1,7 @@
 import logging
 import asyncio
 
-from mlflow.openai import log_model
+import mlflow
 import openai
 
 
@@ -28,7 +28,13 @@ SUMMARIZATION_PROMPT = """You're an AI assistant for home automation. You're bei
     """
 
 
-def log_system_models():
+from mlflow.entities.model_registry import RegisteredModel
+def log_system_models() -> list[RegisteredModel]:
+    from mlflow import MlflowClient
+    rms = [rm for rm in MlflowClient().search_registered_models()]
+    registry_models: list[str] = [rm.name for rm in rms]
+    print(f"Already registered models: {registry_models}")
+
     QUERY_PROMPT = """
     You are given a query about events or actions happening for home automation over an unknown period of time.
     Based on the input user's question, return the start and end times for the query. Prefix lines with THOUGHT: to decide next steps. Show your work.
@@ -40,38 +46,71 @@ def log_system_models():
 
     OUTPUT ONLY JSON FORMATTED OBJECTS WITH "start" and "end" keys!
     """
-    log_model(
-        model="gpt-3.5-turbo",
-        task=openai.ChatCompletion,
-        messages=[
-            {"role": "system", "content": QUERY_PROMPT},
-            {"role": "user", "content": "INPUT: {query}"},
-        ],
-        artifact_path="model",
-        registered_model_name="querytime",
-    )
+    if "timerange" not in registry_models:
+        mlflow.openai.log_model(
+            model="gpt-3.5-turbo",
+            task=openai.ChatCompletion,
+            messages=[
+                {"role": "system", "content": QUERY_PROMPT},
+                {"role": "user", "content": "INPUT: {query}"},
+            ],
+            artifact_path="timerange",
+            registered_model_name="timerange",
+        )
 
-    log_model(
-        model="gpt-3.5-turbo",
-        task=openai.ChatCompletion,
-        messages=[
-            {"role": "system", "content": SUMMARIZATION_PROMPT},
-            {
-                "role": "user",
-                "content": "SENSOR DATA:\n{state_lines}\n\nQUERY: {query}",
-            },
-        ],
-        artifact_path="model",
-        registered_model_name="chat",
-    )
-    log_model(
-        model="text-embedding-ada-002",
-        task=openai.Embedding,
-        artifact_path="embeddings",
-        registered_model_name="embeddings",
-    )
+    if "chat" not in registry_models:
+        mlflow.openai.log_model(
+            model="gpt-3.5-turbo",
+            task=openai.ChatCompletion,
+            messages=[
+                {"role": "system", "content": SUMMARIZATION_PROMPT},
+                {
+                    "role": "user",
+                    "content": "SENSOR DATA:\n{state_lines}\n\nQUERY: {query}",
+                },
+            ],
+            artifact_path="chat",
+            registered_model_name="chat",
+        )
 
-    return {}
+    if "summarizer" not in registry_models:
+        # TODO: This is a really bad model - the blog post for a better distillation
+        # for this task will show improvements with ROGUE etc
+        from transformers import pipeline
+        summarizer = pipeline("summarization", model="Falconsai/text_summarization")
+        mlflow.transformers.log_model(
+            summarizer,
+            artifact_path="summarizer",
+            registered_model_name="summarizer",
+            pip_requirements=["transformers", "torch"],
+        )
+
+    if "embeddings" not in registry_models:
+        mlflow.openai.log_model(
+            model="text-embedding-ada-002",
+            task=openai.Embedding,
+            artifact_path="embeddings",
+            registered_model_name="embeddings",
+        )
+
+    if "localembeddings" not in registry_models:
+        from sentence_transformers import SentenceTransformer
+        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+        data = "input data for signature inference"
+        signature = mlflow.models.infer_signature(
+            model_input=data,
+            model_output=embedding_model.encode(data),
+        )
+
+        mlflow.sentence_transformers.log_model(
+            model=embedding_model,
+            artifact_path="localembeddings",
+            registered_model_name="localembeddings",
+            signature=signature,
+            input_example=data,
+        )
+
+    return rms
 
 
 # TODO: Add webhooks/eventing to MLflow OSS server. AzureML has eventgrid support
@@ -83,3 +122,18 @@ async def poll_registry(delay_seconds: float = 10.0):
         # TODO: Consider running a separate server for each model to solve the isolation problem
         _logger.debug("Polling registry for changes")
         await asyncio.sleep(delay=delay_seconds)
+
+
+def summarize_events(events: list[str]) -> list[str]:
+    model = mlflow.pyfunc.load_model("models:/summarizer/latest")
+    return model.predict(events)
+
+def tokenized_events(events: list[str]) -> list[str]:
+    model = mlflow.sentence_transformers.load_model("models:/localembeddings/latest")
+    return model.predict(events)
+
+def embed_summary(summary: str) -> list[float]:
+    # TODO: switch to pyfunc after you test bare flavor
+    model = mlflow.sentence_transformers.load_model("models:/localembeddings/latest")
+    # return model.predict(summary)
+    return model.encode(summary).tolist()

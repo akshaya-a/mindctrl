@@ -13,4 +13,9 @@ tenacity
 # homeassistant>2023.11 # TODO: I need to switch to Arch from debian :(
 # https://aur.archlinux.org/packages/python-mlflow
 azureml-mlflow
-paho-mqtt
+aiomqtt
+pgvector
+asyncpg
+transformers
+torch
+sentence-transformers

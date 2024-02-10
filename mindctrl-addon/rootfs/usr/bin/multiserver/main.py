@@ -18,8 +18,9 @@ import pandas as pd
 import collections
 
 from .models import log_system_models, poll_registry, SUMMARIZATION_PROMPT
-from .mqtt import subscribe_to_mqtt
+from .mqtt import setup_mqtt_client, listen_to_mqtt
 from .mlflow import connect_to_mlflow
+from .db.config import setup_db, insert_summary
 
 
 _logger = logging.getLogger(__name__)
@@ -38,18 +39,38 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(poll_registry(10.0))
 
     # The buffer should be enhanced to be token-aware
-    state_ring_buffer = collections.deque(maxlen=100)
+    state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=100)
+    print("Setting up DB")
+    engine = await setup_db()
 
-    client = subscribe_to_mqtt(state_ring_buffer)
+    print("Setting up MQTT")
+    mqtt_client = setup_mqtt_client()
+    loop = asyncio.get_event_loop()
+    print("Starting MQTT listener")
+    mqtt_listener_task = loop.create_task(listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary))
+
+    print("Logging models")
     loaded_models = log_system_models()
     connect_to_mlflow()
 
     write_healthcheck_file()
 
+    print("Finished server setup")
     # Make resources available to requests via .state
-    yield {"state_ring_buffer": state_ring_buffer, "loaded_models": loaded_models}
+    yield {
+        "state_ring_buffer": state_ring_buffer,
+        "loaded_models": loaded_models,
+        "database_engine": engine,
+    }
 
-    client.loop_stop()
+    # Cancel the task
+    mqtt_listener_task.cancel()
+    # Wait for the task to be cancelled
+    try:
+        await mqtt_listener_task
+    except asyncio.CancelledError:
+        pass
+    await engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)
