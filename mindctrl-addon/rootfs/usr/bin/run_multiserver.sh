@@ -20,6 +20,11 @@ export MQTT_PORT="$(bashio::config 'MQTT_PORT')"
 export MQTT_USERNAME="$(bashio::config 'MQTT_USERNAME')"
 export MQTT_PASSWORD="$(bashio::config 'MQTT_PASSWORD')"
 
+export POSTGRES_USER="$(bashio::config 'POSTGRES_USER')"
+export POSTGRES_PASSWORD="$(bashio::config 'POSTGRES_PASSWORD')"
+export POSTGRES_ADDRESS="$(bashio::config 'POSTGRES_ADDRESS')"
+export POSTGRES_PORT="$(bashio::config 'POSTGRES_PORT')"
+
 export GIT_PYTHON_REFRESH=quiet
 
 ingress_entry=$(bashio::addon.ingress_entry)
