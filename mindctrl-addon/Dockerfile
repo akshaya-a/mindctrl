@@ -38,8 +38,6 @@ RUN chmod a+x /etc/s6-overlay/s6-rc.d/init-server-env/run
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/discovery/run
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/gateway/data/check
 
-# Patch psutil as a temporary fix for lack of aarch64 wheel
-COPY utils.py.patch /usr/local/lib/python3.11/dist-packages/mlflow/gateway/utils.py
 
 LABEL \
     io.hass.name="${BUILD_NAME}" \
