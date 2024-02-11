@@ -31,6 +31,19 @@ RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 COPY rootfs /
 
+ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
+ENV HF_HUB_CACHE=/model_cache
+# HF is super flaky today
+ENV HF_HUB_DOWNLOAD_TIMEOUT=120
+#COPY cache_models.py /cache_models.py
+#RUN python3 /cache_models.py
+RUN huggingface-cli download Falconsai/text_summarization
+RUN huggingface-cli download sentence-transformers/all-MiniLM-L6-v2
+
+ENV TRANSFORMERS_OFFLINE=1
+ENV HF_HUB_OFFLINE=1
+ENV DO_NOT_TRACK=1
+
 RUN chmod a+x /usr/bin/run_tracking.sh
 RUN chmod a+x /usr/bin/run_gateway.sh
 RUN chmod a+x /usr/bin/run_multiserver.sh

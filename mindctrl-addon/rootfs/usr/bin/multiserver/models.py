@@ -3,6 +3,7 @@ import asyncio
 
 import mlflow
 import openai
+from mlflow.entities.model_registry import RegisteredModel
 
 
 _logger = logging.getLogger(__name__)
@@ -28,9 +29,9 @@ SUMMARIZATION_PROMPT = """You're an AI assistant for home automation. You're bei
     """
 
 
-from mlflow.entities.model_registry import RegisteredModel
 def log_system_models() -> list[RegisteredModel]:
     from mlflow import MlflowClient
+
     rms = [rm for rm in MlflowClient().search_registered_models()]
     registry_models: list[str] = [rm.name for rm in rms]
     print(f"Already registered models: {registry_models}")
@@ -77,6 +78,7 @@ def log_system_models() -> list[RegisteredModel]:
         # TODO: This is a really bad model - the blog post for a better distillation
         # for this task will show improvements with ROGUE etc
         from transformers import pipeline
+
         summarizer = pipeline("summarization", model="Falconsai/text_summarization")
         mlflow.transformers.log_model(
             summarizer,
@@ -95,6 +97,7 @@ def log_system_models() -> list[RegisteredModel]:
 
     if "localembeddings" not in registry_models:
         from sentence_transformers import SentenceTransformer
+
         embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
         data = "input data for signature inference"
         signature = mlflow.models.infer_signature(
@@ -128,9 +131,11 @@ def summarize_events(events: list[str]) -> list[str]:
     model = mlflow.pyfunc.load_model("models:/summarizer/latest")
     return model.predict(events)
 
+
 def tokenized_events(events: list[str]) -> list[str]:
     model = mlflow.sentence_transformers.load_model("models:/localembeddings/latest")
     return model.predict(events)
+
 
 def embed_summary(summary: str) -> list[float]:
     # TODO: switch to pyfunc after you test bare flavor
