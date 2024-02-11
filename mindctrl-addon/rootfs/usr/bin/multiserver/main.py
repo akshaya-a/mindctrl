@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(poll_registry(10.0))
 
     # The buffer should be enhanced to be token-aware
-    state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=100)
+    state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=20)
     print("Setting up DB")
     engine = await setup_db()
 

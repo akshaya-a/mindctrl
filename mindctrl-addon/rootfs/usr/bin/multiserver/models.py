@@ -18,6 +18,10 @@ EMBEDDINGS_MODEL = "embeddings"
 CHAMPION_ALIAS = "champion"
 CHALLENGER_ALIAS = "challenger"
 
+OAI_GPT4_T = "gpt-4-turbo-preview"
+SUMMARIZER_OAI_MODEL = OAI_GPT4_T
+CHAT_OAI_MODEL = OAI_GPT4_T
+
 SUMMARIZATION_PROMPT = """You're an AI assistant for home automation. You're being given the latest set of events from the home automation system. You are to concisely summarize the events relevant to the user's query followed by an explanation of your reasoning.
     EXAMPLE SENSOR DATA:
     {{'event_type': 'state_changed', 'event_data': {{'entity_id': 'binary_sensor.washer_wash_completed', 'old_state': {{'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'off', 'attributes': {{'friendly_name': 'Washer Wash completed'}}, 'last_changed': '2023-12-23T09:20:07.695950+00:00', 'last_updated': '2023-12-23T09:20:07.695950+00:00', 'context': {{'id': '01HJAZK20FGR2Z9NTCD46XMQEG', 'parent_id': None, 'user_id': None}}}}, 'new_state': {{'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'on', 'attributes': {{'friendly_name': 'Washer Wash completed'}}, 'last_changed': '2023-12-23T09:53:07.724686+00:00', 'last_updated': '2023-12-23T09:53:07.724686+00:00', 'context': {{'id': '01HJB1FFMCT64MM6GKQX55HMKQ', 'parent_id': None, 'user_id': None}}}}}}}}
@@ -81,7 +85,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
 
     if CHAT_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
-            model="gpt-3.5-turbo-0125",
+            model=CHAT_OAI_MODEL,
             task=openai.ChatCompletion,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},
@@ -97,7 +101,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
 
     if SUMMARIZER_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
-            model="gpt-3.5-turbo-0125",
+            model=SUMMARIZER_OAI_MODEL,
             task=openai.ChatCompletion,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},

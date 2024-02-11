@@ -3,7 +3,7 @@ import uuid
 import json
 import os
 import logging
-from typing import Callable, Awaitable
+from typing import Callable, Awaitable, Optional
 import paho.mqtt.client as mqtt
 import aiomqtt
 import asyncio
@@ -19,10 +19,12 @@ async def listen_to_mqtt(
     client: aiomqtt.Client,
     state_ring_buffer: collections.deque[dict],
     on_summary: ON_SUMMARY,
-    summary_interval: int = 10,
+    summary_interval: Optional[int] = None,
 ):
     interval = 5  # Seconds
     event_index = 0
+    if summary_interval is None:
+        summary_interval = state_ring_buffer.maxlen or 20
     # This convoluted construction is to handle connection errors as the client context needs to be re-entered
     while True:
         try:
@@ -65,6 +67,21 @@ async def listen_to_mqtt(
                         continue
                     else:
                         _logger.warning(f"UNKNOWN EVENT TYPE:\n{data}")
+                        # TODO: Next step make this more robust with pydantic models
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'script_started', 'event_data': {'name': 'Wake Up', 'entity_id': 'script.wake_up'}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'service_removed', 'event_data': {'domain': 'notify', 'service': 'alexa_media_last_called'}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'service_registered', 'event_data': {'domain': 'notify', 'service': 'alexa_media_last_called'}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'entity_registry_updated', 'event_data': {'action': 'update', 'entity_id': 'media_player.sony_xr_85x90l_2', 'changes': {'capabilities': {}}}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'recorder_hourly_statistics_generated', 'event_data': {}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'config_entry_discovered', 'event_data': {}}
+                        # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
+                        # {'event_type': 'hue_event', 'event_data': {'id': 'main_bathroom_light_dial_button', 'device_id': '76ba15661915ae06765cf5c64f449fcc', 'unique_id': '5fd10e90-40b4-48d5-9caf-a0116404887d', 'type': 'short_release', 'subtype': 1}}
 
                     # Summarize the event and write it to storage
                     # https://docs.timescale.com/self-hosted/latest/configuration/telemetry/
