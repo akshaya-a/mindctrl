@@ -68,7 +68,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
     """
     if TIMERANGE_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-0125",
             task=openai.ChatCompletion,
             messages=[
                 {"role": "system", "content": QUERY_PROMPT},
@@ -81,7 +81,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
 
     if CHAT_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-0125",
             task=openai.ChatCompletion,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},
@@ -97,7 +97,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
 
     if SUMMARIZER_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-0125",
             task=openai.ChatCompletion,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},
@@ -126,7 +126,7 @@ QUERY: summarize the above events for me""",
             registered_model_name=SUMMARIZER_MODEL,
             pip_requirements=["transformers", "torch"],
         )
-        set_alias(mlflow_client, SUMMARIZER_MODEL, CHALLENGER_ALIAS)
+        # set_alias(mlflow_client, SUMMARIZER_MODEL, CHALLENGER_ALIAS)
 
     if EMBEDDINGS_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
@@ -173,6 +173,13 @@ def summarize_events(
     events: list[str], include_challenger=False
 ) -> Tuple[list[str], list[str]]:
     champion_model = mlflow.pyfunc.load_model(f"models:/summarizer@{CHAMPION_ALIAS}")
+    champion_summary = [""]
+    try:
+        champion_summary = champion_model.predict(events)
+    except Exception as e:  # noqa: E722
+        _logger.warning(f"Failed to load champion model: {e}")
+        pass
+
     challenger_summary = [""]
     if include_challenger:
         try:
@@ -184,7 +191,7 @@ def summarize_events(
             _logger.warning(f"Failed to load challenger model: {e}")
             pass
 
-    return champion_model.predict(events), challenger_summary
+    return champion_summary, challenger_summary
 
 
 def tokenized_events(events: list[str]) -> list[str]:
