@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 # Eventing - move this to plugin
 from contextlib import asynccontextmanager
@@ -12,8 +13,6 @@ from fastapi.templating import Jinja2Templates
 
 import mlflow
 from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
-
-import pandas as pd
 
 import collections
 
@@ -47,10 +46,12 @@ async def lifespan(app: FastAPI):
     mqtt_client = setup_mqtt_client()
     loop = asyncio.get_event_loop()
     print("Starting MQTT listener")
-    mqtt_listener_task = loop.create_task(listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary))
+    mqtt_listener_task = loop.create_task(
+        listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary)
+    )
 
     print("Logging models")
-    loaded_models = log_system_models()
+    loaded_models = log_system_models(bool(os.environ.get("FORCE_PUBLISH", False)))
     connect_to_mlflow()
 
     write_healthcheck_file()
@@ -74,8 +75,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, "templates")))

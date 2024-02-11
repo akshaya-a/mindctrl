@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql.types import TIMESTAMP
 from pgvector.sqlalchemy import Vector
 
 
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 384
 
 # from ..config import Base
 

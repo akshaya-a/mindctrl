@@ -1,12 +1,22 @@
 import logging
 import asyncio
+from typing import Tuple
 
 import mlflow
 import openai
 from mlflow.entities.model_registry import RegisteredModel
+from mlflow import MlflowClient
 
 
 _logger = logging.getLogger(__name__)
+
+TIMERANGE_MODEL = "timerange"
+CHAT_MODEL = "chat"
+SUMMARIZER_MODEL = "summarizer"
+EMBEDDINGS_MODEL = "embeddings"
+
+CHAMPION_ALIAS = "champion"
+CHALLENGER_ALIAS = "challenger"
 
 SUMMARIZATION_PROMPT = """You're an AI assistant for home automation. You're being given the latest set of events from the home automation system. You are to concisely summarize the events relevant to the user's query followed by an explanation of your reasoning.
     EXAMPLE SENSOR DATA:
@@ -29,10 +39,19 @@ SUMMARIZATION_PROMPT = """You're an AI assistant for home automation. You're bei
     """
 
 
-def log_system_models() -> list[RegisteredModel]:
-    from mlflow import MlflowClient
+def set_alias(client: MlflowClient, model_name: str, alias: str):
+    filter_string = f"name='{model_name}'"
+    latest_version = client.search_model_versions(
+        filter_string, max_results=1, order_by=["name DESC"]
+    )[0]
+    print(f"Setting alias {alias} for {model_name} version {latest_version.version}")
+    client.set_registered_model_alias(model_name, alias, latest_version.version)
 
-    rms = [rm for rm in MlflowClient().search_registered_models()]
+
+def log_system_models(force_publish=False) -> list[RegisteredModel]:
+    mlflow_client = MlflowClient()
+
+    rms = [rm for rm in mlflow_client.search_registered_models()]
     registry_models: list[str] = [rm.name for rm in rms]
     print(f"Already registered models: {registry_models}")
 
@@ -47,7 +66,7 @@ def log_system_models() -> list[RegisteredModel]:
 
     OUTPUT ONLY JSON FORMATTED OBJECTS WITH "start" and "end" keys!
     """
-    if "timerange" not in registry_models:
+    if TIMERANGE_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
             model="gpt-3.5-turbo",
             task=openai.ChatCompletion,
@@ -55,11 +74,12 @@ def log_system_models() -> list[RegisteredModel]:
                 {"role": "system", "content": QUERY_PROMPT},
                 {"role": "user", "content": "INPUT: {query}"},
             ],
-            artifact_path="timerange",
-            registered_model_name="timerange",
+            artifact_path="oai-timerange",
+            registered_model_name=TIMERANGE_MODEL,
         )
+        set_alias(mlflow_client, TIMERANGE_MODEL, CHAMPION_ALIAS)
 
-    if "chat" not in registry_models:
+    if CHAT_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
             model="gpt-3.5-turbo",
             task=openai.ChatCompletion,
@@ -70,11 +90,31 @@ def log_system_models() -> list[RegisteredModel]:
                     "content": "SENSOR DATA:\n{state_lines}\n\nQUERY: {query}",
                 },
             ],
-            artifact_path="chat",
-            registered_model_name="chat",
+            artifact_path="oai-chat",
+            registered_model_name=CHAT_MODEL,
         )
+        set_alias(mlflow_client, CHAT_MODEL, CHAMPION_ALIAS)
 
-    if "summarizer" not in registry_models:
+    if SUMMARIZER_MODEL not in registry_models or force_publish:
+        mlflow.openai.log_model(
+            model="gpt-3.5-turbo",
+            task=openai.ChatCompletion,
+            messages=[
+                {"role": "system", "content": SUMMARIZATION_PROMPT},
+                {
+                    "role": "user",
+                    "content": """
+------START SENSOR DATA-----:\n
+{state_lines}\n
+------END SENSOR DATA-----\n
+QUERY: summarize the above events for me""",
+                },
+            ],
+            artifact_path="oai-summarizer",
+            registered_model_name=SUMMARIZER_MODEL,
+        )
+        set_alias(mlflow_client, SUMMARIZER_MODEL, CHAMPION_ALIAS)
+
         # TODO: This is a really bad model - the blog post for a better distillation
         # for this task will show improvements with ROGUE etc
         from transformers import pipeline
@@ -82,20 +122,21 @@ def log_system_models() -> list[RegisteredModel]:
         summarizer = pipeline("summarization", model="Falconsai/text_summarization")
         mlflow.transformers.log_model(
             summarizer,
-            artifact_path="summarizer",
-            registered_model_name="summarizer",
+            artifact_path="hf-summarizer",
+            registered_model_name=SUMMARIZER_MODEL,
             pip_requirements=["transformers", "torch"],
         )
+        set_alias(mlflow_client, SUMMARIZER_MODEL, CHALLENGER_ALIAS)
 
-    if "embeddings" not in registry_models:
+    if EMBEDDINGS_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
             model="text-embedding-ada-002",
             task=openai.Embedding,
-            artifact_path="embeddings",
-            registered_model_name="embeddings",
+            artifact_path="oai-embeddings",
+            registered_model_name=EMBEDDINGS_MODEL,
         )
+        set_alias(mlflow_client, EMBEDDINGS_MODEL, CHAMPION_ALIAS)
 
-    if "localembeddings" not in registry_models:
         from sentence_transformers import SentenceTransformer
 
         embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -107,11 +148,12 @@ def log_system_models() -> list[RegisteredModel]:
 
         mlflow.sentence_transformers.log_model(
             model=embedding_model,
-            artifact_path="localembeddings",
-            registered_model_name="localembeddings",
+            artifact_path="st-embeddings",
+            registered_model_name=EMBEDDINGS_MODEL,
             signature=signature,
             input_example=data,
         )
+        set_alias(mlflow_client, EMBEDDINGS_MODEL, CHALLENGER_ALIAS)
 
     return rms
 
@@ -127,9 +169,22 @@ async def poll_registry(delay_seconds: float = 10.0):
         await asyncio.sleep(delay=delay_seconds)
 
 
-def summarize_events(events: list[str]) -> list[str]:
-    model = mlflow.pyfunc.load_model("models:/summarizer/latest")
-    return model.predict(events)
+def summarize_events(
+    events: list[str], include_challenger=False
+) -> Tuple[list[str], list[str]]:
+    champion_model = mlflow.pyfunc.load_model(f"models:/summarizer@{CHAMPION_ALIAS}")
+    challenger_summary = [""]
+    if include_challenger:
+        try:
+            challenger_model = mlflow.pyfunc.load_model(
+                f"models:/summarizer@{CHALLENGER_ALIAS}"
+            )
+            challenger_summary = challenger_model.predict(events)
+        except Exception as e:  # noqa: E722
+            _logger.warning(f"Failed to load challenger model: {e}")
+            pass
+
+    return champion_model.predict(events), challenger_summary
 
 
 def tokenized_events(events: list[str]) -> list[str]:

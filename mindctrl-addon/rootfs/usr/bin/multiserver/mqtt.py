@@ -13,7 +13,14 @@ _logger = logging.getLogger(__name__)
 
 
 ON_SUMMARY = Callable[[collections.deque], Awaitable[None]]
-async def listen_to_mqtt(client: aiomqtt.Client, state_ring_buffer: collections.deque[dict], on_summary: ON_SUMMARY, summary_interval: int = 10):
+
+
+async def listen_to_mqtt(
+    client: aiomqtt.Client,
+    state_ring_buffer: collections.deque[dict],
+    on_summary: ON_SUMMARY,
+    summary_interval: int = 10,
+):
     interval = 5  # Seconds
     event_index = 0
     # This convoluted construction is to handle connection errors as the client context needs to be re-entered
@@ -43,7 +50,8 @@ async def listen_to_mqtt(client: aiomqtt.Client, state_ring_buffer: collections.
                     if event_type == "state_changed":
                         if (
                             data["event_data"]["entity_id"].startswith("binary_sensor")
-                            and data["event_data"]["entity_id"] != "binary_sensor.internet"
+                            and data["event_data"]["entity_id"]
+                            != "binary_sensor.internet"
                         ):
                             state_ring_buffer.append(data)
                         # Too noisy with numeric sensors right now
@@ -65,14 +73,16 @@ async def listen_to_mqtt(client: aiomqtt.Client, state_ring_buffer: collections.
                     if new_count > current_count:
                         event_index += new_count - current_count
 
-                    if event_index % summary_interval == 0 and new_count > 0:
+                    if event_index % summary_interval == 0 and event_index > 0:
                         print(f"Summarizing {event_index} events")
                         await on_summary(state_ring_buffer)
                         event_index = 0
 
                     continue
         except aiomqtt.MqttError as e:
-            _logger.warning(f"{e}\nConnection lost; Reconnecting in {interval} seconds ...")
+            _logger.warning(
+                f"{e}\nConnection lost; Reconnecting in {interval} seconds ..."
+            )
             await asyncio.sleep(interval)
 
 
@@ -87,5 +97,6 @@ def setup_mqtt_client() -> aiomqtt.Client:
         username=username,
         password=password,
         logger=_logger.getChild("mqtt_client"),
-        keepalive=60)
+        keepalive=60,
+    )
     return client
