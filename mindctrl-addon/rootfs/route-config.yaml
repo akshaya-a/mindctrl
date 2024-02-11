@@ -1,4 +1,4 @@
-routes:
+endpoints:
   - name: completions
     endpoint_type: llm/v1/completions
     model:

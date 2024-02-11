@@ -1,6 +1,6 @@
 # https://raw.githubusercontent.com/mlflow/mlflow/master/requirements/gateway-requirements.txt
 
-mlflow~=2.10
+mlflow[genai]~=2.10
 pydantic<3,>=1.0
 fastapi<1
 uvicorn[standard]<1
