@@ -2,7 +2,6 @@
 
 bashio::log.info "Starting multiserver script in $PWD"
 
-# cd /usr/bin/multiserver
 
 
 pyloc=$(which python3)
@@ -41,16 +40,5 @@ export NOTIFY_FD="${notifyfd}"
 export MLFLOW_TRACKING_URI="http://0.0.0.0:5000"
 export PYTHONPATH="/usr/bin/multiserver"
 
-if [[ -z "$DAPR_MODE" ]]; then
-  export DAPR_MODE="$(bashio::config 'DAPR_MODE' || echo 'false')"
-fi
-if [ "$DAPR_MODE" = "true" ]; then
-    bashio::log.info "Starting MLflow Tracking Server with Dapr so exiting..."
-    dapr run --app-id multiserver --app-port 5002 -- \
-        python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
-
-else
-    bashio::log.info "Starting MLflow Tracking Server without Dapr..."
-
-    python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
-fi
+bashio::log.info "Starting MLflow Tracking Server with Dapr..."
+dapr run --app-id multiserver --app-port 5002 -- python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
