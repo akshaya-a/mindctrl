@@ -60,7 +60,7 @@ async def setup_db() -> AsyncEngine:
 
 # TODO: move the relevant stuff to rag interface
 # TODO: probably rename to mlmodels to reduce confusion with dbmodels
-from ..models import summarize_events, embed_summary
+from mlmodels import summarize_events, embed_summary
 from .models.summary_data import EMBEDDING_DIM
 
 

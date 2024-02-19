@@ -1,4 +1,4 @@
-ARG BUILD_FROM="ghcr.io/hassio-addons/debian-base:7.2.0"
+ARG BUILD_FROM="ghcr.io/hassio-addons/debian-base:7.3.3"
 FROM $BUILD_FROM
 
 # ensure local python is preferred over distribution python
@@ -18,6 +18,7 @@ RUN set -eux; \
     tzdata \
     python3-full \
     python3-pip \
+    wget \
     ; \
     rm -rf /var/lib/apt/lists/*; \
     \
@@ -29,7 +30,6 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
-COPY rootfs /
 
 ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
 ENV HF_HUB_CACHE=/model_cache
@@ -44,12 +44,19 @@ ENV TRANSFORMERS_OFFLINE=1
 ENV HF_HUB_OFFLINE=1
 ENV DO_NOT_TRACK=1
 
+RUN mkdir /dapr; \
+    wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+RUN dapr init --slim
+
+COPY rootfs /
+
 RUN chmod a+x /usr/bin/run_tracking.sh
 RUN chmod a+x /usr/bin/run_gateway.sh
 RUN chmod a+x /usr/bin/run_multiserver.sh
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/init-server-env/run
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/discovery/run
 RUN chmod a+x /etc/s6-overlay/s6-rc.d/gateway/data/check
+RUN chmod a+x /etc/s6-overlay/s6-rc.d/tracking/data/check
 
 
 LABEL \

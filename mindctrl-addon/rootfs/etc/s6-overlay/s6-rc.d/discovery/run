@@ -13,17 +13,21 @@ bashio::log.info "Waiting for mindctrl to become available..."
 bashio::net.wait_for 5002 0.0.0.0 300
 bashio::log.info "...done!"
 
+if bashio::supervisor.ping; then
+    bashio::log.info "Supervisor is running, setting config from supervisor"
+    config=$(\
+        bashio::var.json \
+            host "127.0.0.1" \
+            port "^5002" \
+    )
 
-config=$(\
-    bashio::var.json \
-        host "127.0.0.1" \
-        port "^5002" \
-)
+    bashio::log.info "Sending discovery information to Home Assistant: ${config}"
 
-bashio::log.info "Sending discovery information to Home Assistant: ${config}"
-
-if bashio::discovery "mindctrl" "${config}" > /dev/null; then
-    bashio::log.info "Successfully send discovery information to Home Assistant."
+    if bashio::discovery "mindctrl" "${config}" > /dev/null; then
+        bashio::log.info "Successfully send discovery information to Home Assistant."
+    else
+        bashio::log.error "Discovery message to Home Assistant failed!"
+    fi
 else
-    bashio::log.error "Discovery message to Home Assistant failed!"
+    bashio::log.info "Supervisor is not running, sending discovery is not possible."
 fi

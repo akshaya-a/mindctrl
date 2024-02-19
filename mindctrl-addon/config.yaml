@@ -1,6 +1,6 @@
 name: "Mindctrl"
 description: "LLMOps for Homeassistant"
-version: "0.0.32"
+version: "0.0.33"
 url: "https://github.com/akshaya-a/mindctrl/tree/main/mindctrl-addon"
 slug: "mindctrl"
 init: false
@@ -17,11 +17,9 @@ ingress: true
 ingress_port: 5002
 ports:
   5000/tcp: 5000 # tracking server
-  5001/tcp: 5001 # ai gateway
   5002/tcp: 5002 # multiserver
 ports_description:
   5000/tcp: "MLflow Tracking Server"
-  5001/tcp: "AI Gateway"
   5002/tcp: "MultiServer"
 discovery:
   - mindctrl
@@ -29,6 +27,7 @@ map:
   - share:rw # Used for artifacts storage, expects "tracking" share in HA.
 environment:
   FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
+  DAPR_MODE: "true"
 image: "ghcr.io/akshaya-a/{arch}-mindctrl"
 options:
   OPENAI_API_KEY: ""
@@ -40,6 +39,7 @@ options:
   POSTGRES_PASSWORD: ""
   POSTGRES_ADDRESS: ""
   POSTGRES_PORT: ""
+  DAPR_MODE: "true"
   server_pip_packages: # TODO: not working for debugging, figure out later
     - mlflow==2.7.1
     - azureml-mlflow
@@ -57,5 +57,6 @@ schema:
   POSTGRES_PASSWORD: str
   POSTGRES_ADDRESS: str
   POSTGRES_PORT: int
+  DAPR_MODE: str
   server_pip_packages:
     - "match(.*)" # TODO: figure out a better regex for version specifiers
