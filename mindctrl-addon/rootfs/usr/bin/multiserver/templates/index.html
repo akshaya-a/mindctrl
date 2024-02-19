@@ -367,19 +367,35 @@
     <div id="mlflowContent" class="tabContent" style="display: none;">
         <iframe src="{{ mlflow_url }}" width="100%" height="100%"></iframe>
     </div>
+    <div id="dashboardContent" class="tabContent" style="display: none;">
+        <iframe src="{{ dashboard_url }}" width="100%" height="100%"></iframe>
+    </div>
     <script>
         document.getElementById('debugButton').addEventListener('click', function () {
             document.getElementById('debugContent').style.display = 'block';
             document.getElementById('mlflowContent').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'none';
             this.classList.add('active');
             document.getElementById('mlflowButton').classList.remove('active');
+            document.getElementById('dashboardButton').classList.remove('active');
         });
 
         document.getElementById('mlflowButton').addEventListener('click', function () {
             document.getElementById('debugContent').style.display = 'none';
             document.getElementById('mlflowContent').style.display = 'block';
+            document.getElementById('dashboardContent').style.display = 'none';
             this.classList.add('active');
             document.getElementById('debugButton').classList.remove('active');
+            document.getElementById('dashboardButton').classList.remove('active');
+        });
+
+        document.getElementById('dashboardButton').addEventListener('click', function () {
+            document.getElementById('debugContent').style.display = 'none';
+            document.getElementById('mlflowContent').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+            this.classList.add('active');
+            document.getElementById('debugButton').classList.remove('active');
+            document.getElementById('mlflowButton').classList.remove('active');
         });
     </script>
 </body>

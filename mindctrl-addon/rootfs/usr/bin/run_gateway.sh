@@ -14,7 +14,8 @@ if [[ -z "$DAPR_MODE" ]]; then
 fi
 if [ "$DAPR_MODE" = "true" ]; then
   bashio::log.info "Starting MLflow Deployment Server with Dapr..."
-  s6-notifyoncheck dapr run --app-id deployment-server --app-port 5001 --app-protocol http --dapr-http-port 5501 -- \
+  s6-notifyoncheck dapr run --app-id deployment-server --app-port 5001 --app-protocol http \
+    --enable-app-health-check --app-health-check-path --dapr-http-port 5501 -- \
     mlflow deployments start-server --config-path /usr/bin/deployment-server/route-config.yaml --port 5001 --host 0.0.0.0
 else
   bashio::log.info "Starting MLflow Deployment Server without Dapr"

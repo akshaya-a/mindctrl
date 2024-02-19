@@ -112,6 +112,8 @@ def read_root(request: Request, response_class=HTMLResponse):
     chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
     mlflow_url = request.base_url.replace(port=5000)
     print(mlflow_url)
+    dashboard_url = request.base_url.replace(port=9999)
+    print(dashboard_url)
 
     return templates.TemplateResponse(
         "index.html",
@@ -122,6 +124,7 @@ def read_root(request: Request, response_class=HTMLResponse):
             "ws_url": ws_url,
             "chat_url": chat_url,
             "mlflow_url": mlflow_url,
+            "dashboard_url": dashboard_url,
         },
     )
 
@@ -140,6 +143,7 @@ def read_version(request: Request):
     ingress_header = ingress_header or ""
     chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
     mlflow_url = request.base_url.replace(port=5000)
+    dashboard_url = request.base_url.replace(port=9999)
 
     import os
 
@@ -152,6 +156,7 @@ def read_version(request: Request):
         "ws_url": ws_url,
         "chat_url": chat_url,
         "mlflow_url": mlflow_url,
+        "dashboard_url": dashboard_url,
     }
 
 
