@@ -1,10 +1,8 @@
 import collections
-import uuid
 import json
 import os
 import logging
 from typing import Callable, Awaitable, Optional
-import paho.mqtt.client as mqtt
 import aiomqtt
 import asyncio
 

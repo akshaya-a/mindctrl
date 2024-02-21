@@ -119,19 +119,6 @@ QUERY: summarize the above events for me""",
         )
         set_alias(mlflow_client, SUMMARIZER_MODEL, CHAMPION_ALIAS)
 
-        # TODO: This is a really bad model - the blog post for a better distillation
-        # for this task will show improvements with ROGUE etc
-        from transformers import pipeline
-
-        summarizer = pipeline("summarization", model="Falconsai/text_summarization")
-        mlflow.transformers.log_model(
-            summarizer,
-            artifact_path="hf-summarizer",
-            registered_model_name=SUMMARIZER_MODEL,
-            pip_requirements=["transformers", "torch"],
-        )
-        # set_alias(mlflow_client, SUMMARIZER_MODEL, CHALLENGER_ALIAS)
-
     if EMBEDDINGS_MODEL not in registry_models or force_publish:
         mlflow.openai.log_model(
             model="text-embedding-ada-002",
