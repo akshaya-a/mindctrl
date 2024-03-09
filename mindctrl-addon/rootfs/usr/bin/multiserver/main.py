@@ -16,9 +16,9 @@ from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
 
 import collections
 
-from mlmodels import log_system_models, poll_registry, SUMMARIZATION_PROMPT
+from mlmodels import log_system_models, SUMMARIZATION_PROMPT
 from mqtt import setup_mqtt_client, listen_to_mqtt
-from mlflow_bridge import connect_to_mlflow
+from mlflow_bridge import connect_to_mlflow, poll_registry
 from db.config import setup_db, insert_summary
 
 

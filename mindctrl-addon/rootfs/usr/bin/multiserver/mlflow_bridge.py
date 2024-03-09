@@ -16,7 +16,7 @@ def connect_to_mlflow():
     _logger.info(f"Tracking URI: {mlflow.get_tracking_uri()}")
     _logger.info(f"Model Registry URI: {mlflow.get_registry_uri()}")
 
-from .const import CHAMPION_ALIAS, CHALLENGER_ALIAS
+from const import CHAMPION_ALIAS, CHALLENGER_ALIAS
 
 def is_deployable_alias(aliases: list[str]) -> bool:
     if not aliases:

@@ -7,7 +7,7 @@ import openai
 from mlflow.entities.model_registry import RegisteredModel
 from mlflow import MlflowClient
 
-from .const import CHALLENGER_ALIAS, CHAMPION_ALIAS
+from const import CHALLENGER_ALIAS, CHAMPION_ALIAS
 
 _logger = logging.getLogger(__name__)
 
