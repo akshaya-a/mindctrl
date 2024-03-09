@@ -95,11 +95,10 @@ async def listen_to_mqtt(
 
                     continue
         except aiomqtt.MqttError as e:
-            _logger.warning(
-                f"{e}\nConnection lost; Reconnecting in {interval} seconds ..."
-            )
+            _logger.warning(f"{e}\nConnection lost; disposing client ...")
             # This exit should not be needed, but something is holding the client._lock
             await client.__aexit__(None, None, None)
+            _logger.warning(f"Reconnecting in {interval} seconds ...")
             await asyncio.sleep(interval)
 
 

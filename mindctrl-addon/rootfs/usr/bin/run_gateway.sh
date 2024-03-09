@@ -8,6 +8,7 @@ if bashio::supervisor.ping; then
 fi
 
 bashio::log.info "Starting MLflow Deployment Server with Dapr..."
-s6-notifyoncheck dapr run --app-id deployment-server --app-port 5001 --app-protocol http \
-  --enable-app-health-check --app-health-check-path /health --dapr-http-port 5501 -- \
+# https://github.com/dapr/dashboard/issues/195
+s6-notifyoncheck dapr run --app-id deployments --app-port 5001 --app-protocol http \
+  --enable-api-logging --enable-app-health-check --app-health-check-path /health --dapr-http-port 5501 -- \
   mlflow deployments start-server --config-path /usr/bin/deployment-server/route-config.yaml --port 5001 --host 0.0.0.0

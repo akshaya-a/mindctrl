@@ -7,6 +7,7 @@ import openai
 from mlflow.entities.model_registry import RegisteredModel
 from mlflow import MlflowClient
 
+from .const import CHALLENGER_ALIAS, CHAMPION_ALIAS
 
 _logger = logging.getLogger(__name__)
 
@@ -14,9 +15,6 @@ TIMERANGE_MODEL = "timerange"
 CHAT_MODEL = "chat"
 SUMMARIZER_MODEL = "summarizer"
 EMBEDDINGS_MODEL = "embeddings"
-
-CHAMPION_ALIAS = "champion"
-CHALLENGER_ALIAS = "challenger"
 
 OAI_GPT4_T = "gpt-4-turbo-preview"
 SUMMARIZER_OAI_MODEL = OAI_GPT4_T
@@ -147,17 +145,6 @@ QUERY: summarize the above events for me""",
         set_alias(mlflow_client, EMBEDDINGS_MODEL, CHALLENGER_ALIAS)
 
     return rms
-
-
-# TODO: Add webhooks/eventing to MLflow OSS server. AzureML has eventgrid support
-# In its absence, we poll the MLflow server for changes to the model registry
-async def poll_registry(delay_seconds: float = 10.0):
-    while True:
-        # Sync any new models by tag/label/all
-        # Solve any environment dependencies mismatch or fail
-        # TODO: Consider running a separate server for each model to solve the isolation problem
-        _logger.debug("Polling registry for changes")
-        await asyncio.sleep(delay=delay_seconds)
 
 
 def summarize_events(
