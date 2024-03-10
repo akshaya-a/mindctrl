@@ -1,22 +1,23 @@
 import mlflow
 from mlflow import MlflowClient
-import os
 import logging
 import asyncio
+
+from const import CHAMPION_ALIAS, CHALLENGER_ALIAS
+from config import AppSettings
 
 
 _logger = logging.getLogger(__name__)
 
 
-def connect_to_mlflow():
-    tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+def connect_to_mlflow(settings: AppSettings):
+    tracking_uri = settings.mlflow_tracking_uri
     if tracking_uri:
         mlflow.set_tracking_uri(tracking_uri)
 
     _logger.info(f"Tracking URI: {mlflow.get_tracking_uri()}")
     _logger.info(f"Model Registry URI: {mlflow.get_registry_uri()}")
 
-from const import CHAMPION_ALIAS, CHALLENGER_ALIAS
 
 def is_deployable_alias(aliases: list[str]) -> bool:
     if not aliases:

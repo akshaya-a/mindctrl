@@ -1,5 +1,4 @@
 TABLE_NAME = "summary_data"
-from .models.summary_data import EMBEDDING_DIM
 
 # CREATE_TABLE = """CREATE TABLE IF NOT EXISTS {table_name}
 # (

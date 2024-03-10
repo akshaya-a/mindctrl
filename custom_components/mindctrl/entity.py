@@ -1,4 +1,5 @@
 """AdGuard Home base entity."""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
@@ -8,6 +9,7 @@ from homeassistant.helpers.entity import Entity
 
 from .const import ADDON_SLUG, DOMAIN, _LOGGER
 from .services import MindctrlClient
+
 
 # https://github.com/home-assistant/core/blob/52d27230bce239017722d8ce9dd6f5386f63aba2/homeassistant/components/adguard/entity.py
 class MindctrlEntity(Entity, ABC):
@@ -69,7 +71,7 @@ class MindctrlEntity(Entity, ABC):
             manufacturer="AK",
             name="Mindctrl",
             sw_version=self.hass.data[DOMAIN][self._entry.entry_id].get(
-                DATA_MINDCTRL_VERSION
+                "version", "unknown"
             ),
             configuration_url=config_url,
         )

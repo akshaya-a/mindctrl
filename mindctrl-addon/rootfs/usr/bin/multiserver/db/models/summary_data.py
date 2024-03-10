@@ -1,8 +1,4 @@
-import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.dialects.postgresql.types import TIMESTAMP
-from pgvector.sqlalchemy import Vector
 
 
 EMBEDDING_DIM = 384

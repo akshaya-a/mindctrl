@@ -3,35 +3,21 @@
 
 from __future__ import annotations
 
-from functools import partial
-import logging
-
-import mlflow as mlflowlib
-
-import voluptuous as vol
-
 from homeassistant.components import conversation as haconversation
 from homeassistant.components.hassio import AddonManager, AddonError, AddonState
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_API_KEY
-from homeassistant.core import (
-    HomeAssistant,
-    SupportsResponse,
-    callback
-)
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import (
     ConfigEntryNotReady,
 )
-from homeassistant.helpers import config_validation as cv, selector
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 import asyncio
 
 from .addon import get_addon_manager
 
-from .const import (
-    ADDON_NAME, CONF_URL, CONF_USE_ADDON, DOMAIN, _LOGGER
-)
+from .const import ADDON_NAME, CONF_URL, CONF_USE_ADDON, DOMAIN, _LOGGER
 
 from .services import MindctrlClient, async_register_services
 from .conversation import MLflowAgent
@@ -53,10 +39,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
     return True
 
+
 async def update_listener(hass, entry):
     """Handle options update."""
     # https://developers.home-assistant.io/docs/config_entries_options_flow_handler#signal-updates
     _LOGGER.error(f"update_listener {entry}")
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up MLflow from a config entry."""
@@ -125,8 +113,7 @@ async def async_ensure_addon_running(hass: HomeAssistant, entry: ConfigEntry) ->
 
     addon_state = addon_info.state
 
-    addon_config = {
-    }
+    addon_config = {}
 
     if addon_state == AddonState.NOT_INSTALLED:
         addon_manager.async_schedule_install_setup_addon(
@@ -142,7 +129,6 @@ async def async_ensure_addon_running(hass: HomeAssistant, entry: ConfigEntry) ->
         )
         raise ConfigEntryNotReady
 
-    addon_options = addon_info.options
     updates = {}
     if updates:
         hass.config_entries.async_update_entry(entry, data={**entry.data, **updates})

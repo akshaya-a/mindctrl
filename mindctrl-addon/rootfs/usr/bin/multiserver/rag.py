@@ -4,6 +4,7 @@ from enum import Enum
 from fastapi import Request
 import json
 from pydantic import BaseModel
+from itertools import islice
 
 
 class EventType(Enum):
@@ -51,16 +52,15 @@ def extract_timestamps(query_range_response: str) -> tuple[datetime, datetime]:
 
 
 # https://cookbook.openai.com/examples/embedding_long_inputs
-from itertools import islice
-
 def batched(iterable, n):
     """Batch data into tuples of length n. The last batch may be shorter."""
     # batched('ABCDEFG', 3) --> ABC DEF G
     if n < 1:
-        raise ValueError('n must be at least one')
+        raise ValueError("n must be at least one")
     it = iter(iterable)
-    while (batch := tuple(islice(it, n))):
+    while batch := tuple(islice(it, n)):
         yield batch
+
 
 # TODO: Need to enable this to avoid truncation for embedding
 # Batched tokenization makes this a bit more interesting

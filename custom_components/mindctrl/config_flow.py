@@ -1,23 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any
 from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.const import CONF_NAME, CONF_URL
+from homeassistant.const import CONF_URL
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.components.hassio import (
-    AddonError,
-    AddonInfo,
-    AddonManager,
-    AddonState,
-    HassioServiceInfo,
-    is_hassio,
-)
 
 # from homeassistant.components.zeroconf import ZeroconfServiceInfo
 from homeassistant.data_entry_flow import (
-    AbortFlow,
-    FlowHandler,
-    FlowManager,
     FlowResult,
 )
 import voluptuous as vol
@@ -28,15 +16,12 @@ import uuid
 from .const import (
     ADDON_HOST,
     ADDON_PORT,
-    ADDON_SLUG,
     CONF_ADDON_LOG_LEVEL,
     CONF_INTEGRATION_CREATED_ADDON,
     DOMAIN,
     _LOGGER,
     CONF_USE_ADDON,
-    CONF_URL,
 )
-from .addon import get_addon_manager
 
 
 DEFAULT_URL = f"http://{ADDON_HOST}:{ADDON_PORT}"
@@ -171,7 +156,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         try:
-            version_info = await validate_input(self.hass, user_input)
+            _ = await validate_input(self.hass, user_input)
         except InvalidInput as err:
             errors["base"] = err.error
         except Exception:  # pylint: disable=broad-except

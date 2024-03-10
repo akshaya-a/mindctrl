@@ -14,7 +14,7 @@ from homeassistant.config_entries import ConfigEntry
 import mlflow
 from .const import DOMAIN, SERVICE_INVOKE_MODEL, _LOGGER, CONF_URL
 import voluptuous as vol
-from homeassistant.helpers import config_validation as cv, selector
+from homeassistant.helpers import config_validation as cv
 
 
 class MindctrlClient(object):

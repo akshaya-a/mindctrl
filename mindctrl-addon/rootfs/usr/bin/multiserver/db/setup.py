@@ -1,42 +1,33 @@
 import collections
 import json
 import logging
-import os
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
-    async_sessionmaker,
-    AsyncSession,
     AsyncEngine,
 )
 
 from .queries import (
-    ADD_RETENTION_POLICY,
     CREATE_SUMMARY_TABLE,
     ENABLE_PGVECTOR,
     CONVERT_TO_HYPERTABLE,
     ENABLE_TIMESCALE,
 )
 
+from config import PostgresStoreSettings
+from mlmodels import summarize_events
+
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def get_connection_string(include_password: bool = False) -> str:
-    username = os.environ.get("POSTGRES_USER")
-    password = os.environ["POSTGRES_PASSWORD"]
-    address = os.environ.get("POSTGRES_ADDRESS", "localhost")
-    port = os.environ.get("POSTGRES_PORT", "5432")
-    database = os.environ.get("POSTGRES_DATABASE", "mindctrl")
-    return f"postgresql+asyncpg://{username}:{password if include_password else '****'}@{address}:{port}/{database}"
+def get_connection_string(
+    settings: PostgresStoreSettings, include_password: bool = False
+) -> str:
+    return f"postgresql+asyncpg://{settings.user}:{settings.password.get_secret_value() if include_password else settings.password}@{settings.address}:{settings.port}/{settings.database}"
 
 
-DATABASE_URL = get_connection_string(include_password=True)
-DATABASE_SAFE_URL = get_connection_string(include_password=False)
-_LOGGER.info(f"Using database: {DATABASE_SAFE_URL}")
-
-engine: AsyncEngine = create_async_engine(DATABASE_URL, future=True, echo=True)
 # Don't need this until we have real models
 # async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(engine, expire_on_commit=False)
 # TODO: Go use real models later
@@ -46,7 +37,14 @@ engine: AsyncEngine = create_async_engine(DATABASE_URL, future=True, echo=True)
 #     return async_session
 
 
-async def setup_db() -> AsyncEngine:
+async def setup_db(settings: PostgresStoreSettings) -> AsyncEngine:
+    connection_string = get_connection_string(settings, include_password=True)
+    _LOGGER.info(
+        f"Using database: {get_connection_string(settings, include_password=False)}"
+    )
+
+    engine: AsyncEngine = create_async_engine(connection_string, future=True, echo=True)
+
     async with engine.begin() as conn:
         await conn.execute(text(ENABLE_TIMESCALE))
         await conn.execute(text(ENABLE_PGVECTOR))
@@ -60,17 +58,18 @@ async def setup_db() -> AsyncEngine:
 
 # TODO: move the relevant stuff to rag interface
 # TODO: probably rename to mlmodels to reduce confusion with dbmodels
-from mlmodels import summarize_events, embed_summary
-from .models.summary_data import EMBEDDING_DIM
 
 
-async def insert_summary(state_ring_buffer: collections.deque[dict]):
+async def insert_summary(
+    engine: AsyncEngine,
+    include_challenger: bool,
+    state_ring_buffer: collections.deque[dict],
+):
     print("Inserting summary")
     # TODO: do this better as a batch insert
     # use summarizer model to emit a LIST of summaries, each with the timestamp from relevant event
     events = [json.dumps(event) for event in list(state_ring_buffer)]
     # summarized_events = summarize_events(events)
-    include_challenger = bool(os.environ.get("INCLUDE_CHALLENGER", True))
     champion_summary, challenger_summary = summarize_events(
         ["\n".join(events)], include_challenger
     )

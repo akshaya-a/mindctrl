@@ -1,10 +1,11 @@
 import collections
 import json
-import os
 import logging
 from typing import Callable, Awaitable, Optional
 import aiomqtt
 import asyncio
+
+from config import MqttEventsSettings
 
 
 _logger = logging.getLogger(__name__)
@@ -26,17 +27,25 @@ async def listen_to_mqtt(
     # This convoluted construction is to handle connection errors as the client context needs to be re-entered
     while True:
         try:
-            print(f"Connecting to MQTT Broker {client}...")
+            print(
+                f"Connecting as {client.identifier} to MQTT broker {client._hostname}:{client._port}..."
+            )
             async with client:
+                topic = "hass_ak/#"
                 print("Connected to MQTT Broker, subscribing to topics ...")
-                await client.subscribe("hass_ak/#")
-                print("Subscribed to topics")
+                await client.subscribe(topic=topic)
+                print(f"Subscribed to topic {topic}")
                 async for msg in client.messages:
                     _logger.debug(f"{msg.topic} {msg.payload}")
                     if not isinstance(msg.payload, bytes):
                         _logger.warning(f"Message payload is not bytes: {msg.payload}")
                         continue
-                    data: dict = json.loads(msg.payload.decode("utf-8"))
+                    try:
+                        data: dict = json.loads(msg.payload.decode("utf-8"))
+                    except json.JSONDecodeError:
+                        print(f"UNDECODABLE MESSAGE:\n{msg.payload.decode('utf-8')}")
+                        continue
+
                     event_type = data.get("event_type", None)
                     if event_type is None:
                         _logger.warning(f"NO EVENT TYPE:\n{data}")
@@ -102,15 +111,14 @@ async def listen_to_mqtt(
             await asyncio.sleep(interval)
 
 
-def setup_mqtt_client() -> aiomqtt.Client:
-    broker = os.environ.get("MQTT_BROKER", "localhost")
-    port = int(os.environ.get("MQTT_PORT", 1883))
-    username = os.environ.get("MQTT_USERNAME")
-    password = os.environ.get("MQTT_PASSWORD")
+def setup_mqtt_client(settings: MqttEventsSettings) -> aiomqtt.Client:
+    if settings.username and settings.password:
+        user = settings.username
+        password = settings.password.get_secret_value()
     client = aiomqtt.Client(
-        hostname=broker,
-        port=port,
-        username=username,
+        hostname=settings.broker,
+        port=settings.port,
+        username=user,
         password=password,
         logger=_logger.getChild("mqtt_client"),
         keepalive=60,

@@ -1,0 +1,12 @@
+# https://raw.githubusercontent.com/mlflow/mlflow/master/requirements/gateway-requirements.txt
+
+pytest
+pytest-kubernetes
+pytest-dotenv
+pytest-mqtt
+testcontainers-postgres
+aiomqtt
+pytest-asyncio
+httpx
+ruff
+-r requirements.txt
