@@ -31,4 +31,4 @@ jobs:
           ruff check .
       - name: Test with pytest
         run: |
-          pytest -v -s -c mindctrl-addon/pytest.ini
+          pytest -v -s -c mindctrl-addon/tests/pytest.ini
