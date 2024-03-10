@@ -1,3 +1,4 @@
+from functools import lru_cache, partial
 import logging
 import os
 from pathlib import Path
@@ -16,45 +17,64 @@ from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
 
 import collections
 
-from mlmodels import log_system_models, SUMMARIZATION_PROMPT
+from mlmodels import SUMMARIZER_OAI_MODEL, log_system_models, SUMMARIZATION_PROMPT
 from mqtt import setup_mqtt_client, listen_to_mqtt
 from mlflow_bridge import connect_to_mlflow, poll_registry
-from db.config import setup_db, insert_summary
+from db.setup import setup_db, insert_summary
+from config import AppSettings
 
 
 _logger = logging.getLogger(__name__)
 
 
-def write_healthcheck_file():
+def write_healthcheck_file(settings: AppSettings):
     # Write readiness: https://skarnet.org/software/s6/notifywhenup.html
-    notification_fd = os.environ.get("NOTIFY_FD")
+    notification_fd = settings.notify_fd
     if notification_fd:
         os.write(int(notification_fd), b"\n")
         os.close(int(notification_fd))
 
 
+@lru_cache
+def get_settings():
+    return AppSettings()  # pyright: ignore
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app_settings = get_settings()
+    print("Starting mindctrl server with settings:")
+    print(app_settings.model_dump())
+
     asyncio.create_task(poll_registry(10.0))
 
     # The buffer should be enhanced to be token-aware
     state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=20)
     print("Setting up DB")
-    engine = await setup_db()
+    # TODO: convert to ABC with a common interface
+    if not app_settings.store.store_type == "psql":
+        raise ValueError(f"unknown store type: {app_settings.store.store_type}")
+    engine = await setup_db(app_settings.store)
+    insert_summary_partial = partial(
+        insert_summary, engine, app_settings.include_challenger_models
+    )
 
     print("Setting up MQTT")
-    mqtt_client = setup_mqtt_client()
+    if not app_settings.events.events_type == "mqtt":
+        raise ValueError(f"unknown events type: {app_settings.events.events_type}")
+
+    mqtt_client = setup_mqtt_client(app_settings.events)
     loop = asyncio.get_event_loop()
     print("Starting MQTT listener")
     mqtt_listener_task = loop.create_task(
-        listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary)
+        listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary_partial)
     )
 
     print("Logging models")
-    loaded_models = log_system_models(bool(os.environ.get("FORCE_PUBLISH", False)))
-    connect_to_mlflow()
+    loaded_models = log_system_models(app_settings.force_publish_models)
+    connect_to_mlflow(app_settings)
 
-    write_healthcheck_file()
+    write_healthcheck_file(app_settings)
 
     print("Finished server setup")
     # Make resources available to requests via .state
@@ -116,8 +136,9 @@ def read_root(request: Request, response_class=HTMLResponse):
     print(dashboard_url)
 
     return templates.TemplateResponse(
-        "index.html",
-        {
+        request=request,
+        name="index.html",
+        context={
             "request": request,
             "tracking_store": mlflow.get_tracking_uri(),
             "model_registry": mlflow.get_registry_uri(),
@@ -145,12 +166,7 @@ def read_version(request: Request):
     mlflow_url = request.base_url.replace(port=5000)
     dashboard_url = request.base_url.replace(port=9999)
 
-    import os
-
-    version = os.environ.get("MINDCTRL_ADDON_VERSION", "0.0.0")
-    print(f"Version: {version}")
     return {
-        "version": version,
         "tracking_store": mlflow.get_tracking_uri(),
         "model_registry": mlflow.get_registry_uri(),
         "ws_url": ws_url,
@@ -201,12 +217,15 @@ def generate_state_lines(buffer: collections.deque):
     # TODO: when I get internet see if RAG framework already has a known technique to deal with context chunking
     import tiktoken
 
+    print(f"Buffer has {len(buffer)} events")
+
     enc = tiktoken.encoding_for_model(
-        "gpt-3.5-turbo"
+        SUMMARIZER_OAI_MODEL
     )  # TODO: pick it up from the model meta
     MAX_TOKENS = 4000  # TODO: Also pick it up from the model meta and encode the slack into a smarter heuristic
     buffer_lines = []
-    total_tokens = len(enc.encode(SUMMARIZATION_PROMPT))
+    prompt_tokens = len(enc.encode(SUMMARIZATION_PROMPT))
+    total_tokens = prompt_tokens
     for index, item in enumerate(buffer):
         buffer_line = f"{item}"
         next_tokens = len(enc.encode(buffer_line)) + 1  # \n
@@ -219,7 +238,9 @@ def generate_state_lines(buffer: collections.deque):
         total_tokens += next_tokens
 
     state_lines = "\n".join(buffer_lines)
-    print(f"Generated {total_tokens} token message data:\n{state_lines}")
+    print(
+        f"Generated {total_tokens} token message, {prompt_tokens} from prompt:\n---------\n{state_lines}\n---------"
+    )
     return state_lines
 
 
