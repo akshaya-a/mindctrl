@@ -112,6 +112,8 @@ async def listen_to_mqtt(
 
 
 def setup_mqtt_client(settings: MqttEventsSettings) -> aiomqtt.Client:
+    user = None
+    password = None
     if settings.username and settings.password:
         user = settings.username
         password = settings.password.get_secret_value()
