@@ -44,4 +44,9 @@ jobs:
           kubectl get pods
           sleep 60
           kubectl get pods
+          sleep 60
+          echo "logs below"
+          cd /var/log/pods
+          ls -a
+          cat * */*
         working-directory: ./mindctrl-addon/rootfs/usr/bin
