@@ -17,7 +17,6 @@ jobs:
       - uses: nolar/setup-k3d-k3s@v1
         name: Create cluster
         with:
-          version: v1.21 # E.g.: v1.21, v1.21.2, v1.21.2+k3s1
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check k3s
         run: kubectl get nodes
