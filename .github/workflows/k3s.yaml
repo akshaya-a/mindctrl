@@ -38,5 +38,10 @@ jobs:
       - name: Deploy mindctrl
         shell: bash
         run: |
-          dapr run -k -f dapr-k8s.yaml
+          dapr run -k -f dapr-k8s.yaml &
+          echo "sleeping"
+          sleep 60
+          kubectl get pods
+          sleep 60
+          kubectl get pods
         working-directory: ./mindctrl-addon/rootfs/usr/bin

@@ -6,3 +6,4 @@ apps:
     appProtocol: http
     appPort: 5002
     containerImage: "ghcr.io/akshaya-a/amd64-mindctrl:latest"
+    createService: true
