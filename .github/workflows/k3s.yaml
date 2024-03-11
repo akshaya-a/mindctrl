@@ -37,5 +37,6 @@ jobs:
       - name: Deploy mindctrl
         shell: bash
         run: |
+          ls -a
           dapr run -k -f dapr-k8s.yaml
         working-directory: ./mindctrl-addon/rootfs/usr/bin
