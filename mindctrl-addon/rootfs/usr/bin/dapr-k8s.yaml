@@ -1,0 +1,8 @@
+version: 1
+# TODO: This is just for getting the k8s stuff working
+apps:
+  - appID: multiserver # optional
+    appDirPath: ./multiserver/ # REQUIRED
+    appProtocol: http
+    appPort: 5002
+    containerImage: "ghcr.io/akshaya-a/amd64-mindctrl:latest"

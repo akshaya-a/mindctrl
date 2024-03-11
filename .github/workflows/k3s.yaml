@@ -9,9 +9,33 @@ on:
       - main
 
 jobs:
-  some-job:
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
+      - uses: actions/checkout@v3
       - uses: nolar/setup-k3d-k3s@v1
+        name: Create cluster
         with:
           version: v1.21 # E.g.: v1.21, v1.21.2, v1.21.2+k3s1
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check k3s
+        run: kubectl get nodes
+      - name: Dapr tool installer
+        uses: dapr/setup-dapr@v1
+      - name: Initialize Dapr
+        shell: bash
+        run: |
+          # Initialize Dapr
+          # Group the Dapr init logs so these lines can be collapsed.
+          echo "::group::Initialize Dapr"
+          dapr init --kubernetes --wait
+          echo "::endgroup::"
+
+          dapr status --kubernetes
+        working-directory: ./mindctrl-addon/rootfs/usr/bin
+      - name: Deploy mindctrl
+        shell: bash
+        run: |
+          dapr run -k -f dapr-k8s.yaml
+        working-directory: ./mindctrl-addon/rootfs/usr/bin
