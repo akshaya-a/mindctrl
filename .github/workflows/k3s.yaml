@@ -47,5 +47,5 @@ jobs:
           sleep 60
           echo "logs below"
           # docker exec k3d-k3s-default-server-0 sh -c "cd /var/log/pods && ls -a && cat * */*"
-          docker exec k3d-k3s-default-server-0 /bin/bash -c "find /var/log/pods -type f -name "*.log" | grep -i multiserver | while read file; do cat "$file"; done"
+          docker exec k3d-k3s-default-server-0 sh -c "find /var/log/pods -type f -name "*.log" | grep -i multiserver | while read file; do cat "$file"; done"
         working-directory: ./mindctrl-addon/rootfs/usr/bin
