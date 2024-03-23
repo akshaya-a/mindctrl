@@ -1,0 +1,52 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: multiserver-service
+  labels:
+    app: multiserver
+spec:
+  selector:
+    app: multiserver
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multiserver
+  labels:
+    app: multiserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multiserver
+  template:
+    metadata:
+      labels:
+        app: multiserver
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "multiserver"
+        dapr.io/app-port: "5002"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+        - name: multiserver
+          image: $K3D_REGISTRY_URL/multiserver:latest
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: openai-api-key
+            - name: APP_PORT
+              value: "5002"
+          ports:
+            - containerPort: 5002
+          imagePullPolicy: Always
