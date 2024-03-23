@@ -95,8 +95,8 @@ if [[ -z "${SKIP_CREATION}" ]]; then
     echo "K3D_REGISTRY_URL=k3d-${REGISTRY_NAME}:${REGISTRY_PORT}" >> $GITHUB_ENV
   else
     echo "Skipping the registry creation."
+    k3d cluster create ${K3D_NAME:-} --wait --image=rancher/k3s:"${K3S//+/-}" ${K3D_ARGS:-}
   fi
-  k3d cluster create ${K3D_NAME:-} --wait --image=rancher/k3s:"${K3S//+/-}" ${K3D_ARGS:-}
 else
   echo "Skipping the cluster creation. The cluster can be not fully ready yet."
 fi
