@@ -17,8 +17,8 @@ jobs:
       - name: Create cluster
         shell: bash
         run: bash scripts/setup_k3d.sh
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Check k3s
         run: kubectl get nodes
       - name: Install Dapr
