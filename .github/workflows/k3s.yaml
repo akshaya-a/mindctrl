@@ -23,7 +23,7 @@ jobs:
           SKIP_REGISTRY_CREATION: ""
           SKIP_READINESS: ""
       - name: Check k3s
-        run: kubectl get nodes
+        run: bash scripts/check_k3d.sh
       - name: Install Dapr
         shell: bash
         run: |
