@@ -19,6 +19,9 @@ jobs:
         run: bash scripts/setup_k3d.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_CREATION: ""
+          SKIP_REGISTRY_CREATION: ""
+          SKIP_READINESS: ""
       - name: Check k3s
         run: kubectl get nodes
       - name: Install Dapr
