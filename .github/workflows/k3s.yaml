@@ -38,7 +38,6 @@ jobs:
           echo "::endgroup::"
 
           dapr status --kubernetes
-        working-directory: ./mindctrl-addon/rootfs/usr/bin
       - name: Set k8s secret
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -48,15 +47,12 @@ jobs:
       - name: Build apps
         shell: bash
         run: bash scripts/build_apps.sh
-        working-directory: ./mindctrl-addon/rootfs/usr/bin
       - name: Push apps
         shell: bash
         run: bash scripts/push_apps.sh
-        working-directory: ./mindctrl-addon/rootfs/usr/bin
       - name: Deploy mindctrl
         shell: bash
         run: bash scripts/deploy_apps.sh
-        working-directory: ./mindctrl-addon/rootfs/usr/bin
       - name: Check mindctrl
         shell: bash
         run: |
@@ -68,4 +64,3 @@ jobs:
           sleep 60
           echo "logs below"
           docker exec k3d-k3s-default-server-0 sh -c 'for file in $(find /var/log/pods -type f -name "*.log" | grep -i multiserver); do echo "$file"; cat "$file"; done'
-        working-directory: ./mindctrl-addon/rootfs/usr/bin
