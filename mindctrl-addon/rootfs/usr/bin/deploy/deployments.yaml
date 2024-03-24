@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: deployments
-          image: $REGISTRY_NAME:$REGISTRY_PORT/deployments:latest
+          image: $K3D_REGISTRY_URL/deployments:latest
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
           env:

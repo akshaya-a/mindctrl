@@ -1,10 +1,14 @@
 #!/bin/bash
 set -eu
 
+echo "GET NODES"
 kubectl get nodes
+
+echo "CHECK REGISTRY"
 docker ps -f name=$REGISTRY_NAME
 k3d registry list
 nslookup k3d-$REGISTRY_NAME
+nslookup $REGISTRY_NAME
 
 # https://k3d.io/v5.2.0/usage/registries/#testing-your-registry
 echo "Testing registry at $K3D_REGISTRY_URL"
