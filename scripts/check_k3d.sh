@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: nginx-test-registry
-        image: k3d-registry.localhost:12345/nginx:latest
+        image: $K3D_REGISTRY_URL/nginx:latest
         ports:
         - containerPort: 80
 EOF

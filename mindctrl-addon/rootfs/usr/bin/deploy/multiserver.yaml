@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: multiserver
-          image: $REGISTRY_NAME:$REGISTRY_PORT/multiserver:latest
+          image: $K3D_REGISTRY_URL/multiserver:latest
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
           env:

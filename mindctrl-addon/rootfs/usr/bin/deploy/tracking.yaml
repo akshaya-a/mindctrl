@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: tracking
-          image: $REGISTRY_NAME:$REGISTRY_PORT/tracking:latest
+          image: $K3D_REGISTRY_URL/tracking:latest
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
           env:
