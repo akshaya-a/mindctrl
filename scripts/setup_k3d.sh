@@ -93,6 +93,8 @@ if [[ -z "${SKIP_CREATION}" ]]; then
     # Communicate back to GitHub Actions.
     echo "Created registry::k3d-${REGISTRY_NAME}:${REGISTRY_PORT}"
     echo "K3D_REGISTRY_URL=k3d-${REGISTRY_NAME}:${REGISTRY_PORT}" >> $GITHUB_ENV
+    echo "REGISTRY_NAME=${REGISTRY_NAME}" >> $GITHUB_ENV
+    echo "REGISTRY_PORT=${REGISTRY_PORT}" >> $GITHUB_ENV
   else
     echo "Skipping the registry creation."
     k3d cluster create ${K3D_NAME:-} --wait --image=rancher/k3s:"${K3S//+/-}" ${K3D_ARGS:-}
