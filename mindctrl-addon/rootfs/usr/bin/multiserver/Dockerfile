@@ -30,19 +30,6 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
-
-ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
-ENV HF_HUB_CACHE=/model_cache
-# HF is super flaky today
-ENV HF_HUB_DOWNLOAD_TIMEOUT=120
-#COPY cache_models.py /cache_models.py
-#RUN python3 /cache_models.py
-RUN huggingface-cli download sentence-transformers/all-MiniLM-L6-v2
-
-ENV TRANSFORMERS_OFFLINE=1
-ENV HF_HUB_OFFLINE=1
-ENV DO_NOT_TRACK=1
-
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
 # python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
 CMD [ "python3", "-m", "uvicorn", "main:app", "--port", "5002", "--host", "0.0.0.0"]

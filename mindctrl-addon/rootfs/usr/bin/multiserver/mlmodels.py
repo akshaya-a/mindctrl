@@ -125,23 +125,23 @@ QUERY: summarize the above events for me""",
         )
         set_alias(mlflow_client, EMBEDDINGS_MODEL, CHAMPION_ALIAS)
 
-        from sentence_transformers import SentenceTransformer
+        # from sentence_transformers import SentenceTransformer
 
-        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-        data = "input data for signature inference"
-        signature = mlflow.models.infer_signature(
-            model_input=data,
-            model_output=embedding_model.encode(data),
-        )
+        # embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+        # data = "input data for signature inference"
+        # signature = mlflow.models.infer_signature(
+        #     model_input=data,
+        #     model_output=embedding_model.encode(data),
+        # )
 
-        mlflow.sentence_transformers.log_model(
-            model=embedding_model,
-            artifact_path="st-embeddings",
-            registered_model_name=EMBEDDINGS_MODEL,
-            signature=signature,
-            input_example=data,
-        )
-        set_alias(mlflow_client, EMBEDDINGS_MODEL, CHALLENGER_ALIAS)
+        # mlflow.sentence_transformers.log_model(
+        #     model=embedding_model,
+        #     artifact_path="st-embeddings",
+        #     registered_model_name=EMBEDDINGS_MODEL,
+        #     signature=signature,
+        #     input_example=data,
+        # )
+        # set_alias(mlflow_client, EMBEDDINGS_MODEL, CHALLENGER_ALIAS)
 
     return rms
 
