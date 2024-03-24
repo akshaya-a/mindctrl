@@ -62,5 +62,8 @@ jobs:
           sleep 60
           kubectl get pods
           sleep 60
+          kubectl describe pod "$(kubectl get pod -l app.kubernetes.io/name=deployments --no-headers -o name|cut -d/ -f2|head -1)"
+          kubectl describe pod "$(kubectl get pod -l app.kubernetes.io/name=tracking --no-headers -o name|cut -d/ -f2|head -1)"
+          kubectl describe pod "$(kubectl get pod -l app.kubernetes.io/name=multiserver --no-headers -o name|cut -d/ -f2|head -1)"
           echo "logs below"
           docker exec k3d-k3s-default-server-0 sh -c 'for file in $(find /var/log/pods -type f -name "*.log" | grep -i multiserver); do echo "$file"; cat "$file"; done'
