@@ -34,7 +34,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--deploy-mode",
         action="store",
-        default=str(DeployMode.LOCAL),
+        default=DeployMode.LOCAL.value,
         help=f"mindctrl deployment mode for integration: {list(DeployMode)}",
     )
 
