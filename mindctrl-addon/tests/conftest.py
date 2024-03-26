@@ -354,8 +354,17 @@ def k3d_server_url(
             cluster.apply(target_deploy_folder / "multiserver.yaml")
 
             # breakpoint()
-            # import time
-            # time.sleep(60)
+            print("Waiting for deployments to be created + logs populated")
+            import time
+
+            time.sleep(60)
+            cluster.kubectl(["describe", "pod", "-l", "app=deployments"])
+            cluster.kubectl(["describe", "pod", "-l", "app=tracking"])
+            cluster.kubectl(["describe", "pod", "-l", "app=multiserver"])
+
+            cluster.kubectl(["logs", "-l", "app=deployments"])
+            cluster.kubectl(["logs", "-l", "app=tracking"])
+            cluster.kubectl(["logs", "-l", "app=multiserver"])
 
             print("Waiting for deployments to be available")
             cluster.wait("deployments/multiserver", "condition=Available=True")
