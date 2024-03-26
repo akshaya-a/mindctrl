@@ -55,16 +55,16 @@ def build_app(app: str, k3d_registry_url: str, client: docker.DockerClient):
         rm=True,
         forcerm=True,
     )  # type: ignore
-    # for line in resp:
-    #     print(line)
+    for line in resp:
+        _logger.debug(line)
     return tag
 
 
 def push_app(tag: str, client: docker.DockerClient):
     print("Pushing", tag)
-    _ = client.images.push(tag, stream=True, decode=True)
-    # for line in resp:
-    #     print(line)
+    resp = client.images.push(tag, stream=True, decode=True)
+    for line in resp:
+        _logger.debug(line)
 
 
 @pytest.fixture(scope="session")
@@ -261,6 +261,7 @@ def prepare_apps(
         with open(target_app, "w") as f:
             f.write(content)
 
+    print(f"Built tags {built_tags}")
     return built_tags
 
 
@@ -315,7 +316,7 @@ def k3d_server_url(
             # m.setenv("STORE__PASSWORD", db_url.password)
             # m.setenv("STORE__ADDRESS", db_url.host)
             # m.setenv("STORE__ADDRESS", internal_address)
-            m.setenv("STORE__ADDRESS", "postgres")
+            m.setenv("STORE__ADDRESS", "postgres-service")
             # m.setenv(
             #     "STORE__PORT", str(db_url.port)
             # )  # testcontainers spins up on random ports
@@ -325,7 +326,7 @@ def k3d_server_url(
             m.setenv("STORE__DATABASE", "test-mindctrl")
             # m.setenv("STORE__DATABASE", db_url.database)
             m.setenv("EVENTS__EVENTS_TYPE", "mqtt")
-            m.setenv("EVENTS__BROKER", "mosquitto")
+            m.setenv("EVENTS__BROKER", "mosquitto-service")
             m.setenv("EVENTS__PORT", str(1883))
 
             target_deploy_folder = tmp_path_factory.mktemp("deploy-resolved")
@@ -340,6 +341,8 @@ def k3d_server_url(
             # The registry is created here so now push the images
             for tag in built_tags:
                 push_app(tag, docker_client)
+
+            os.system(f"curl -X GET {cluster.k3d_registry_url}/v2/_catalog")
 
             print("Creating secrets")
             cluster.create_secret("openai-api-key", "OPENAI_API_KEY")
@@ -374,9 +377,21 @@ def k3d_server_url(
                 )
             )
 
-            print(cluster.kubectl(["logs", "-l", "app=deployments"], as_dict=False))
-            print(cluster.kubectl(["logs", "-l", "app=tracking"], as_dict=False))
-            print(cluster.kubectl(["logs", "-l", "app=multiserver"], as_dict=False))
+            print(
+                cluster.kubectl(
+                    ["logs", "-l", "app=deployments", "--tail=100"], as_dict=False
+                )
+            )
+            print(
+                cluster.kubectl(
+                    ["logs", "-l", "app=tracking", "--tail=100"], as_dict=False
+                )
+            )
+            print(
+                cluster.kubectl(
+                    ["logs", "-l", "app=multiserver", "--tail=100"], as_dict=False
+                )
+            )
 
             print("Waiting for deployments to be available")
             cluster.wait("deployments/multiserver", "condition=Available=True")
