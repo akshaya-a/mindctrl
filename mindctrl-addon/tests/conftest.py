@@ -358,13 +358,25 @@ def k3d_server_url(
             import time
 
             time.sleep(60)
-            cluster.kubectl(["describe", "pod", "-l", "app=deployments"])
-            cluster.kubectl(["describe", "pod", "-l", "app=tracking"])
-            cluster.kubectl(["describe", "pod", "-l", "app=multiserver"])
+            print(
+                cluster.kubectl(
+                    ["describe", "pod", "-l", "app=deployments"], as_dict=False
+                )
+            )
+            print(
+                cluster.kubectl(
+                    ["describe", "pod", "-l", "app=tracking"], as_dict=False
+                )
+            )
+            print(
+                cluster.kubectl(
+                    ["describe", "pod", "-l", "app=multiserver"], as_dict=False
+                )
+            )
 
-            cluster.kubectl(["logs", "-l", "app=deployments"])
-            cluster.kubectl(["logs", "-l", "app=tracking"])
-            cluster.kubectl(["logs", "-l", "app=multiserver"])
+            print(cluster.kubectl(["logs", "-l", "app=deployments"], as_dict=False))
+            print(cluster.kubectl(["logs", "-l", "app=tracking"], as_dict=False))
+            print(cluster.kubectl(["logs", "-l", "app=multiserver"], as_dict=False))
 
             print("Waiting for deployments to be available")
             cluster.wait("deployments/multiserver", "condition=Available=True")
