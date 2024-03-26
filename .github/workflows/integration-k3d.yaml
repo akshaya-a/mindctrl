@@ -29,6 +29,14 @@ jobs:
       - name: Lint with Ruff
         run: |
           ruff check .
+      - name: Create cluster
+        shell: bash
+        run: bash scripts/setup_k3d.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_CREATION: true
+          SKIP_REGISTRY_CREATION: true
+          SKIP_READINESS: true
       - name: Test with pytest
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

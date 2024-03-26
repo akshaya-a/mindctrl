@@ -17,6 +17,6 @@ azureml-mlflow
 aiomqtt
 pgvector
 asyncpg
-transformers
-torch
-sentence-transformers
+# transformers
+# torch
+# sentence-transformers
