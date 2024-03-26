@@ -30,8 +30,10 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
+COPY run_tracking_container.sh /
+
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
-CMD [ "mlflow", "server", "--backend-store-uri", "$MLFLOW_TRACKING_URI", "--artifacts-destination", "$ARTIFACTS_DESTINATION", "--port", "5000", "--host", "0.0.0.0"]
+CMD [ "/run_tracking_container.sh"]
 
 
 LABEL \

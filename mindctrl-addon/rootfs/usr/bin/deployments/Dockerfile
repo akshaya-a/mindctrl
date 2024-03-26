@@ -31,11 +31,11 @@ COPY requirements.txt /
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 
-#   mlflow deployments start-server --config-path /usr/bin/deployment-server/route-config.yaml --port 5001 --host 0.0.0.0
+#   mlflow deployments start-server --config-path /usr/bin/deployments/route-config.yaml --port 5001 --host 0.0.0.0
 COPY route-config.yaml /
-COPY run_deployments.sh /
+COPY run_deployments_container.sh /
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
-CMD [ "/run_deployments.sh"]
+CMD [ "/run_deployments_container.sh"]
 
 
 LABEL \

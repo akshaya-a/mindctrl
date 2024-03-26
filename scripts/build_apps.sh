@@ -5,11 +5,11 @@ cd ./mindctrl-addon/rootfs/usr/bin
 
 echo "using target registry $K3D_REGISTRY_URL"
 
-echo "Building the deployment-server image"
+echo "Building the deployments image"
 docker build --pull --progress=plain --rm \
--f "./deployment-server/Dockerfile" \
+-f "./deployments/Dockerfile" \
 -t $K3D_REGISTRY_URL/deployments:latest \
-"./deployment-server" # context
+"./deployments" # context
 
 
 echo "Building the multiserver image"

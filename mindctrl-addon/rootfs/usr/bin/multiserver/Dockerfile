@@ -30,9 +30,10 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
+COPY . /
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
 # python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
-CMD [ "python3", "-m", "uvicorn", "main:app", "--port", "5002", "--host", "0.0.0.0"]
+CMD [ "/run_multiserver_container.sh"]
 
 
 LABEL \

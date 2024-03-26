@@ -39,9 +39,7 @@ def get_connection_string(
 
 async def setup_db(settings: PostgresStoreSettings) -> AsyncEngine:
     connection_string = get_connection_string(settings, include_password=True)
-    _LOGGER.info(
-        f"Using database: {get_connection_string(settings, include_password=False)}"
-    )
+    print(f"Using database: {get_connection_string(settings, include_password=False)}")
 
     engine: AsyncEngine = create_async_engine(connection_string, future=True, echo=True)
 

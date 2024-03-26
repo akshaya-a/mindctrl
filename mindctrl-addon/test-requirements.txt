@@ -9,4 +9,6 @@ aiomqtt
 pytest-asyncio
 httpx
 ruff
+# already pulled in by testcontainers, but we need it separately too
+docker
 -r requirements.txt

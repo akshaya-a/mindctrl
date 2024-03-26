@@ -47,6 +47,10 @@ spec:
                   key: openai-api-key
             - name: APP_PORT
               value: "5000"
+            - name: MLFLOW_DEPLOYMENTS_TARGET
+              # TODO: Change this to the actual deployments service URL or dapr discovery
+              # https://docs.dapr.io/developing-applications/building-blocks/service-invocation/howto-invoke-discover-services/#additional-url-formats
+              value: "http://deployments-service:5001"
           ports:
             - containerPort: 5000
           imagePullPolicy: Always
