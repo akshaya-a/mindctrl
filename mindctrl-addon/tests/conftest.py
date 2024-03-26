@@ -252,7 +252,8 @@ def prepare_apps(
         target_app = target_dir / app.name
 
         # Don't push until the registry is created later
-        built_tags.append(build_app(app.stem, registry_url, docker_client))
+        if "postgres" not in app.name and "mosquitto" not in app.name:
+            built_tags.append(build_app(app.stem, registry_url, docker_client))
 
         with open(app, "r") as f:
             content = f.read()
@@ -291,37 +292,41 @@ def k3d_server_url(
 
             # breakpoint()
 
-            docker_network_name = f"k3d-{cluster.cluster_name}"
-            postgres = next(start_postgres(docker_network_name))
-            internal_address, internal_port = get_internal_host_port(
-                postgres, docker_network_name
-            )
-            db_url = sqlalchemy.engine.url.make_url(postgres.get_connection_url())
+            # docker_network_name = f"k3d-{cluster.cluster_name}"
+            # postgres = next(start_postgres(docker_network_name))
+            # internal_address, internal_port = get_internal_host_port(
+            #     postgres, docker_network_name
+            # )
+            # db_url = sqlalchemy.engine.url.make_url(postgres.get_connection_url())
 
-            # breakpoint()
+            # # breakpoint()
 
-            mosquitto = next(start_mosquitto(docker_network_name))
-            mqtt_host, mqtt_port = get_internal_host_port(
-                mosquitto, docker_network_name
-            )
+            # mosquitto = next(start_mosquitto(docker_network_name))
+            # mqtt_host, mqtt_port = get_internal_host_port(
+            #     mosquitto, docker_network_name
+            # )
 
             # breakpoint()
 
             m.setenv("STORE__STORE_TYPE", "psql")
-            m.setenv("STORE__USER", db_url.username)
-            m.setenv("STORE__PASSWORD", db_url.password)
+            m.setenv("STORE__USER", "test-user")
+            # m.setenv("STORE__USER", db_url.username)
+            m.setenv("STORE__PASSWORD", "test-password")
+            # m.setenv("STORE__PASSWORD", db_url.password)
             # m.setenv("STORE__ADDRESS", db_url.host)
-            m.setenv("STORE__ADDRESS", internal_address)
+            # m.setenv("STORE__ADDRESS", internal_address)
+            m.setenv("STORE__ADDRESS", "postgres")
             # m.setenv(
             #     "STORE__PORT", str(db_url.port)
             # )  # testcontainers spins up on random ports
             m.setenv(
-                "STORE__PORT", str(internal_port)
+                "STORE__PORT", str(5432)
             )  # testcontainers spins up on random ports
-            m.setenv("STORE__DATABASE", db_url.database)
+            m.setenv("STORE__DATABASE", "test-mindctrl")
+            # m.setenv("STORE__DATABASE", db_url.database)
             m.setenv("EVENTS__EVENTS_TYPE", "mqtt")
-            m.setenv("EVENTS__BROKER", mqtt_host)
-            m.setenv("EVENTS__PORT", str(mqtt_port))
+            m.setenv("EVENTS__BROKER", "mosquitto")
+            m.setenv("EVENTS__PORT", str(1883))
 
             target_deploy_folder = tmp_path_factory.mktemp("deploy-resolved")
             deploy_folder = Path(__file__).parent.parent / "rootfs/usr/bin/deploy"
@@ -336,10 +341,14 @@ def k3d_server_url(
             for tag in built_tags:
                 push_app(tag, docker_client)
 
+            print("Creating secrets")
             cluster.create_secret("openai-api-key", "OPENAI_API_KEY")
             cluster.create_secret("store-password", "STORE__PASSWORD")
             cluster.create_secret("events-password", "EVENTS__PASSWORD")
 
+            print("Applying k8s specs")
+            cluster.apply(target_deploy_folder / "mosquitto.yaml")
+            cluster.apply(target_deploy_folder / "postgres.yaml")
             cluster.apply(target_deploy_folder / "deployments.yaml")
             cluster.apply(target_deploy_folder / "tracking.yaml")
             cluster.apply(target_deploy_folder / "multiserver.yaml")
@@ -348,8 +357,7 @@ def k3d_server_url(
             # import time
             # time.sleep(60)
 
-            cluster.wait("deployments/deployments", "condition=Available=True")
-            cluster.wait("deployments/tracking", "condition=Available=True")
+            print("Waiting for deployments to be available")
             cluster.wait("deployments/multiserver", "condition=Available=True")
             # this is wrong, get multiserver ingress instead
             yield cluster.k3d_registry_url
