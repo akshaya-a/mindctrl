@@ -10,5 +10,6 @@ pytest-asyncio
 httpx
 ruff
 # already pulled in by testcontainers, but we need it separately too
-docker
+# ALSO: https://github.com/docker/docker-py/issues/3240
+docker<7
 -r requirements.txt
