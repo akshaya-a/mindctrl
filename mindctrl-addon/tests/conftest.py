@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from subprocess import CalledProcessError
 import time
-from typing import Generator, Optional, Union
+from typing import Optional, Union
 from pydantic import SecretStr
 import pytest
 import multiprocessing
@@ -12,6 +12,11 @@ from uvicorn import Config, Server
 import httpx
 import sqlalchemy
 import docker
+
+
+from testcontainers.postgres import PostgresContainer
+
+from testcontainers.core.container import DockerContainer
 
 from config import AppSettings, MqttEventsSettings, PostgresStoreSettings
 from k3d_cluster_manager import LocalRegistryK3dManager
@@ -57,7 +62,7 @@ def build_app(app: str, k3d_registry_url: str, client: docker.DockerClient):
 
 def push_app(tag: str, client: docker.DockerClient):
     print("Pushing", tag)
-    resp = client.images.push(tag, stream=True, decode=True)
+    _ = client.images.push(tag, stream=True, decode=True)
     # for line in resp:
     #     print(line)
 
@@ -121,11 +126,6 @@ def start_postgres(network_name: Optional[str] = None):
         print(version)
     yield postgres
     postgres.stop()
-
-
-from testcontainers.postgres import PostgresContainer
-
-from testcontainers.core.container import DockerContainer
 
 
 class MosquittoContainer(DockerContainer):
