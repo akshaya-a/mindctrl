@@ -344,7 +344,7 @@ def k3d_server_url(
             print("Creating secrets")
             cluster.create_secret("openai-api-key", "OPENAI_API_KEY")
             cluster.create_secret("store-password", "STORE__PASSWORD")
-            cluster.create_secret("events-password", "EVENTS__PASSWORD")
+            # cluster.create_secret("events-password", "EVENTS__PASSWORD")
 
             print("Applying k8s specs")
             cluster.apply(target_deploy_folder / "mosquitto.yaml")

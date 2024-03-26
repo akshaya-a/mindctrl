@@ -70,11 +70,11 @@ spec:
               value: "$EVENTS__PORT"
             - name: EVENTS__USERNAME
               value: $EVENTS__USERNAME
-            - name: EVENTS__PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: events-password
-                  key: events-password
+            # - name: EVENTS__PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: events-password
+            #       key: events-password
             - name: MLFLOW_TRACKING_URI
               # TODO: Change this to the actual deployments service URL or dapr discovery
               # https://docs.dapr.io/developing-applications/building-blocks/service-invocation/howto-invoke-discover-services/#additional-url-formats
