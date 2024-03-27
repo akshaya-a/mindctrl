@@ -37,7 +37,7 @@ ENV HF_HUB_CACHE=/model_cache
 ENV HF_HUB_DOWNLOAD_TIMEOUT=120
 #COPY cache_models.py /cache_models.py
 #RUN python3 /cache_models.py
-RUN huggingface-cli download sentence-transformers/all-MiniLM-L6-v2
+#RUN huggingface-cli download sentence-transformers/all-MiniLM-L6-v2
 
 ENV TRANSFORMERS_OFFLINE=1
 ENV HF_HUB_OFFLINE=1
