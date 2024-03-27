@@ -1,7 +1,6 @@
 import pandas as pd
 import logging
 from pathlib import Path
-import aiomqtt
 
 
 _logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ async def test_read_version(server_client):
     assert "dashboard_url" in version_data.keys()
 
 
-async def test_summarize(server_client, hosting_settings):
+async def test_summarize(server_client, mqtt_client):
     df = pd.DataFrame(
         {
             "query": [
@@ -43,11 +42,9 @@ async def test_summarize(server_client, hosting_settings):
     state_ring_file = Path(__file__).parent / "test_data" / "state_ring_buffer.txt"
     with open(state_ring_file, "r") as f:
         state_lines = f.readlines()
-        async with aiomqtt.Client(
-            hostname=hosting_settings.events.broker, port=hosting_settings.events.port
-        ) as client:
-            for event in state_lines:
-                await client.publish(topic="hass_ak", payload=event.encode("utf-8"))
+
+        for event in state_lines:
+            await mqtt_client.publish(topic="hass_ak", payload=event.encode("utf-8"))
 
     response = await server_client.post(
         "/deployed-models/chat/labels/latest/invocations",

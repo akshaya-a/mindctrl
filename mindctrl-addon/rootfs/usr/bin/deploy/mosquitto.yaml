@@ -1,0 +1,64 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mosquitto-service
+  labels:
+    app: mosquitto
+spec:
+  selector:
+    app: mosquitto
+  ports:
+    - protocol: TCP
+      port: 1883
+      targetPort: 1883
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  labels:
+    app: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "mosquitto"
+        dapr.io/app-port: "1883"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              mosquitto_passwd -c -b ./mqttpass.txt $USERNAME $PASSWORD
+              cat ./mqttpass.txt
+              pwd
+              chown -R mosquitto:mosquitto ./mqttpass.txt
+              ls -la
+              echo "listener 1883" > ./mosquitto.conf
+              echo "password_file mqttpass.txt" >> ./mosquitto.conf
+              cat ./mosquitto.conf
+              mosquitto -c ./mosquitto.conf
+          env:
+            - name: APP_PORT
+              value: "1883"
+            - name: USERNAME
+              value: $EVENTS__USERNAME
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: events-password
+                  key: events-password
+          ports:
+            - containerPort: 1883
+          imagePullPolicy: Always

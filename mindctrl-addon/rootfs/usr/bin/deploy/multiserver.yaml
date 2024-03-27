@@ -1,0 +1,103 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: multiserver-service
+  labels:
+    app: multiserver
+spec:
+  selector:
+    app: multiserver
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multiserver
+  labels:
+    app: multiserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multiserver
+  template:
+    metadata:
+      labels:
+        app: multiserver
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "multiserver"
+        dapr.io/app-port: "5002"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+        - name: multiserver
+          image: $K3D_REGISTRY_URL/multiserver:latest
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: openai-api-key
+            - name: APP_PORT
+              value: "5002"
+            - name: STORE__STORE_TYPE
+              value: $STORE__STORE_TYPE
+            - name: STORE__USER
+              value: $STORE__USER
+            - name: STORE__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: store-password
+                  key: store-password
+            - name: STORE__ADDRESS
+              value: $STORE__ADDRESS
+            - name: STORE__DATABASE
+              value: $STORE__DATABASE
+            - name: STORE__PORT
+              value: "$STORE__PORT"
+            - name: EVENTS__EVENTS_TYPE
+              value: $EVENTS__EVENTS_TYPE
+            - name: EVENTS__BROKER
+              value: $EVENTS__BROKER
+            - name: EVENTS__PORT
+              value: "$EVENTS__PORT"
+            - name: EVENTS__USERNAME
+              value: $EVENTS__USERNAME
+            - name: EVENTS__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: events-password
+                  key: events-password
+            - name: MLFLOW_TRACKING_URI
+              # TODO: Change this to the actual deployments service URL or dapr discovery
+              # https://docs.dapr.io/developing-applications/building-blocks/service-invocation/howto-invoke-discover-services/#additional-url-formats
+              value: "http://tracking-service:5000"
+          ports:
+            - containerPort: 5002
+          imagePullPolicy: Always
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: multiserver-service
+                port:
+                  number: 5002

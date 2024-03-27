@@ -9,9 +9,62 @@ on:
       - main
 
 jobs:
-  some-job:
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: nolar/setup-k3d-k3s@v1
-        with:
-          version: v1.21 # E.g.: v1.21, v1.21.2, v1.21.2+k3s1
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: Create cluster
+        shell: bash
+        run: bash scripts/setup_k3d.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_CREATION: ""
+          SKIP_REGISTRY_CREATION: ""
+          SKIP_READINESS: ""
+      - name: Check k3s
+        run: bash scripts/check_k3d.sh
+      - name: Install Dapr
+        shell: bash
+        run: |
+          wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+      - name: Initialize Dapr
+        shell: bash
+        run: |
+          # Initialize Dapr
+          # Group the Dapr init logs so these lines can be collapsed.
+          echo "::group::Initialize Dapr"
+          dapr init --kubernetes --wait
+          echo "::endgroup::"
+
+          dapr status --kubernetes
+      - name: Set k8s secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          kubectl create secret generic openai-api-key --from-literal=openai-api-key=$OPENAI_API_KEY
+
+      - name: Build apps
+        shell: bash
+        run: bash scripts/build_apps.sh
+      - name: Push apps
+        shell: bash
+        run: bash scripts/push_apps.sh
+      - name: Deploy mindctrl
+        shell: bash
+        run: bash scripts/deploy_apps.sh
+      - name: Check mindctrl
+        shell: bash
+        run: |
+          echo "sleeping"
+          sleep 120
+          kubectl get pods --show-labels
+
+          kubectl describe pod "$(kubectl get pod -l app=deployments --no-headers -o name|cut -d/ -f2|head -1)"
+          kubectl describe pod "$(kubectl get pod -l app=tracking --no-headers -o name|cut -d/ -f2|head -1)"
+          kubectl describe pod "$(kubectl get pod -l app=multiserver --no-headers -o name|cut -d/ -f2|head -1)"
+          sleep 30
+          kubectl get pods --show-labels
+
+          echo "logs below"
+          docker exec k3d-k3s-default-server-0 sh -c 'for file in $(find /var/log/pods -type f -name "*.log" | grep -i multiserver); do echo "$file"; cat "$file"; done'

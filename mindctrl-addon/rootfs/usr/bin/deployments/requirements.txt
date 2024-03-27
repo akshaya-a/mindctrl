@@ -1,0 +1,3 @@
+# https://raw.githubusercontent.com/mlflow/mlflow/master/requirements/gateway-requirements.txt
+
+mlflow[genai]~=2.11

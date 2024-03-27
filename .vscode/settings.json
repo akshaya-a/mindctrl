@@ -1,0 +1,8 @@
+{
+    "python.testing.pytestArgs": [
+        "-c",
+        "mindctrl-addon/tests/pytest.ini"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

@@ -1,0 +1,56 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "postgres"
+        dapr.io/app-port: "5432"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+        - name: postgres
+          image: timescale/timescaledb-ha:pg16-all-oss
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          env:
+            - name: POSTGRES_USER
+              value: $STORE__USER
+            - name: POSTGRES_DB
+              value: $STORE__DATABASE
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: store-password
+                  key: store-password
+            - name: APP_PORT
+              value: "5432"
+          ports:
+            - containerPort: 5432
+          imagePullPolicy: Always
