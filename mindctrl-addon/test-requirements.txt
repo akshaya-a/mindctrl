@@ -3,7 +3,6 @@
 pytest
 pytest-kubernetes
 pytest-dotenv
-pytest-mqtt
 testcontainers-postgres
 aiomqtt
 pytest-asyncio

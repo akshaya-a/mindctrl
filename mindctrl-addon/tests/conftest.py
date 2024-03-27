@@ -64,6 +64,7 @@ def build_app(app: str, k3d_registry_url: str, client: docker.DockerClient):
 def push_app(tag: str, client: docker.DockerClient):
     _logger.info(f"Pushing {tag}")
     resp = client.images.push(tag, stream=True, decode=True)
+    ## WARNING: For some reason, not pulling on the logs will cause the push to fail
     for line in resp:
         _logger.debug(line)
 
