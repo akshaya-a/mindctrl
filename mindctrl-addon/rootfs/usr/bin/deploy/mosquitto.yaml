@@ -37,11 +37,28 @@ spec:
       containers:
         - name: mosquitto
           image: eclipse-mosquitto:latest
-          command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
-          # args: ["mosquitto -c /mosquitto-no-auth.conf"]
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              mosquitto_passwd -c -b ./mqttpass.txt $USERNAME $PASSWORD
+              cat ./mqttpass.txt
+              pwd
+              chown -R mosquitto:mosquitto ./mqttpass.txt
+              ls -la
+              echo "listener 1883" > ./mosquitto.conf
+              echo "password_file mqttpass.txt" >> ./mosquitto.conf
+              cat ./mosquitto.conf
+              mosquitto -c ./mosquitto.conf
           env:
             - name: APP_PORT
               value: "1883"
+            - name: USERNAME
+              value: $EVENTS__USERNAME
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: events-password
+                  key: events-password
           ports:
             - containerPort: 1883
           imagePullPolicy: Always

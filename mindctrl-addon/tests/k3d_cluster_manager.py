@@ -59,3 +59,29 @@ class LocalRegistryK3dManager(K3dManager):
             ],
             as_dict=True,
         )
+
+    def set_kubectl_default(self):
+        self._exec(
+            [
+                "kubeconfig",
+                "merge",
+                self.cluster_name,
+                "--kubeconfig-merge-default",
+                "--kubeconfig-switch-context",
+            ]
+        )
+
+    def wait_and_get_logs(self, app: str):
+        try:
+            self.wait(
+                name=f"deployments/{app}",
+                waitfor="condition=Available=True",
+                timeout=90,
+            )
+        except Exception as e:
+            print(e)
+            print(self.kubectl(["describe", "pod", "-l", f"app={app}"], as_dict=False))
+            print(
+                self.kubectl(["logs", "-l", f"app={app}", "--tail=100"], as_dict=False)
+            )
+            raise
