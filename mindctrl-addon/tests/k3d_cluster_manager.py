@@ -1,10 +1,14 @@
 # https://github.com/Blueshoe/pytest-kubernetes/blob/main/pytest_kubernetes/providers/k3d.py#L5
 
+import logging
 import os
 import subprocess
 from typing import Dict, List, Optional
 from pytest_kubernetes.providers.k3d import K3dManager
 from pytest_kubernetes.options import ClusterOptions
+
+
+_logger = logging.getLogger(__name__)
 
 
 class LocalRegistryK3dManager(K3dManager):
@@ -21,6 +25,7 @@ class LocalRegistryK3dManager(K3dManager):
         additional_env: Dict[str, str] = {},
         timeout: Optional[int] = None,
     ) -> subprocess.CompletedProcess:
+        _logger.info(f"Executing: {self.get_binary_name()} {' '.join(arguments)}")
         proc = super()._exec(arguments, additional_env, timeout)
         self.executions.append(proc)
         return proc
@@ -71,17 +76,37 @@ class LocalRegistryK3dManager(K3dManager):
             ]
         )
 
-    def wait_and_get_logs(self, app: str):
+    def wait_and_get_logs(self, app: str, timeout: int = 90):
+        _logger.info(f"Waiting {timeout}s for {app} to be ready")
         try:
             self.wait(
                 name=f"deployments/{app}",
                 waitfor="condition=Available=True",
-                timeout=90,
+                timeout=timeout,
             )
-        except Exception as e:
+        except subprocess.TimeoutExpired as e:
             print(e)
             print(self.kubectl(["describe", "pod", "-l", f"app={app}"], as_dict=False))
             print(
                 self.kubectl(["logs", "-l", f"app={app}", "--tail=100"], as_dict=False)
             )
             raise
+
+    def install_dapr(self):
+        _logger.info("Installing Dapr")
+        # lol don't hate me
+        self._exec(
+            [
+                "version",
+                ">",
+                "/dev/null",
+                "&&",
+                "dapr",
+                "init",
+                "--kubernetes",
+                "--wait",
+            ]
+        )
+        self._exec(
+            ["version", ">", "/dev/null", "&&", "dapr", "status", "--kubernetes"]
+        )

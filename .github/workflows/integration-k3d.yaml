@@ -37,6 +37,10 @@ jobs:
           SKIP_CREATION: true
           SKIP_REGISTRY_CREATION: true
           SKIP_READINESS: true
+      - name: Install Dapr
+        shell: bash
+        run: |
+          wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
       - name: Test with pytest
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

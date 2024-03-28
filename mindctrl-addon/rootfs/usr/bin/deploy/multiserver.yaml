@@ -33,6 +33,10 @@ spec:
         dapr.io/app-id: "multiserver"
         dapr.io/app-port: "5002"
         dapr.io/enable-api-logging: "true"
+        # Multiserver is currently a beefy service, so we need to give it some time to start up
+        # Actually there is some issue with postgres and connections are timing out
+        # TODO: investigate why this is happening
+        dapr.io/sidecar-liveness-probe-delay-seconds: "15"
     spec:
       containers:
         - name: multiserver
