@@ -11,6 +11,7 @@ from uvicorn import Config, Server
 import httpx
 import sqlalchemy
 import docker
+import subprocess
 
 from testcontainers.postgres import PostgresContainer
 from testcontainers.core.waiting_utils import wait_for_logs
@@ -251,6 +252,7 @@ def k3d_server_url(
                 options=["-p", f'"{constants.K8S_INGRESS_PORT}:80@loadbalancer"']
             )
             cluster.set_kubectl_default()
+            cluster.install_dapr()
 
             m.setenv("STORE__STORE_TYPE", "psql")
             m.setenv("STORE__USER", constants.POSTGRES_USER)
@@ -300,7 +302,7 @@ def k3d_server_url(
             cluster.apply(target_deploy_folder / "multiserver.yaml")
 
             _logger.info("Waiting for deployments to be available")
-            cluster.wait_and_get_logs("multiserver")
+            cluster.wait_and_get_logs("multiserver", timeout=300)
 
             port_forward_process = cluster.port_forwarding(
                 "service/mosquitto-service", constants.MQTT_PORT, constants.MQTT_PORT
@@ -315,12 +317,18 @@ def k3d_server_url(
 
             yield multiserver_url
 
+    except subprocess.TimeoutExpired as e:
+        _logger.error(f"Timeout waiting for readiness: {e}")
+        if not os.environ.get("CI", "false") == "true":
+            breakpoint()
+
     finally:
         _logger.info("Deleting cluster")
 
         # comment out to keep cluster for debugging, but
         # remember to k3d registry delete AND k3d cluster delete manually
         cluster.delete()
+        # Easy to recreate and zombie procs are annoying
         if port_forward_process:
             port_forward_process.stop()
 

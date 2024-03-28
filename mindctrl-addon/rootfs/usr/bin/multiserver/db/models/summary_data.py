@@ -1,6 +1,3 @@
-
-
-
 EMBEDDING_DIM = 384
 
 # from ..config import Base

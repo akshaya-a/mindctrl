@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class UnknownEventsSettings(BaseModel):
     events_type: Literal["unknown"]
 
+
 class MqttEventsSettings(BaseModel):
     events_type: Literal["mqtt"]
 
@@ -14,6 +15,7 @@ class MqttEventsSettings(BaseModel):
     port: int = 1883
     username: Optional[str] = None
     password: Optional[SecretStr] = None
+
 
 class PostgresStoreSettings(BaseModel):
     store_type: Literal["psql"]
@@ -24,16 +26,22 @@ class PostgresStoreSettings(BaseModel):
     port: int = 5432
     database: str = "mindctrl"
 
+
 # Just to make typing happy for now - add dapr, sqlite, etc
 class UnknownStoreSettings(BaseModel):
     store_type: Literal["unknown"]
 
+
 class AppSettings(BaseSettings):
     # double underscore, in case your font doesn't make it clear
-    model_config = SettingsConfigDict(env_nested_delimiter='__')
+    model_config = SettingsConfigDict(env_nested_delimiter="__")
 
-    store: Union[PostgresStoreSettings, UnknownStoreSettings] = Field(discriminator="store_type")
-    events: Union[MqttEventsSettings, UnknownEventsSettings] = Field(discriminator="events_type")
+    store: Union[PostgresStoreSettings, UnknownStoreSettings] = Field(
+        discriminator="store_type"
+    )
+    events: Union[MqttEventsSettings, UnknownEventsSettings] = Field(
+        discriminator="events_type"
+    )
     # TODO: move this into the gateway or something
     openai_api_key: SecretStr
     force_publish_models: bool = False
