@@ -21,3 +21,6 @@ Issues = "https://github.com/akshaya-a/mindctrl/issues"
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.ruff]
+extend-exclude = ["openai_deployment"]
