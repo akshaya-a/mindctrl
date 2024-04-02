@@ -45,15 +45,11 @@ RUN mkdir /dapr; \
 RUN dapr init --slim
 
 COPY rootfs /
+COPY requirements.txt /
+RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 # One day when builder workflow supports --build-context
 # COPY --from=mindctrl_source / /pysrc
-COPY pysrc /
-RUN pip3 install --no-cache --break-system-packages /pysrc
-
-
-COPY requirements.txt /
-COPY services /
-RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
+RUN pip3 install --no-cache --break-system-packages /.context/pysrc/
 
 RUN chmod a+x /usr/bin/run_tracking.sh && \
     chmod a+x /usr/bin/run_gateway.sh && \

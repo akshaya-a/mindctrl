@@ -7,8 +7,8 @@ if [ ! -d "python" ] || [ ! -d "mindctrl-addon" ]; then
 fi
 
 # Define source and target directories
-src_dir="python/src"
-target_dir="mindctrl-addon/pysrc"
+src_dir="python"
+target_dir="mindctrl-addon/rootfs/.context/pysrc"
 
 # Check if source directory exists
 if [ ! -d "$src_dir" ]; then
@@ -32,7 +32,7 @@ echo "Python source files have been copied to $target_dir"
 
 # Define source and target directories
 src_dir="services"
-target_dir="mindctrl-addon/services"
+target_dir="mindctrl-addon/rootfs/.context/services"
 
 # Check if source directory exists
 if [ ! -d "$src_dir" ]; then

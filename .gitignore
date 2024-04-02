@@ -4,6 +4,9 @@ mlruns/
 dapr-local.yaml
 *.sqlite
 
+# my temporary docker context
+.context
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
