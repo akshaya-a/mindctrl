@@ -38,7 +38,8 @@ bashio::log.info "setting notification fd to ${notifyfd}"
 export NOTIFY_FD="${notifyfd}"
 
 export MLFLOW_TRACKING_URI="http://0.0.0.0:5000"
-export PYTHONPATH="/usr/bin/multiserver"
+export MLFLOW_DEPLOYMENTS_TARGET="http://0.0.0.0:5001"
+# export PYTHONPATH="/usr/bin/multiserver"
 
 bashio::log.info "Starting MLflow Tracking Server with Dapr..."
-dapr run --app-id multiserver --app-port 5002 -- python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
+dapr run --app-id multiserver --app-port 5002 -- python3 -m uvicorn mindctrl.main:app --host 0.0.0.0 --port 5002

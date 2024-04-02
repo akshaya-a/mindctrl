@@ -11,4 +11,8 @@ ruff
 # already pulled in by testcontainers, but we need it separately too
 # ALSO: https://github.com/docker/docker-py/issues/3240
 docker<7
--r requirements.txt
+# ugh..https://github.com/docker/docker-py/issues/2230
+python-on-whales
+-r ../services/deployments/requirements.txt
+-r ../services/tracking/requirements.txt
+-r ../services/multiserver/requirements.txt

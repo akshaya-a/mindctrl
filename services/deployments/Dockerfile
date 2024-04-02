@@ -30,45 +30,16 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
+COPY --from=mindctrl_source / /pysrc
+RUN pip3 install  --no-cache --break-system-packages /pysrc
 
-ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
-ENV HF_HUB_CACHE=/model_cache
-# HF is super flaky today
-ENV HF_HUB_DOWNLOAD_TIMEOUT=120
-#COPY cache_models.py /cache_models.py
-#RUN python3 /cache_models.py
-#RUN huggingface-cli download sentence-transformers/all-MiniLM-L6-v2
-
-ENV TRANSFORMERS_OFFLINE=1
-ENV HF_HUB_OFFLINE=1
-ENV DO_NOT_TRACK=1
-
-RUN mkdir /dapr; \
-    wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
-RUN dapr init --slim
-
-COPY rootfs /
-# One day when builder workflow supports --build-context
-# COPY --from=mindctrl_source / /pysrc
-COPY pysrc /
-RUN pip3 install --no-cache --break-system-packages /pysrc
-
-RUN chmod a+x /usr/bin/run_tracking.sh && \
-    chmod a+x /usr/bin/run_gateway.sh && \
-    chmod a+x /usr/bin/run_multiserver.sh && \
-    chmod a+x /usr/bin/run_dashboard.sh && \
-    chmod a+x /etc/s6-overlay/s6-rc.d/init-server-env/run && \
-    chmod a+x /etc/s6-overlay/s6-rc.d/discovery/run && \
-    chmod a+x /etc/s6-overlay/s6-rc.d/gateway/data/check && \
-    chmod a+x /etc/s6-overlay/s6-rc.d/tracking/data/check
+#   mlflow deployments start-server --config-path /usr/bin/deployments/route-config.yaml --port 5001 --host 0.0.0.0
+COPY route-config.yaml run_deployments_container.sh replay_server.py /
+ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
+CMD [ "/run_deployments_container.sh"]
 
 
 LABEL \
-    io.hass.name="${BUILD_NAME}" \
-    io.hass.description="${BUILD_DESCRIPTION}" \
-    io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
-    io.hass.version=${BUILD_VERSION} \
     maintainer="AK" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \

@@ -2,6 +2,7 @@
 
 import logging
 import os
+from pathlib import Path
 import subprocess
 from typing import Dict, List, Optional
 from pytest_kubernetes.providers.k3d import K3dManager
@@ -110,3 +111,46 @@ class LocalRegistryK3dManager(K3dManager):
         self._exec(
             ["version", ">", "/dev/null", "&&", "dapr", "status", "--kubernetes"]
         )
+
+    # create configmap name-of-your-configmap --from-file=your-file.json
+    def create_configmap(self, name: str, *args, **kwargs):
+        command_args = [
+            "create",
+            "configmap",
+            name,
+        ]
+
+        for arg in args:
+            if isinstance(arg, Path):
+                command_args.append(f"--from-file={arg}")
+            else:
+                raise ValueError(f"Unknown arg type: {arg}")
+
+        for key, value in kwargs.items():
+            command_args.append(f"--from-literal={key}={value}")
+
+        self.kubectl(command_args)
+
+    def show_configmap(self, name: str):
+        # kubectl get configmaps special-config -o yaml
+        return self.kubectl(["get", "configmaps", name, "-o", "yaml"], as_dict=False)
+
+    def generate_persistent_volume(
+        self, name: str, host_path: Path, mode: str = "ReadOnlyMany", size: str = "10Mi"
+    ):
+        return f"""
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {name}
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: {size}
+  accessModes:
+    - {mode}
+  hostPath:
+    path: "{host_path}"
+"""

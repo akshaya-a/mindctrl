@@ -1,0 +1,320 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're an AI assistant for home automation. You're being given the latest set of events from the home automation system. You are to concisely summarize the events relevant to the user's query followed by an explanation of your reasoning.\n    EXAMPLE SENSOR DATA:\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.washer_wash_completed', 'old_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'off', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:20:07.695950+00:00', 'last_updated': '2023-12-23T09:20:07.695950+00:00', 'context': {'id': '01HJAZK20FGR2Z9NTCD46XMQEG', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'on', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:53:07.724686+00:00', 'last_updated': '2023-12-23T09:53:07.724686+00:00', 'context': {'id': '01HJB1FFMCT64MM6GKQX55HMKQ', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'tts', 'service': 'cloud_say', 'service_data': {'cache': True, 'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'message': 'The washer is complete! Move the clothes to the dryer or they gonna get so so so stinky poo poo!!!!'}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'media_player', 'service': 'play_media', 'service_data': {'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'media_content_id': 'media-source://tts/cloud?message=The+washer+is+complete!+Move+the+clothes+to+the+dryer+or+they+gonna+get+so+so+so+stinky+poo+poo!!!!&cache=true', 'media_content_type': 'music', 'announce': True}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:46:48.945634+00:00', 'last_updated': '2023-12-23T09:46:48.945634+00:00', 'context': {'id': '01HJB13XQHGYJYCBH1BS9E6JQY', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:50.016556+00:00', 'last_updated': '2023-12-23T09:53:50.016556+00:00', 'context': {'id': '01HJB1GRY0RSE049YV3NPJ6QFC', 'parent_id': None, 'user_id': None}}}}\n\n    EXAMPLE QUERY: \"Is the laundry running?\"\n    EXAMPLE OUTPUT: \"The washer is complete. You should move the clothes to the dryer. I see the washer completed sensor turned on at 2023-12-23T09:20:07.695950+00:00\"\n\n    EXAMPLE QUERY: \"Is there anyone in the bedroom?\"\n    EXAMPLE OUTPUT: \"There is no one in the bedroom. Even though there was recent activity, I see the bedroom motion sensor turned off at 2023-12-23T09:53:50.016556+00:00\"\n\n    EXAMPLE QUERY: \"What rooms have activity recently?\"\n    EXAMPLE OUTPUT: \"The bedroom has had activity. I see the bedroom motion sensor turned on at 2023-12-23T09:53:26.786268+00:00\"\n\n    Remember to be concise and that there could be multiple sequences of events interleaved, so you can output multiple lines.\n    "
+                        },
+                        {
+                            "role": "user",
+                            "content": "SENSOR DATA:\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:24:41.165914+00:00', 'last_updated': '2023-12-24T08:24:41.165914+00:00', 'context': {'id': '01HJDET8EDQ01CTZK3F9YJ095G', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T07:52:48.516898+00:00', 'last_updated': '2023-12-24T07:52:48.516898+00:00', 'context': {'id': '01HJDCZWM4PDTZW9W983KB9E89', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:11.781732+00:00', 'last_updated': '2023-12-24T08:35:11.781732+00:00', 'context': {'id': '01HJDFDG9558Q1Q8FD9SGNBZMW', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:11.826021+00:00', 'last_updated': '2023-12-24T08:35:11.826021+00:00', 'context': {'id': '01HJDFDGAJDPT13FPB6FC9CPCZ', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen_island_pendants'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.den_main_lights'}}}\n\nQUERY: Has there been any motion near the garage door?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Fri, 29 Mar 2024 01:18:38 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Access-Control-Allow-Origin": [
+                        "*"
+                    ],
+                    "Cache-Control": [
+                        "no-cache, must-revalidate"
+                    ],
+                    "openai-model": [
+                        "gpt-4-0125-preview"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "3397"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "300000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "297667"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "466ms"
+                    ],
+                    "x-request-id": [
+                        "req_b6485ed13fa8a29759447a680082385e"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "86bc06dccb1dc386-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-97vB5FJ77HRDmoGnnMuxIX4mhvAfX\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675115,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Yes, there was motion detected near the garage door. It turned on at 2023-12-24T08:35:01.899264+00:00 and turned off at 2023-12-24T08:35:11.826021+00:00.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3067,\n    \"completion_tokens\": 60,\n    \"total_tokens\": 3127\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're an AI assistant for home automation. You're being given the latest set of events from the home automation system. You are to concisely summarize the events relevant to the user's query followed by an explanation of your reasoning.\n    EXAMPLE SENSOR DATA:\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.washer_wash_completed', 'old_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'off', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:20:07.695950+00:00', 'last_updated': '2023-12-23T09:20:07.695950+00:00', 'context': {'id': '01HJAZK20FGR2Z9NTCD46XMQEG', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'on', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:53:07.724686+00:00', 'last_updated': '2023-12-23T09:53:07.724686+00:00', 'context': {'id': '01HJB1FFMCT64MM6GKQX55HMKQ', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'tts', 'service': 'cloud_say', 'service_data': {'cache': True, 'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'message': 'The washer is complete! Move the clothes to the dryer or they gonna get so so so stinky poo poo!!!!'}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'media_player', 'service': 'play_media', 'service_data': {'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'media_content_id': 'media-source://tts/cloud?message=The+washer+is+complete!+Move+the+clothes+to+the+dryer+or+they+gonna+get+so+so+so+stinky+poo+poo!!!!&cache=true', 'media_content_type': 'music', 'announce': True}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:46:48.945634+00:00', 'last_updated': '2023-12-23T09:46:48.945634+00:00', 'context': {'id': '01HJB13XQHGYJYCBH1BS9E6JQY', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:50.016556+00:00', 'last_updated': '2023-12-23T09:53:50.016556+00:00', 'context': {'id': '01HJB1GRY0RSE049YV3NPJ6QFC', 'parent_id': None, 'user_id': None}}}}\n\n    EXAMPLE QUERY: \"Is the laundry running?\"\n    EXAMPLE OUTPUT: \"The washer is complete. You should move the clothes to the dryer. I see the washer completed sensor turned on at 2023-12-23T09:20:07.695950+00:00\"\n\n    EXAMPLE QUERY: \"Is there anyone in the bedroom?\"\n    EXAMPLE OUTPUT: \"There is no one in the bedroom. Even though there was recent activity, I see the bedroom motion sensor turned off at 2023-12-23T09:53:50.016556+00:00\"\n\n    EXAMPLE QUERY: \"What rooms have activity recently?\"\n    EXAMPLE OUTPUT: \"The bedroom has had activity. I see the bedroom motion sensor turned on at 2023-12-23T09:53:26.786268+00:00\"\n\n    Remember to be concise and that there could be multiple sequences of events interleaved, so you can output multiple lines.\n    "
+                        },
+                        {
+                            "role": "user",
+                            "content": "SENSOR DATA:\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:24:41.165914+00:00', 'last_updated': '2023-12-24T08:24:41.165914+00:00', 'context': {'id': '01HJDET8EDQ01CTZK3F9YJ095G', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T07:52:48.516898+00:00', 'last_updated': '2023-12-24T07:52:48.516898+00:00', 'context': {'id': '01HJDCZWM4PDTZW9W983KB9E89', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:11.781732+00:00', 'last_updated': '2023-12-24T08:35:11.781732+00:00', 'context': {'id': '01HJDFDG9558Q1Q8FD9SGNBZMW', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:11.826021+00:00', 'last_updated': '2023-12-24T08:35:11.826021+00:00', 'context': {'id': '01HJDFDGAJDPT13FPB6FC9CPCZ', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen_island_pendants'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.den_main_lights'}}}\n\nQUERY: What rooms have activity?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Fri, 29 Mar 2024 01:18:42 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Access-Control-Allow-Origin": [
+                        "*"
+                    ],
+                    "Cache-Control": [
+                        "no-cache, must-revalidate"
+                    ],
+                    "openai-model": [
+                        "gpt-4-0125-preview"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "3350"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "300000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "297507"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "498ms"
+                    ],
+                    "x-request-id": [
+                        "req_e1b8ddc4fa448d4936f715118de77c11"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "86bc06f4c8ccec48-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-97vB9gcN8LxFa4RFkj13Cad0AyPOY\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675119,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"There was recent activity in both the AI Pro area and the garage. The AI Pro motion sensor detected motion at 2023-12-24T08:35:01.242443+00:00, and the garage door sensor detected motion at the same time, 2023-12-24T08:35:01.899264+00:00. Both sensors turned off shortly after, indicating the activity was brief.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3062,\n    \"completion_tokens\": 89,\n    \"total_tokens\": 3151\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're an AI assistant for home automation. You're being given the latest set of events from the home automation system. You are to concisely summarize the events relevant to the user's query followed by an explanation of your reasoning.\n    EXAMPLE SENSOR DATA:\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.washer_wash_completed', 'old_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'off', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:20:07.695950+00:00', 'last_updated': '2023-12-23T09:20:07.695950+00:00', 'context': {'id': '01HJAZK20FGR2Z9NTCD46XMQEG', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.washer_wash_completed', 'state': 'on', 'attributes': {'friendly_name': 'Washer Wash completed'}, 'last_changed': '2023-12-23T09:53:07.724686+00:00', 'last_updated': '2023-12-23T09:53:07.724686+00:00', 'context': {'id': '01HJB1FFMCT64MM6GKQX55HMKQ', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'tts', 'service': 'cloud_say', 'service_data': {'cache': True, 'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'message': 'The washer is complete! Move the clothes to the dryer or they gonna get so so so stinky poo poo!!!!'}}}\n    {'event_type': 'call_service', 'event_data': {'domain': 'media_player', 'service': 'play_media', 'service_data': {'entity_id': ['media_player.kitchen_interrupt', 'media_player.master_bedroom_interrupt'], 'media_content_id': 'media-source://tts/cloud?message=The+washer+is+complete!+Move+the+clothes+to+the+dryer+or+they+gonna+get+so+so+so+stinky+poo+poo!!!!&cache=true', 'media_content_type': 'music', 'announce': True}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:46:48.945634+00:00', 'last_updated': '2023-12-23T09:46:48.945634+00:00', 'context': {'id': '01HJB13XQHGYJYCBH1BS9E6JQY', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}}}\n    {'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:26.786268+00:00', 'last_updated': '2023-12-23T09:53:26.786268+00:00', 'context': {'id': '01HJB1G282MSCK7H5KDVE5S260', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.bedroom_motion_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Bedroom motion sensor Motion'}, 'last_changed': '2023-12-23T09:53:50.016556+00:00', 'last_updated': '2023-12-23T09:53:50.016556+00:00', 'context': {'id': '01HJB1GRY0RSE049YV3NPJ6QFC', 'parent_id': None, 'user_id': None}}}}\n\n    EXAMPLE QUERY: \"Is the laundry running?\"\n    EXAMPLE OUTPUT: \"The washer is complete. You should move the clothes to the dryer. I see the washer completed sensor turned on at 2023-12-23T09:20:07.695950+00:00\"\n\n    EXAMPLE QUERY: \"Is there anyone in the bedroom?\"\n    EXAMPLE OUTPUT: \"There is no one in the bedroom. Even though there was recent activity, I see the bedroom motion sensor turned off at 2023-12-23T09:53:50.016556+00:00\"\n\n    EXAMPLE QUERY: \"What rooms have activity recently?\"\n    EXAMPLE OUTPUT: \"The bedroom has had activity. I see the bedroom motion sensor turned on at 2023-12-23T09:53:26.786268+00:00\"\n\n    Remember to be concise and that there could be multiple sequences of events interleaved, so you can output multiple lines.\n    "
+                        },
+                        {
+                            "role": "user",
+                            "content": "SENSOR DATA:\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:24:41.165914+00:00', 'last_updated': '2023-12-24T08:24:41.165914+00:00', 'context': {'id': '01HJDET8EDQ01CTZK3F9YJ095G', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T07:52:48.516898+00:00', 'last_updated': '2023-12-24T07:52:48.516898+00:00', 'context': {'id': '01HJDCZWM4PDTZW9W983KB9E89', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 0, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:01.242443+00:00', 'context': {'id': '01HJDFD5ZTEY0RJJKNKNDARS7H', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.ai_pro_motion', 'old_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'on', 'attributes': {'event_id': '6587ed3500d68303e40220a7', 'event_score': 100, 'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:01.242443+00:00', 'last_updated': '2023-12-24T08:35:11.471265+00:00', 'context': {'id': '01HJDFDFZFYH0SV9ZMCC5ZQAVR', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.ai_pro_motion', 'state': 'off', 'attributes': {'attribution': 'Powered by UniFi Protect Server', 'device_class': 'motion', 'friendly_name': 'AI Pro Motion'}, 'last_changed': '2023-12-24T08:35:11.781732+00:00', 'last_updated': '2023-12-24T08:35:11.781732+00:00', 'context': {'id': '01HJDFDG9558Q1Q8FD9SGNBZMW', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'state_changed', 'event_data': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'old_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'on', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:01.899264+00:00', 'last_updated': '2023-12-24T08:35:01.899264+00:00', 'context': {'id': '01HJDFD6MBMV4C5XEDK1096KR7', 'parent_id': None, 'user_id': None}}, 'new_state': {'entity_id': 'binary_sensor.garage_door_sensor_motion', 'state': 'off', 'attributes': {'device_class': 'motion', 'friendly_name': 'Garage door sensor Motion'}, 'last_changed': '2023-12-24T08:35:11.826021+00:00', 'last_updated': '2023-12-24T08:35:11.826021+00:00', 'context': {'id': '01HJDFDGAJDPT13FPB6FC9CPCZ', 'parent_id': None, 'user_id': None}}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen_island_pendants'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.kitchen'}}}\n{'event_type': 'call_service', 'event_data': {'domain': 'light', 'service': 'turn_off', 'service_data': {'entity_id': 'light.den_main_lights'}}}\n\nQUERY: Should any room have its lights on right now? If so, which ones and why?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Fri, 29 Mar 2024 01:18:47 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Access-Control-Allow-Origin": [
+                        "*"
+                    ],
+                    "Cache-Control": [
+                        "no-cache, must-revalidate"
+                    ],
+                    "openai-model": [
+                        "gpt-4-0125-preview"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "4201"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "300000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "297450"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "509ms"
+                    ],
+                    "x-request-id": [
+                        "req_924f0b0fecd812175df5f29b90d8d2af"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "86bc070c3e596ac2-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-97vBCshB5wD3bH3YyKj2pNvifjIC1\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675122,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"No room should have its lights on right now. There are no recent motion events indicating activity in any room that would require the lights to be on. The AI Pro Motion sensor and the Garage door sensor both detected motion but then turned off, indicating no current activity. Additionally, there were service calls to turn off lights in the kitchen and den, suggesting that any previous need for lighting in those areas has been addressed.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3075,\n    \"completion_tokens\": 83,\n    \"total_tokens\": 3158\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                }
+            }
+        }
+    ]
+}

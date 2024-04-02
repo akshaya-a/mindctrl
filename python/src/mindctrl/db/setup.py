@@ -15,8 +15,8 @@ from .queries import (
     ENABLE_TIMESCALE,
 )
 
-from config import PostgresStoreSettings
-from mlmodels import summarize_events
+from ..config import PostgresStoreSettings
+from ..mlmodels import summarize_events
 
 
 _LOGGER = logging.getLogger(__name__)

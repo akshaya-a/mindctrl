@@ -1,5 +1,5 @@
 from pydantic_core import ValidationError
-from config import AppSettings
+from mindctrl.config import AppSettings
 
 import pytest
 

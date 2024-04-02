@@ -4,5 +4,8 @@
         "mindctrl-addon/tests/pytest.ini"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.extraPaths": [
+        "python/src"
+    ]
 }

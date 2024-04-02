@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f mindctrl-addon/test-requirements.txt ]; then pip install -r mindctrl-addon/test-requirements.txt; fi
+          pip install -r mindctrl-addon/test-requirements.txt python/
       - name: Lint with Ruff
         run: |
           ruff check .
@@ -45,5 +45,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          pytest -s -v -c pytest.ini --deploy-mode=k3d
+          pytest -v -s -c pytest.ini --deploy-mode=k3d --replay-mode=replay
         working-directory: mindctrl-addon/tests

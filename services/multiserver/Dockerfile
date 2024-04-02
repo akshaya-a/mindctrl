@@ -30,12 +30,15 @@ COPY requirements.txt /
 
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
+COPY --from=mindctrl_source / /pysrc
+RUN pip3 install  --no-cache --break-system-packages /pysrc
 
-#   mlflow deployments start-server --config-path /usr/bin/deployments/route-config.yaml --port 5001 --host 0.0.0.0
-COPY route-config.yaml /
-COPY run_deployments_container.sh /
+COPY run_multiserver_container.sh /
+
+
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
-CMD [ "/run_deployments_container.sh"]
+# python3 -m uvicorn main:app --host 0.0.0.0 --port 5002
+CMD [ "/run_multiserver_container.sh"]
 
 
 LABEL \
