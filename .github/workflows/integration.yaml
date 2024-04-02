@@ -33,4 +33,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          pytest -v -s -c mindctrl-addon/tests/pytest.ini --deploy-mode=local --replay-mode=replay
+          pytest -v -s -c pytest.ini --deploy-mode=local --replay-mode=replay
+        working-directory: mindctrl-addon/tests
