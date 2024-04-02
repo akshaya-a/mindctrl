@@ -72,7 +72,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
     if TIMERANGE_MODEL not in registry_models or force_publish:
         log_model(
             model="gpt-3.5-turbo-0125",
-            task=openai.ChatCompletion,
+            task=openai.chat.completions,
             messages=[
                 {"role": "system", "content": QUERY_PROMPT},
                 {"role": "user", "content": "INPUT: {query}"},
@@ -85,7 +85,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
     if CHAT_MODEL not in registry_models or force_publish:
         log_model(
             model=CHAT_OAI_MODEL,
-            task=openai.ChatCompletion,
+            task=openai.chat.completions,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},
                 {
@@ -101,7 +101,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
     if SUMMARIZER_MODEL not in registry_models or force_publish:
         log_model(
             model=SUMMARIZER_OAI_MODEL,
-            task=openai.ChatCompletion,
+            task=openai.chat.completions,
             messages=[
                 {"role": "system", "content": SUMMARIZATION_PROMPT},
                 {
@@ -121,7 +121,7 @@ QUERY: summarize the above events for me""",
     if EMBEDDINGS_MODEL not in registry_models or force_publish:
         log_model(
             model="text-embedding-ada-002",
-            task=openai.Embedding,
+            task=openai.embeddings,
             artifact_path="oai-embeddings",
             registered_model_name=EMBEDDINGS_MODEL,
         )

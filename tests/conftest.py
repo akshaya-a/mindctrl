@@ -28,6 +28,9 @@ import constants
 _logger = logging.getLogger(__name__)
 
 
+REPO_ROOT_PATH = Path(__file__).parent.parent
+
+
 class DeployMode(Enum):
     LOCAL = "local"
     K3D = "k3d"
@@ -64,7 +67,7 @@ def build_app(
     source_path: Path,
 ):
     tag = f"{k3d_registry_url}/{app}:latest" if k3d_registry_url else f"{app}:latest"
-    app_to_build = Path(__file__).parent.parent.parent / "services" / app
+    app_to_build = REPO_ROOT_PATH / "services" / app
     assert app_to_build.exists(), f"Missing {app_to_build}"
 
     _logger.info(f"Building {app_to_build} with tag {tag}")
@@ -237,16 +240,14 @@ async def deployment_server(
         return
 
     deployment_server_dir = tmp_path_factory.mktemp("deploymentserver")
-    original_deployment_server = (
-        Path(__file__).parent.parent.parent / "services/deployments"
-    )
+    original_deployment_server = REPO_ROOT_PATH / "services/deployments"
     assert original_deployment_server.exists(), f"Missing {original_deployment_server}"
 
     shutil.copytree(
         original_deployment_server, deployment_server_dir, dirs_exist_ok=True
     )
 
-    mindctrl_source = Path(__file__).parent.parent.parent / "python"
+    mindctrl_source = REPO_ROOT_PATH / "python"
     _logger.info(f"Building deployment server with context: {deployment_server_dir}")
 
     tag = build_app("deployments", None, mindctrl_source)
@@ -359,7 +360,7 @@ def prepare_apps(
 
         # Don't push until the registry is created later
         if "postgres" not in app.name and "mosquitto" not in app.name:
-            mindctrl_source = Path(__file__).parent.parent.parent / "python"
+            mindctrl_source = REPO_ROOT_PATH / "python"
             built_tags.append(build_app(app.stem, registry_url, mindctrl_source))
 
         with open(app, "r") as f:
@@ -445,7 +446,7 @@ def k3d_server_url(
             m.setenv("EVENTS__PASSWORD", constants.MQTT_PASSWORD)
 
             target_deploy_folder = tmp_path_factory.mktemp("deploy-resolved")
-            deploy_folder = Path(__file__).parent.parent.parent / "services/deploy"
+            deploy_folder = REPO_ROOT_PATH / "services/deploy"
             assert deploy_folder.exists(), (
                 f"Missing {deploy_folder}"
             )  # Life easier when I inevitably move stuff around
@@ -469,9 +470,7 @@ def k3d_server_url(
             cluster.create_secret("events-password", "EVENTS__PASSWORD")
 
             # TODO: Get rid of all this gross path assumptions all across the fixtures
-            deployment_server_content = (
-                Path(__file__).parent.parent.parent / "services/deployments"
-            )
+            deployment_server_content = REPO_ROOT_PATH / "services/deployments"
             assert (
                 deployment_server_content.exists()
             ), f"Missing {deployment_server_content}"
@@ -554,6 +553,9 @@ def k3d_server_url(
     except subprocess.TimeoutExpired as e:
         _logger.error(f"Timeout waiting for readiness: {e}")
         if not os.environ.get("CI", "false") == "true":
+            _logger.error(
+                "##################\nBREAKING TO PRESERVE CLUSTER\n####################"
+            )
             breakpoint()
 
     finally:
