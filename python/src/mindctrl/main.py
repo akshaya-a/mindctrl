@@ -17,11 +17,11 @@ from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
 
 import collections
 
-from mlmodels import SUMMARIZER_OAI_MODEL, log_system_models, SUMMARIZATION_PROMPT
-from mqtt import setup_mqtt_client, listen_to_mqtt
-from mlflow_bridge import connect_to_mlflow, poll_registry
-from db.setup import setup_db, insert_summary
-from config import AppSettings
+from .mlmodels import SUMMARIZER_OAI_MODEL, log_system_models, SUMMARIZATION_PROMPT
+from .mqtt import setup_mqtt_client, listen_to_mqtt
+from .mlflow_bridge import connect_to_mlflow, poll_registry
+from .db.setup import setup_db, insert_summary
+from .config import AppSettings
 
 
 _logger = logging.getLogger(__name__)
@@ -269,6 +269,15 @@ def invoke_labeled_model_version(
     except mlflow.MlflowException as e:
         _logger.error(f"Error loading model: {e}")
         raise HTTPException(status_code=400, detail=f"Error loading model: {e}")
+    except ModuleNotFoundError as me:
+        import sys
+
+        with open("/tmp/loaded_modules.txt", "w") as f:
+            f.write(str(sys.modules))
+        _logger.error(
+            f"Error loading model: {me}\npath: {sys.path}\nloaded_modules: /tmp/loaded_modules.txt"
+        )
+        raise HTTPException(status_code=400, detail=f"Error loading model: {me}")
     return invoke_model_impl(model, payload, request)
 
 

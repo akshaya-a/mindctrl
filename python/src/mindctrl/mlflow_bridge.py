@@ -3,8 +3,8 @@ from mlflow import MlflowClient
 import logging
 import asyncio
 
-from const import CHAMPION_ALIAS, CHALLENGER_ALIAS
-from config import AppSettings
+from .const import CHAMPION_ALIAS, CHALLENGER_ALIAS
+from .config import AppSettings
 
 
 _logger = logging.getLogger(__name__)

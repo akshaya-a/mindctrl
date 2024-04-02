@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 
-cd ./mindctrl-addon/rootfs/usr/bin
+cd ./services
 
 echo "using target registry $K3D_REGISTRY_URL"
 

@@ -6,7 +6,9 @@ import openai
 from mlflow.entities.model_registry import RegisteredModel
 from mlflow import MlflowClient
 
-from const import CHALLENGER_ALIAS, CHAMPION_ALIAS
+
+from .openai_deployment import log_model
+from .const import CHALLENGER_ALIAS, CHAMPION_ALIAS
 
 _logger = logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
     OUTPUT ONLY JSON FORMATTED OBJECTS WITH "start" and "end" keys!
     """
     if TIMERANGE_MODEL not in registry_models or force_publish:
-        mlflow.openai.log_model(
+        log_model(
             model="gpt-3.5-turbo-0125",
             task=openai.ChatCompletion,
             messages=[
@@ -81,7 +83,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
         set_alias(mlflow_client, TIMERANGE_MODEL, CHAMPION_ALIAS)
 
     if CHAT_MODEL not in registry_models or force_publish:
-        mlflow.openai.log_model(
+        log_model(
             model=CHAT_OAI_MODEL,
             task=openai.ChatCompletion,
             messages=[
@@ -97,7 +99,7 @@ def log_system_models(force_publish=False) -> list[RegisteredModel]:
         set_alias(mlflow_client, CHAT_MODEL, CHAMPION_ALIAS)
 
     if SUMMARIZER_MODEL not in registry_models or force_publish:
-        mlflow.openai.log_model(
+        log_model(
             model=SUMMARIZER_OAI_MODEL,
             task=openai.ChatCompletion,
             messages=[
@@ -117,7 +119,7 @@ QUERY: summarize the above events for me""",
         set_alias(mlflow_client, SUMMARIZER_MODEL, CHAMPION_ALIAS)
 
     if EMBEDDINGS_MODEL not in registry_models or force_publish:
-        mlflow.openai.log_model(
+        log_model(
             model="text-embedding-ada-002",
             task=openai.Embedding,
             artifact_path="oai-embeddings",

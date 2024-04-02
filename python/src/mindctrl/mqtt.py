@@ -5,7 +5,7 @@ from typing import Callable, Awaitable, Optional
 import aiomqtt
 import asyncio
 
-from config import MqttEventsSettings
+from .config import MqttEventsSettings
 
 
 _logger = logging.getLogger(__name__)

@@ -37,6 +37,7 @@ spec:
         # Actually there is some issue with postgres and connections are timing out
         # TODO: investigate why this is happening
         dapr.io/sidecar-liveness-probe-delay-seconds: "15"
+        dapr.io/sidecar-liveness-probe-threshold: "10"
     spec:
       containers:
         - name: multiserver
@@ -83,6 +84,8 @@ spec:
               # TODO: Change this to the actual deployments service URL or dapr discovery
               # https://docs.dapr.io/developing-applications/building-blocks/service-invocation/howto-invoke-discover-services/#additional-url-formats
               value: "http://tracking-service:5000"
+            - name: MLFLOW_DEPLOYMENTS_TARGET
+              value: "http://deployments-service:5001"
           ports:
             - containerPort: 5002
           imagePullPolicy: Always

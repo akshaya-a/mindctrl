@@ -1,0 +1,112 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: deployments-service
+  labels:
+    app: deployments
+spec:
+  selector:
+    app: deployments
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: deployments-recording-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Mi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: deployments-replay-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployments
+  labels:
+    app: deployments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deployments
+  template:
+    metadata:
+      labels:
+        app: deployments
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "deployments"
+        dapr.io/app-port: "5001"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+        - name: deployments
+          image: $K3D_REGISTRY_URL/deployments:latest
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api-key
+                  key: openai-api-key
+            - name: APP_PORT
+              value: "5001"
+            - name: MINDCTRL_CONFIG_REPLAY
+              valueFrom:
+                configMapKeyRef:
+                  name: mindctrl-config
+                  key: deployment_server_replay
+          ports:
+            - containerPort: 5001
+          volumeMounts:
+            - name: route-config
+              mountPath: /config/route-config.yaml # This should be your final destination
+              subPath: route-config.yaml # The name of the file to be placed inside /config, the filename used here and in mountPath should be same.
+            # - mountPath: "/replays"
+            #   name: replay-pv-storage
+            - name: replay-pv-storage
+              mountPath: "/replays/replay.json"
+              subPath: replay.json
+            - mountPath: "/recordings"
+              name: recording-pv-storage
+          imagePullPolicy: Always
+      volumes:
+        - name: route-config # To access this volume, this name must be used inside volumeMounts of the container
+          configMap:
+            name: mindctrl-config # Name of the configMap
+            items:
+              - key: route-config.yaml # Name of the item we had used inside our ConfigMap (under data:)
+                path: route-config.yaml # Name of the file to be placed inside /config
+        - name: replay-pv-storage
+          # persistentVolumeClaim:
+          #   claimName: deployments-replay-pv-claim
+          configMap:
+            name: mindctrl-config # Name of the configMap
+            items:
+              - key: replay.json # Name of the item we had used inside our ConfigMap (under data:)
+                path: replay.json # Name of the file to be placed inside /config
+        - name: recording-pv-storage
+          persistentVolumeClaim:
+            claimName: deployments-recording-pv-claim

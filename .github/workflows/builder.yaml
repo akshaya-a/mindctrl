@@ -3,7 +3,8 @@ name: Builder
 # TODO: figure out a more wildcard-y way to do this
 env:
   BUILD_ARGS: "--test"
-  MONITORED_FILES: "build.yaml config.yaml Dockerfile run_tracking.sh run_gateway.sh run_multiserver.sh requirements.txt config.py route-config.yaml main.py"
+  MINDCTRL_SRC_DIR: "python/src/"
+  MINDCTRL_SERVICES_DIR: "services/"
 
 on:
   push:
@@ -34,7 +35,7 @@ jobs:
         run: |
           declare -a changed_addons
           for addon in ${{ steps.addons.outputs.addons }}; do
-            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/ ]]; then
+            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/ ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SRC_DIR}" ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SERVICES_DIR}" ]]; then
               if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
                 changed_addons+=("\"${addon}\",");
               fi
@@ -48,7 +49,7 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT;
             echo "addons=[$changed]" >> $GITHUB_OUTPUT;
           else
-            echo "No add-on had any monitored files changed (${{ env.MONITORED_FILES }})";
+            echo "No add-on had any monitored files changed (${{ steps.changed_files.outputs.all }})";
           fi
   build:
     needs: init
@@ -87,6 +88,10 @@ jobs:
              echo "${{ matrix.arch }} is not a valid arch for ${{ matrix.addon }}, skipping build";
              echo "build_arch=false" >> $GITHUB_OUTPUT;
           fi
+
+      - name: Copy python source + services into build context because builder action doesn't support --build-context
+        id: copy
+        run: bash scripts/copy_content_to_addon_context.sh
 
       - name: Login to GitHub Container Registry
         if: env.BUILD_ARGS != '--test'
