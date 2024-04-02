@@ -13,6 +13,6 @@ ruff
 docker<7
 # ugh..https://github.com/docker/docker-py/issues/2230
 python-on-whales
--r services/deployments/requirements.txt
--r services/tracking/requirements.txt
--r services/multiserver/requirements.txt
+-r ../services/deployments/requirements.txt
+-r ../services/tracking/requirements.txt
+-r ../services/multiserver/requirements.txt
