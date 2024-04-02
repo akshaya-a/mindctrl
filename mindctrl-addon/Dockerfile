@@ -26,9 +26,6 @@ RUN set -eux; \
 
 RUN pip3 --version
 
-COPY requirements.txt /
-
-RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 
 ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
@@ -52,6 +49,11 @@ COPY rootfs /
 # COPY --from=mindctrl_source / /pysrc
 COPY pysrc /
 RUN pip3 install --no-cache --break-system-packages /pysrc
+
+
+COPY requirements.txt /
+COPY services /
+RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 
 RUN chmod a+x /usr/bin/run_tracking.sh && \
     chmod a+x /usr/bin/run_gateway.sh && \
