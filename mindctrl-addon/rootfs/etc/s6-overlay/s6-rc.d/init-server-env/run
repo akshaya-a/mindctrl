@@ -5,6 +5,7 @@
 # Example init script, runs before any other service
 # ==============================================================================
 
+bashio::log.level 'debug'
 bashio::log.info "Creating multiserver python env"
 
 
