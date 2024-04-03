@@ -324,6 +324,8 @@ def hosting_settings(
         m.setenv("EVENTS__EVENTS_TYPE", "mqtt")
         m.setenv("EVENTS__BROKER", mqtt_host)
         m.setenv("EVENTS__PORT", str(mqtt_port))
+        if replay_mode == ReplayMode.REPLAY:
+            m.setenv("OPENAI_API_KEY", "DUMMY")
 
         # TODO: maybe just take a connection string as a setting instead of exploded
         yield AppSettings(
@@ -444,6 +446,8 @@ def k3d_server_url(
             m.setenv("EVENTS__PORT", str(constants.MQTT_PORT))
             m.setenv("EVENTS__USERNAME", constants.MQTT_USER)
             m.setenv("EVENTS__PASSWORD", constants.MQTT_PASSWORD)
+            if replay_mode == ReplayMode.REPLAY:
+                m.setenv("OPENAI_API_KEY", "DUMMY")
 
             target_deploy_folder = tmp_path_factory.mktemp("deploy-resolved")
             deploy_folder = REPO_ROOT_PATH / "services/deploy"
