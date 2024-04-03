@@ -1,4 +1,5 @@
 #!/usr/bin/env bashio
+bashio::log.level "all"
 
 bashio::log.info "Starting MLflow tracking server script in $PWD"
 

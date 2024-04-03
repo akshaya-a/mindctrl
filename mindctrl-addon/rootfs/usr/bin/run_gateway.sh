@@ -1,4 +1,5 @@
 #!/usr/bin/env bashio
+bashio::log.level "all"
 
 echo "Starting MLflow Deployment Server in $PWD"
 

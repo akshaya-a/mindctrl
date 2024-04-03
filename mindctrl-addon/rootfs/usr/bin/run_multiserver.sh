@@ -1,4 +1,5 @@
 #!/usr/bin/env bashio
+bashio::log.level "all"
 
 bashio::log.info "Starting multiserver script in $PWD"
 
