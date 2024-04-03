@@ -1,4 +1,4 @@
-name: Builder
+name: Addon Builder
 
 # TODO: figure out a more wildcard-y way to do this
 env:

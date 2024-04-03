@@ -42,8 +42,5 @@ jobs:
         run: |
           wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
       - name: Test with pytest
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          pytest -v -s -c pytest.ini --deploy-mode=k3d --replay-mode=replay
-        working-directory: mindctrl-addon/tests
+          pytest -v -s -c tests/pytest.ini --deploy-mode=k3d --replay-mode=replay

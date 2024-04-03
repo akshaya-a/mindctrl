@@ -30,8 +30,5 @@ jobs:
         run: |
           ruff check .
       - name: Test with pytest
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          pytest -v -s -c pytest.ini --deploy-mode=local --replay-mode=replay
-        working-directory: mindctrl-addon/tests
+          pytest -v -s -c tests/pytest.ini --deploy-mode=local --replay-mode=replay
