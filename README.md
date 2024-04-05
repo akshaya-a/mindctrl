@@ -3,7 +3,8 @@
 Manage your home automation LLM prompts, available LLMs and evaluate changes with MLflow
 
 [![Addon Builder](https://github.com/akshaya-a/mindctrl/actions/workflows/addon-builder.yaml/badge.svg)](https://github.com/akshaya-a/mindctrl/actions/workflows/addon-builder.yaml)
-[![Local Integration](https://github.com/akshaya-a/mindctrl/actions/workflows/integration.yaml/badge.svg)](https://github.com/akshaya-a/mindctrl/actions/workflows/integration.yaml)
+[![Addon Integration](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-addon.yaml/badge.svg)](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-addon.yaml)
+[![Local Integration](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-local.yaml/badge.svg)](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-local.yaml)
 [![K3D Integration](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-k3d.yaml/badge.svg)](https://github.com/akshaya-a/mindctrl/actions/workflows/integration-k3d.yaml)
 
 ---
