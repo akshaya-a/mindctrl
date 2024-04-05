@@ -159,25 +159,30 @@ spec:
 
 
 def prepare_apps(
-    source_dir: Path,
-    target_dir: Path,
+    source_spec_dir: Path,
+    target_spec_dir: Path,
+    services_dir: Path,
     registry_url: str,
     mindctrl_source: Path,
 ):
     _logger.info(
-        f"Pulling spec templates from {source_dir}, generating in {target_dir}"
+        f"Pulling spec templates from {source_spec_dir}, generating in {target_spec_dir}"
     )
 
     built_tags = []
-    for app in source_dir.glob("*.yaml"):
+    for app in source_spec_dir.glob("*.yaml"):
         if "dapr-local" in app.name:
             continue
 
-        target_app = target_dir / app.name
+        target_app = target_spec_dir / app.name
 
         # Don't push until the registry is created later
         if "postgres" not in app.name and "mosquitto" not in app.name:
-            built_tags.append(build_app(app, registry_url, mindctrl_source))
+            source_app = services_dir / app.stem
+            assert (
+                source_app / "Dockerfile"
+            ).exists(), f"Missing {source_app / 'Dockerfile'}"
+            built_tags.append(build_app(source_app, registry_url, mindctrl_source))
 
         with open(app, "r") as f:
             content = f.read()

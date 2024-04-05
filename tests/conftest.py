@@ -66,7 +66,9 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def repo_root_dir():
-    return Path(__file__).parent.parent
+    root = Path(__file__).parent.parent.resolve()
+    _logger.info(f"Executing in {os.getcwd()} with calculated root {root}")
+    return root
 
 
 @pytest.fixture(scope="session")
@@ -381,9 +383,11 @@ def k3d_server_url(
             )  # Life easier when I inevitably move stuff around
 
             mindctrl_source = repo_root_dir / "python"
+            services_dir = repo_root_dir / "services"
             built_tags = prepare_apps(
                 deploy_folder,
                 target_deploy_folder,
+                services_dir,
                 cluster.k3d_registry_url,
                 mindctrl_source,
             )
