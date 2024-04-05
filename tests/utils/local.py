@@ -42,21 +42,33 @@ class DeploymentServerContainer(ServiceContainer):
         _logger.info(
             f"Mapping {self.replays_dir}, {self.recordings_dir}, {self.route_config.parent} as /replays, /recordings, /config"
         )
+
+        container_replay_dir = "/replays"
         self.with_volume_mapping(
             str(self.replays_dir),
-            "/replays",
+            container_replay_dir,
             mode="ro",
         )
+        self.with_env("MINDCTRL_REPLAY_DIR", container_replay_dir)
+
+        container_recordings_dir = "/recordings"
         self.with_volume_mapping(
             str(self.recordings_dir),
-            "/recordings",
+            container_recordings_dir,
             mode="rw",
         )
+        self.with_env("MINDCTRL_RECORDING_DIR", container_recordings_dir)
+
+        container_config_dir = "/config"
         self.with_volume_mapping(
             str(self.replays_dir.parent),
-            "/config",
+            container_config_dir,
             mode="ro",
         )
+        self.with_env(
+            "MLFLOW_DEPLOYMENTS_CONFIG", f"{container_config_dir}/route-config.yaml"
+        )
+
         if self.replay:
             assert (self.replays_dir / "replay.json").exists()
             self.with_env("MINDCTRL_CONFIG_REPLAY", "true")
