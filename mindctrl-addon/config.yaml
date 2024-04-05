@@ -27,6 +27,7 @@ discovery:
   - mindctrl
 map:
   - share:rw # Used for artifacts storage, expects "tracking" share in HA.
+  - addon_config:rw # Used for replay server inputs and outputs
 environment:
   FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
 image: "ghcr.io/akshaya-a/{arch}-mindctrl"
