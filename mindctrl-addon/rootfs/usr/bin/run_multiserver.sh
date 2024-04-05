@@ -1,5 +1,4 @@
 #!/usr/bin/env bashio
-bashio::log.level "all"
 
 bashio::log.info "Starting multiserver script in $PWD"
 
@@ -13,23 +12,27 @@ export GIT_PYTHON_REFRESH=quiet
 
 if bashio::supervisor.ping; then
     bashio::log.info "Supervisor is running, setting config from supervisor"
-    export MQTT_BROKER="$(bashio::config 'MQTT_BROKER')"
-    export MQTT_PORT="$(bashio::config 'MQTT_PORT')"
-    export MQTT_USERNAME="$(bashio::config 'MQTT_USERNAME')"
-    export MQTT_PASSWORD="$(bashio::config 'MQTT_PASSWORD')"
+    response=$(bashio::api.supervisor GET "/addons/self/options/config" false)
+    bashio::log.info "USING CONFIG: ${response}"
 
-    export POSTGRES_USER="$(bashio::config 'POSTGRES_USER')"
-    export POSTGRES_PASSWORD="$(bashio::config 'POSTGRES_PASSWORD')"
-    export POSTGRES_ADDRESS="$(bashio::config 'POSTGRES_ADDRESS')"
-    export POSTGRES_PORT="$(bashio::config 'POSTGRES_PORT')"
+    export STORE__STORE_TYPE="$(bashio::config 'STORE__STORE_TYPE')"
+    export STORE__USER="$(bashio::config 'STORE__USER')"
+    export STORE__PASSWORD="$(bashio::config 'STORE__PASSWORD')"
+    export STORE__ADDRESS="$(bashio::config 'STORE__ADDRESS')"
+    export STORE__PORT="$(bashio::config 'STORE__PORT')"
+    export STORE__DATABASE="$(bashio::config 'STORE__DATABASE')"
+
+    export EVENTS__EVENTS_TYPE="$(bashio::config 'EVENTS__EVENTS_TYPE')"
+    export EVENTS__BROKER="$(bashio::config 'EVENTS__BROKER')"
+    export EVENTS__PORT="$(bashio::config 'EVENTS__PORT')"
+    export EVENTS__USERNAME="$(bashio::config 'EVENTS__USERNAME')"
+    export EVENTS__PASSWORD="$(bashio::config 'EVENTS__PASSWORD')"
 
     export OPENAI_API_KEY="$(bashio::config 'OPENAI_API_KEY')"
 else
     bashio::log.info "Supervisor is not running, setting config from environment"
     printenv
 fi
-
-
 
 ingress_entry=$(bashio::addon.ingress_entry)
 bashio::log.info "ingress_entry: ${ingress_entry}"
@@ -40,7 +43,6 @@ export NOTIFY_FD="${notifyfd}"
 
 export MLFLOW_TRACKING_URI="http://0.0.0.0:5000"
 export MLFLOW_DEPLOYMENTS_TARGET="http://0.0.0.0:5001"
-# export PYTHONPATH="/usr/bin/multiserver"
 
-bashio::log.info "Starting MLflow Tracking Server with Dapr..."
-dapr run --app-id multiserver --app-port 5002 -- python3 -m uvicorn mindctrl.main:app --host 0.0.0.0 --port 5002
+bashio::log.info "Starting mindctrl server with Dapr..."
+dapr run --log-level warn --app-id multiserver --app-port 5002 -- python3 -m uvicorn mindctrl.main:app --host 0.0.0.0 --port 5002

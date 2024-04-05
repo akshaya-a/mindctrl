@@ -1,5 +1,4 @@
 #!/usr/bin/env bashio
-bashio::log.level "all"
 
 bashio::log.info "Starting MLflow tracking server script in $PWD"
 
@@ -22,7 +21,7 @@ export MLFLOW_DEPLOYMENTS_TARGET="http://0.0.0.0:5001"
 bashio::log.info "Querying MLflow gateway health: ${MLFLOW_DEPLOYMENTS_TARGET}/health"
 curl -i "${MLFLOW_DEPLOYMENTS_TARGET}/health"
 
-s6-notifyoncheck dapr run --app-id tracking --app-port 5000 --app-protocol http --dapr-http-port 5500 -- \
+s6-notifyoncheck dapr run --log-level warn --app-id tracking --app-port 5000 --app-protocol http --dapr-http-port 5500 -- \
   mlflow server \
   --backend-store-uri ${dbpath} \
   --artifacts-destination /share/tracking/mlflow-hass \

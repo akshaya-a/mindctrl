@@ -8,6 +8,8 @@ from typing import Dict, List, Optional
 from pytest_kubernetes.providers.k3d import K3dManager
 from pytest_kubernetes.options import ClusterOptions
 
+from .common import build_app
+
 
 _logger = logging.getLogger(__name__)
 
@@ -154,3 +156,39 @@ spec:
   hostPath:
     path: "{host_path}"
 """
+
+
+def prepare_apps(
+    source_spec_dir: Path,
+    target_spec_dir: Path,
+    services_dir: Path,
+    registry_url: str,
+    mindctrl_source: Path,
+):
+    _logger.info(
+        f"Pulling spec templates from {source_spec_dir}, generating in {target_spec_dir}"
+    )
+
+    built_tags = []
+    for app in source_spec_dir.glob("*.yaml"):
+        if "dapr-local" in app.name:
+            continue
+
+        target_app = target_spec_dir / app.name
+
+        # Don't push until the registry is created later
+        if "postgres" not in app.name and "mosquitto" not in app.name:
+            source_app = services_dir / app.stem
+            assert (
+                source_app / "Dockerfile"
+            ).exists(), f"Missing {source_app / 'Dockerfile'}"
+            built_tags.append(build_app(source_app, registry_url, mindctrl_source))
+
+        with open(app, "r") as f:
+            content = f.read()
+            content = os.path.expandvars(content)
+        with open(target_app, "w") as f:
+            f.write(content)
+
+    _logger.info(f"Built tags {built_tags}")
+    return built_tags

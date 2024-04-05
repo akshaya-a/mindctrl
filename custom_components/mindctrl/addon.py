@@ -1,4 +1,5 @@
 """Provide add-on management."""
+
 # Pattern from
 # https://github.com/home-assistant/core/blob/dev/homeassistant/components/zwave_js/addon.py
 from __future__ import annotations
