@@ -1,6 +1,6 @@
 name: "Mindctrl"
 description: "LLMOps for Homeassistant"
-version: "0.0.45"
+version: "0.0.46"
 url: "https://github.com/akshaya-a/mindctrl/tree/main/mindctrl-addon"
 slug: "mindctrl"
 init: false
@@ -31,31 +31,28 @@ environment:
   FORWARDED_ALLOW_IPS: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
 image: "ghcr.io/akshaya-a/{arch}-mindctrl"
 options:
+  STORE__STORE_TYPE: "psql"
+  STORE__USER: "mindctrl"
+  STORE__PASSWORD: ""
+  STORE__ADDRESS: "localhost"
+  STORE__PORT: "5432"
+  STORE__DATABASE: "mindctrl"
+  EVENTS__EVENTS_TYPE: "mqtt"
+  EVENTS__BROKER: "localhost"
+  EVENTS__PORT: "1883"
+  EVENTS__USERNAME: "mindctrl"
+  EVENTS__PASSWORD: ""
   OPENAI_API_KEY: ""
-  MQTT_BROKER: "localhost"
-  MQTT_PORT: "1883"
-  MQTT_USERNAME: ""
-  MQTT_PASSWORD: ""
-  POSTGRES_USER: ""
-  POSTGRES_PASSWORD: ""
-  POSTGRES_ADDRESS: ""
-  POSTGRES_PORT: ""
-  server_pip_packages: # TODO: not working for debugging, figure out later
-    - mlflow==2.7.1
-    - azureml-mlflow
-    - fastapi
-    - uvicorn[standard]
-    - openai
-    - homeassistant
 schema:
+  STORE__STORE_TYPE: str
+  STORE__USER: str
+  STORE__PASSWORD: str
+  STORE__ADDRESS: str
+  STORE__PORT: str
+  STORE__DATABASE: str
+  EVENTS__EVENTS_TYPE: str
+  EVENTS__BROKER: str
+  EVENTS__PORT: str
+  EVENTS__USERNAME: str
+  EVENTS__PASSWORD: str
   OPENAI_API_KEY: str
-  MQTT_BROKER: str
-  MQTT_PORT: int
-  MQTT_USERNAME: str
-  MQTT_PASSWORD: str
-  POSTGRES_USER: str
-  POSTGRES_PASSWORD: str
-  POSTGRES_ADDRESS: str
-  POSTGRES_PORT: int
-  server_pip_packages:
-    - "match(.*)" # TODO: figure out a better regex for version specifiers

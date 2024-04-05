@@ -37,6 +37,7 @@ def write_healthcheck_file(settings: AppSettings):
 
 @lru_cache
 def get_settings():
+    # env vars can populate the settings
     return AppSettings()  # pyright: ignore
 
 
