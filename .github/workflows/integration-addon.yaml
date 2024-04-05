@@ -29,6 +29,9 @@ jobs:
       - name: Lint with Ruff
         run: |
           ruff check .
+      - name: Copy python source + services into build context because builder action doesn't support --build-context
+        id: copy
+        run: bash scripts/copy_content_to_addon_context.sh
       - name: Test with pytest
         run: |
           pytest -v -s -c tests/pytest.ini --deploy-mode=addon --replay-mode=replay
