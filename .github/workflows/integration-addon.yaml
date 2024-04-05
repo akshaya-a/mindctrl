@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   build:
+    name: Addon Integration Tests
     runs-on: ubuntu-latest
 
     steps:
