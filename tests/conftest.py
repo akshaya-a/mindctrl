@@ -273,7 +273,7 @@ def mlflow_fluent_session(
 
 
 @pytest.fixture(scope="session")
-async def deployment_server(
+def deployment_server(
     deploy_mode: DeployMode,
     replay_mode: ReplayMode,
     repo_root_dir: Path,
@@ -619,6 +619,7 @@ def addon_url(
     deploy_mode: DeployMode,
     replay_mode: ReplayMode,
     replay_server_execution_dir: ReplayServerExecutionDir,
+    test_data_dir: Path,
 ):
     if deploy_mode != DeployMode.ADDON:
         raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
@@ -627,6 +628,9 @@ def addon_url(
     # For typing
     assert app_settings.store.store_type == "psql"
     assert app_settings.events.events_type == "mqtt"
+
+    if replay_mode == ReplayMode.REPLAY:
+        replay_server_execution_dir.populate_replays(test_data_dir)
 
     mock_supervisor = create_mock_supervisor(app_settings)
     with mock_supervisor as supervisor:
@@ -644,33 +648,37 @@ def addon_url(
             wait_for_readiness(addon.get_base_url())
             yield addon.get_base_url()
 
+            if replay_mode == ReplayMode.LIVE:
+                replay_server_execution_dir.save_recordings(test_data_dir)
+
+
+@pytest.fixture(scope="session")
+def app_url(
+    deploy_mode: DeployMode,
+    request: pytest.FixtureRequest,
+):
+    match deploy_mode:
+        case DeployMode.LOCAL:
+            return request.getfixturevalue("local_server_url")
+        case DeployMode.K3D:
+            return request.getfixturevalue("k3d_server_url")
+        case DeployMode.ADDON:
+            return request.getfixturevalue("addon_url")
+        case _:
+            raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
+
 
 # TODO: This might be better done via indirection: https://docs.pytest.org/en/latest/example/parametrize.html#deferring-the-setup-of-parametrized-resources
 @pytest.fixture
 async def server_client(
-    deploy_mode: DeployMode,
+    app_url: str,
     request: pytest.FixtureRequest,
 ):
     headers = {"x-mctrl-scenario-name": request.node.name}
-    match deploy_mode:
-        case DeployMode.LOCAL:
-            local_server_url = request.getfixturevalue("local_server_url")
-            async with httpx.AsyncClient(
-                base_url=local_server_url, headers=headers
-            ) as client:
-                yield client
-        case DeployMode.K3D:
-            k3d_server_url = request.getfixturevalue("k3d_server_url")
-            async with httpx.AsyncClient(
-                base_url=k3d_server_url, timeout=10, headers=headers
-            ) as client:
-                yield client
-        case DeployMode.ADDON:
-            addon_url = request.getfixturevalue("addon_url")
-            async with httpx.AsyncClient(base_url=addon_url, headers=headers) as client:
-                yield client
-        case _:
-            raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
+    async with httpx.AsyncClient(
+        base_url=app_url, headers=headers, timeout=10
+    ) as client:
+        yield client
 
 
 @pytest.fixture
