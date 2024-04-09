@@ -42,6 +42,8 @@ def replay_server_session(
         m.setenv(
             "MINDCTRL_REPLAY", "true" if replay_mode.value == "replay" else "false"
         )
+        if replay_mode.value == "replay":
+            m.setenv("OPENAI_API_KEY", "DUMMY")
         app = create_app_from_env()
         yield app
 
