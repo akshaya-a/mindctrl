@@ -12,10 +12,9 @@ from typing import List, Literal, Optional, Union
 import vcr
 
 ## MLflow Patching
-from mlflow.deployments.cli import validate_config_path
 from mlflow.deployments.server.app import GatewayAPI, create_app_from_path
 from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
-from mlflow.deployments.server.runner import Runner, monitor_config
+from mlflow.deployments.server.runner import Runner
 from mlflow.gateway.config import RouteConfig
 from mlflow.gateway.providers import get_provider
 from mlflow.gateway.schemas import chat

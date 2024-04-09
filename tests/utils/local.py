@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 import os
-import shutil
 
 from uvicorn import Config
 
