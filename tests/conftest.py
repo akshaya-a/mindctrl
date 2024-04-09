@@ -247,6 +247,8 @@ def mlflow_storage(tmp_path_factory: pytest.TempPathFactory):
 def mlflow_fluent_session(
     mlflow_storage: Path,
     deployment_server: DeploymentServerContainer,
+    replay_mode: ReplayMode,
+    deploy_mode: DeployMode,
     monkeypatch_session,
 ):
     if deploy_mode == DeployMode.K3D:
@@ -265,6 +267,8 @@ def mlflow_fluent_session(
     with monkeypatch_session.context() as m:
         m.setenv("MLFLOW_DEPLOYMENTS_TARGET", deployment_server.get_base_url())
         m.setenv("MLFLOW_TRACKING_URI", mlflow.get_tracking_uri())
+        if replay_mode == ReplayMode.REPLAY:
+            m.setenv("OPENAI_API_KEY", "DUMMY")
         yield mlflow.get_tracking_uri()
 
 
