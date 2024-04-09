@@ -33,11 +33,11 @@ if [ "$MINDCTRL_CONFIG_REPLAY" == "true" ]; then
     # https://github.com/dapr/dashboard/issues/195
     s6-notifyoncheck dapr run --app-id deployments --app-port 5001 --app-protocol http \
       --enable-api-logging --enable-app-health-check --log-level warn --app-health-check-path /health --dapr-http-port 5501 -- \
-      python3 /.context/services/deployments/replay_server.py --replay --port 5001 --host 0.0.0.0
+      mindctrl serve --replay --port 5001 --host 0.0.0.0
 else
     bashio::log.red "MINDCTRL_CONFIG_REPLAY is not set to true. Running replay server in live mode"
     # https://github.com/dapr/dashboard/issues/195
     s6-notifyoncheck dapr run --app-id deployments --app-port 5001 --app-protocol http \
       --enable-api-logging --enable-app-health-check --log-level warn --app-health-check-path /health --dapr-http-port 5501 -- \
-      python3 /.context/services/deployments/replay_server.py --port 5001 --host 0.0.0.0
+      mindctrl serve --port 5001 --host 0.0.0.0
 fi

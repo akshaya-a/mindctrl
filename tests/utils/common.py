@@ -99,30 +99,31 @@ class UvicornServer(multiprocessing.Process):
         return False
 
 
-def dump_container_logs(container: DockerContainer):
+def dump_container_logs(container: DockerContainer, debug=False):
     out, err = container.get_logs()
     out_lines = out.decode("utf-8").split("\n")
     err_lines = err.decode("utf-8").split("\n")
     container_logger = logging.getLogger(
         str(container.__class__.__name__).removesuffix("Container")
     )
-    container_logger.info(
-        f"Logs for {container.__class__.__name__}\n*******************\n"
-    )
+    log = container_logger.debug if debug else container_logger.info
+    log(f"stdout for {container.__class__.__name__}\n*******************\n")
     for line in out_lines:
-        container_logger.info(line)
+        log(line)
+    log(f"stderr for {container.__class__.__name__}\n*******************\n")
     for line in err_lines:
-        container_logger.info(line)
-    container_logger.info("*******************\n")
+        log(line)
+    log("*******************\n")
 
 
 class ServiceContainer(DockerContainer):
-    def __init__(self, image, port, **kwargs):
+    def __init__(self, image, port, log_debug=False, **kwargs):
         super().__init__(image, **kwargs)
         self.port_to_expose = port
         self.host_network_mode = kwargs.get("network_mode") == "host"
         if not self.host_network_mode:
             self.with_exposed_ports(self.port_to_expose)
+        self.log_debug = log_debug
 
     def get_base_url(self):
         if self.host_network_mode:
@@ -131,7 +132,7 @@ class ServiceContainer(DockerContainer):
 
     def stop(self, force=True, delete_volume=True):
         _logger.info(f"Stopping {self.__class__.__name__}")
-        dump_container_logs(self)
+        dump_container_logs(self, self.log_debug)
         return super().stop(force, delete_volume)
 
 

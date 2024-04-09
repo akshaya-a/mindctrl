@@ -17,6 +17,7 @@ def test_basic_appsettings(monkeypatch):
     monkeypatch.setenv("EVENTS__USERNAME", "user")
     monkeypatch.setenv("EVENTS__PASSWORD", "test_password")
     monkeypatch.setenv("OPENAI_API_KEY", "key")
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", "test_uri")
     settings = AppSettings()  # pyright: ignore
     assert settings.store.store_type == "psql"
     assert settings.store.user == "user"
@@ -34,7 +35,7 @@ def test_basic_appsettings(monkeypatch):
     assert not settings.force_publish_models
     assert settings.notify_fd is None
     assert settings.include_challenger_models
-    assert settings.mlflow_tracking_uri is None
+    assert settings.mlflow_tracking_uri == "test_uri"
     assert "test_password" not in f"{settings.model_dump()}"
 
 

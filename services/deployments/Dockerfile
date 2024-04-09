@@ -34,7 +34,7 @@ COPY --from=mindctrl_source / /pysrc
 RUN pip3 install  --no-cache --break-system-packages /pysrc
 
 #   mlflow deployments start-server --config-path /usr/bin/deployments/route-config.yaml --port 5001 --host 0.0.0.0
-COPY route-config.yaml run_deployments_container.sh replay_server.py /
+COPY route-config.yaml run_deployments_container.sh /
 ENTRYPOINT [ "/bin/bash" ] # To disable s6 overlay
 CMD [ "/run_deployments_container.sh"]
 

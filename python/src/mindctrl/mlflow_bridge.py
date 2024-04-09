@@ -36,5 +36,7 @@ async def poll_registry(delay_seconds: float = 10.0):
         client = MlflowClient()
         mvs = client.search_model_versions()
         aliased_versions = [mv for mv in mvs if is_deployable_alias(mv.aliases)]
-        print(aliased_versions)
+        if len(aliased_versions) > 0:
+            _logger.info("Found new deployable model versions")
+            _logger.info(aliased_versions)
         await asyncio.sleep(delay=delay_seconds)
