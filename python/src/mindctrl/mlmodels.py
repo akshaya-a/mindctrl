@@ -53,10 +53,13 @@ def set_alias(client: MlflowClient, model_name: str, alias: str):
 
 def log_system_models(force_publish=False) -> list[RegisteredModel]:
     mlflow_client = MlflowClient()
+    _logger.info(
+        f"Using model registry: {mlflow_client._registry_uri} inferred {mlflow.get_registry_uri()}"
+    )
 
     rms = [rm for rm in mlflow_client.search_registered_models()]
     registry_models: list[str] = [rm.name for rm in rms]
-    print(f"Already registered models: {registry_models}")
+    _logger.info(f"Already registered models: {registry_models}")
 
     QUERY_PROMPT = """
     You are given a query about events or actions happening for home automation over an unknown period of time.

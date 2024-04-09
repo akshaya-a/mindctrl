@@ -13,15 +13,18 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 import mlflow
+import mlflow.pyfunc
 from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
 
 import collections
+
 
 from .mlmodels import SUMMARIZER_OAI_MODEL, log_system_models, SUMMARIZATION_PROMPT
 from .mqtt import setup_mqtt_client, listen_to_mqtt
 from .mlflow_bridge import connect_to_mlflow, poll_registry
 from .db.setup import setup_db, insert_summary
 from .config import AppSettings
+from .const import SCENARIO_NAME_HEADER, SCENARIO_NAME_PARAM
 
 
 _logger = logging.getLogger(__name__)
@@ -245,18 +248,28 @@ def generate_state_lines(buffer: collections.deque):
     return state_lines
 
 
-def invoke_model_impl(model, payload: dict, request: Request):
+def invoke_model_impl(
+    model: mlflow.pyfunc.PyFuncModel, payload: dict, request: Request
+):
+    scenario_name = request.headers.get(SCENARIO_NAME_HEADER)
+    # TODO: need a better api for this from mlflow.
+    # predict() has expensive side effects so shouldn't simply catch invalid_params
+    model_has_params = hasattr(model.metadata, "get_params_schema")
+    params = None
+    if scenario_name:
+        _logger.info(f"Scenario: {scenario_name}")
+        if not model_has_params:
+            _logger.warning(
+                f"Model {model.metadata} does not have params schema, ignoring scenario header"
+            )
+        else:
+            _logger.info(
+                f"Model has params schema: {model.metadata.get_params_schema()}"
+            )
+            params = {SCENARIO_NAME_PARAM: scenario_name}
     input = dataframe_from_parsed_json(payload["dataframe_split"], "split")
     input["state_lines"] = generate_state_lines(request.state.state_ring_buffer)
-    return model.predict(input)
-
-
-@app.post("/deployed-models/{model_name}/versions/{model_version}/invocations")
-def invoke_model_version(
-    model_name: str, model_version: str, payload: dict, request: Request
-):
-    model = mlflow.pyfunc.load_model(model_uri=f"models:/{model_name}/{model_version}")
-    return invoke_model_impl(model, payload, request)
+    return model.predict(input, params=params)
 
 
 @app.post("/deployed-models/{model_name}/labels/{model_label}/invocations")
@@ -269,7 +282,7 @@ def invoke_labeled_model_version(
         )
     except mlflow.MlflowException as e:
         _logger.error(f"Error loading model: {e}")
-        raise HTTPException(status_code=400, detail=f"Error loading model: {e}")
+        raise HTTPException(status_code=400, detail=f"Error loading model: {e}") from e
     except ModuleNotFoundError as me:
         import sys
 
@@ -278,10 +291,15 @@ def invoke_labeled_model_version(
         _logger.error(
             f"Error loading model: {me}\npath: {sys.path}\nloaded_modules: /tmp/loaded_modules.txt"
         )
-        raise HTTPException(status_code=400, detail=f"Error loading model: {me}")
-    return invoke_model_impl(model, payload, request)
+        raise HTTPException(
+            status_code=400, detail=f"Error loading model: {me}"
+        ) from me
+    except Exception as e:
+        _logger.error(f"Error loading model: {e}")
+        raise HTTPException(status_code=500, detail=f"Error loading model: {e}") from e
 
-
-@app.post("/deployed-labels/{model_label}/invocations")
-def invoke_model_label(model_label: str):
-    return f"scored {model_label}"
+    try:
+        return invoke_model_impl(model, payload, request)
+    except Exception as e:
+        _logger.error(f"Error invoking model: {e}")
+        raise HTTPException(status_code=500, detail=f"Error invoking model: {e}") from e

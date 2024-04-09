@@ -1,0 +1,142 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-3.5-turbo",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What's the weather in San Francisco?"
+                        }
+                    ],
+                    "tool_choice": "auto",
+                    "tools": [
+                        {
+                            "function": {
+                                "description": "Get the current weather in a given location",
+                                "name": "get_current_weather",
+                                "parameters": {
+                                    "properties": {
+                                        "location": {
+                                            "description": "The city and state, e.g. San Francisco, CA",
+                                            "type": "string"
+                                        },
+                                        "unit": {
+                                            "enum": [
+                                                "celsius",
+                                                "fahrenheit"
+                                            ],
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "location"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Tue, 09 Apr 2024 06:35:48 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Access-Control-Allow-Origin": [
+                        "*"
+                    ],
+                    "Cache-Control": [
+                        "no-cache, must-revalidate"
+                    ],
+                    "openai-model": [
+                        "gpt-3.5-turbo-0125"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "539"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "10000"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "60000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "9999"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "59966"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "8.64s"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "34ms"
+                    ],
+                    "x-request-id": [
+                        "req_c3245a946a4793be810ac55df24a38f1"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "87187aa76c6aebaf-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9BzN6xQAbNYhiPiqlo0NO7NTz7lNK\",\n  \"object\": \"chat.completion\",\n  \"created\": 1712644548,\n  \"model\": \"gpt-3.5-turbo-0125\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n            \"id\": \"call_fEZ2LWUPQOmcIoeKb29qRDv3\",\n            \"type\": \"function\",\n            \"function\": {\n              \"name\": \"get_current_weather\",\n              \"arguments\": \"{\\\"location\\\":\\\"San Francisco\\\",\\\"unit\\\":\\\"celsius\\\"}\"\n            }\n          }\n        ]\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"tool_calls\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 88,\n    \"completion_tokens\": 21,\n    \"total_tokens\": 109\n  },\n  \"system_fingerprint\": \"fp_b28b39ffa8\"\n}\n"
+                }
+            }
+        }
+    ]
+}

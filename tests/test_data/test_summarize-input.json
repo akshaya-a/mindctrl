@@ -21,6 +21,9 @@
                     ]
                 },
                 "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
                     "Authorization": [
                         "FAKE_BEARER"
                     ]
@@ -33,7 +36,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Fri, 29 Mar 2024 01:18:38 GMT"
+                        "Mon, 08 Apr 2024 00:00:47 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -55,7 +58,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "3397"
+                        "2650"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -82,7 +85,7 @@
                         "466ms"
                     ],
                     "x-request-id": [
-                        "req_b6485ed13fa8a29759447a680082385e"
+                        "req_33d39fe59b49f3c4e0a3c1f3e000350a"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -92,7 +95,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "86bc06dccb1dc386-SEA"
+                        "870dfa96ba199b62-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -102,7 +105,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-97vB5FJ77HRDmoGnnMuxIX4mhvAfX\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675115,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Yes, there was motion detected near the garage door. It turned on at 2023-12-24T08:35:01.899264+00:00 and turned off at 2023-12-24T08:35:11.826021+00:00.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3067,\n    \"completion_tokens\": 60,\n    \"total_tokens\": 3127\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9BWjEZN4UbZLcCQA5UoEFp52pCFwU\",\n  \"object\": \"chat.completion\",\n  \"created\": 1712534444,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Yes, there was motion detected near the garage door. The garage door sensor detected motion at 2023-12-24T08:35:01.899264+00:00 and then turned off at 2023-12-24T08:35:11.826021+00:00.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3067,\n    \"completion_tokens\": 64,\n    \"total_tokens\": 3131\n  },\n  \"system_fingerprint\": \"fp_b77cb481ed\"\n}\n"
                 }
             }
         },
@@ -126,6 +129,9 @@
                     ]
                 },
                 "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
                     "Authorization": [
                         "FAKE_BEARER"
                     ]
@@ -138,7 +144,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Fri, 29 Mar 2024 01:18:42 GMT"
+                        "Mon, 08 Apr 2024 00:00:50 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -160,7 +166,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "3350"
+                        "2878"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -178,16 +184,16 @@
                         "499"
                     ],
                     "x-ratelimit-remaining-tokens": [
-                        "297507"
+                        "297496"
                     ],
                     "x-ratelimit-reset-requests": [
                         "120ms"
                     ],
                     "x-ratelimit-reset-tokens": [
-                        "498ms"
+                        "500ms"
                     ],
                     "x-request-id": [
-                        "req_e1b8ddc4fa448d4936f715118de77c11"
+                        "req_ae3d1a1c964516fee2ac68a311624893"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -197,7 +203,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "86bc06f4c8ccec48-SEA"
+                        "870dfaa89fb7681c-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -207,7 +213,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-97vB9gcN8LxFa4RFkj13Cad0AyPOY\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675119,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"There was recent activity in both the AI Pro area and the garage. The AI Pro motion sensor detected motion at 2023-12-24T08:35:01.242443+00:00, and the garage door sensor detected motion at the same time, 2023-12-24T08:35:01.899264+00:00. Both sensors turned off shortly after, indicating the activity was brief.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3062,\n    \"completion_tokens\": 89,\n    \"total_tokens\": 3151\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9BWjH6x9NHr0Rv7d6mcVY5jbtK5qv\",\n  \"object\": \"chat.completion\",\n  \"created\": 1712534447,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"The rooms with recent activity are:\\n\\n- AI Pro Motion detected activity, but it has since turned off as of 2023-12-24T08:35:11.781732+00:00.\\n- Garage door sensor detected motion, but it has also turned off as of 2023-12-24T08:35:11.826021+00:00.\\n\\nNo current motion is detected in these areas.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3062,\n    \"completion_tokens\": 88,\n    \"total_tokens\": 3150\n  },\n  \"system_fingerprint\": \"fp_b77cb481ed\"\n}\n"
                 }
             }
         },
@@ -231,6 +237,9 @@
                     ]
                 },
                 "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
                     "Authorization": [
                         "FAKE_BEARER"
                     ]
@@ -243,7 +252,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Fri, 29 Mar 2024 01:18:47 GMT"
+                        "Mon, 08 Apr 2024 00:00:53 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -265,7 +274,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "4201"
+                        "2860"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -283,16 +292,16 @@
                         "499"
                     ],
                     "x-ratelimit-remaining-tokens": [
-                        "297450"
+                        "297479"
                     ],
                     "x-ratelimit-reset-requests": [
                         "120ms"
                     ],
                     "x-ratelimit-reset-tokens": [
-                        "509ms"
+                        "504ms"
                     ],
                     "x-request-id": [
-                        "req_924f0b0fecd812175df5f29b90d8d2af"
+                        "req_a068b502ecc88da37d8ca7c054aa6276"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -302,7 +311,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "86bc070c3e596ac2-SEA"
+                        "870dfabbaa40c3af-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -312,7 +321,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-97vBCshB5wD3bH3YyKj2pNvifjIC1\",\n  \"object\": \"chat.completion\",\n  \"created\": 1711675122,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"No room should have its lights on right now. There are no recent motion events indicating activity in any room that would require the lights to be on. The AI Pro Motion sensor and the Garage door sensor both detected motion but then turned off, indicating no current activity. Additionally, there were service calls to turn off lights in the kitchen and den, suggesting that any previous need for lighting in those areas has been addressed.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3075,\n    \"completion_tokens\": 83,\n    \"total_tokens\": 3158\n  },\n  \"system_fingerprint\": \"fp_8cc6edbbd5\"\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9BWjKvL3SAF21b1rZXPEhNJvKUuMm\",\n  \"object\": \"chat.completion\",\n  \"created\": 1712534450,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"No room should have its lights on right now. There was recent motion detected in both the AI Pro area and the garage, but both sensors have since turned off, indicating no current activity that would necessitate the lights being on. Additionally, there were service calls to turn off lights in the kitchen, kitchen island pendants, and den main lights, further indicating that there should be no lights on at the moment.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3075,\n    \"completion_tokens\": 83,\n    \"total_tokens\": 3158\n  },\n  \"system_fingerprint\": \"fp_b77cb481ed\"\n}\n"
                 }
             }
         }

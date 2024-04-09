@@ -3,14 +3,12 @@
 # TODO: mainline this feature into mlflow and drop this file
 
 import functools
-from pathlib import Path
-import click
 from fastapi import Request as fastRequest, HTTPException
 import logging
 import os
 import subprocess
 import sys
-from typing import Optional, Union
+from typing import List, Literal, Optional, Union
 import vcr
 
 ## MLflow Patching
@@ -40,6 +38,13 @@ from vcr.request import Request
 from aiohttp import hdrs
 
 ##
+
+from .const import (
+    REPLAY_SERVER_INPUT_FILE_SUFFIX,
+    REPLAY_SERVER_OUTPUT_FILE_SUFFIX,
+    SCENARIO_NAME_HEADER,
+)
+
 _logger = logging.getLogger(__name__)
 log = _logger  # vcr patch
 
@@ -115,17 +120,119 @@ def create_app_from_env() -> GatewayAPI:
         )
         prov = get_provider(config.model.provider)(config)  # type: ignore
 
+        # import mindctrl
+        # TODO: define __version__
+        # mctrl_header = {"User-Agent": f"mindctrl/{mindctrl.__version__}"}
+        mctrl_header = {"User-Agent": "mindctrl/0.1.0"}
+
+        from mlflow.gateway.base_models import ResponseModel
+        from mlflow.gateway.providers.utils import send_request
+
+        class Function(ResponseModel):
+            name: str
+            arguments: str
+
+        class ToolCall(ResponseModel):
+            type: str
+            function: Function
+            id: str
+
+        class ResponseMessage(ResponseModel):
+            tool_calls: Optional[list[ToolCall]]
+            role: str
+            content: Optional[str] = None
+
+        class Choice(ResponseModel):
+            index: int
+            message: ResponseMessage
+            finish_reason: Optional[str] = None
+
+        class ChatUsage(ResponseModel):
+            prompt_tokens: Optional[int] = None
+            completion_tokens: Optional[int] = None
+            total_tokens: Optional[int] = None
+
+        class ResponsePayload(ResponseModel):
+            id: Optional[str] = None
+            object: Literal["chat.completion"] = "chat.completion"
+            created: int
+            model: str
+            choices: List[Choice]
+            usage: ChatUsage
+
+        async def chat_with_tools(self, payload):
+            from fastapi.encoders import jsonable_encoder
+
+            payload = jsonable_encoder(payload, exclude_none=True)
+            self.check_for_model_field(payload)
+            all_headers = {**self._request_headers, **mctrl_header}
+            resp = await send_request(
+                headers=all_headers,
+                base_url=self._request_base_url,
+                path="chat/completions",
+                payload=self._add_model_to_payload_if_necessary(payload),
+            )
+            print(resp)
+
+            return ResponsePayload(
+                id=resp["id"],
+                object=resp["object"],
+                created=resp["created"],
+                model=resp["model"],
+                choices=[
+                    Choice(
+                        index=idx,
+                        message=ResponseMessage(
+                            role=c["message"]["role"],
+                            content=c["message"]["content"] or "",
+                            tool_calls=c["message"].get("tool_calls"),  # type: ignore
+                        ),
+                        finish_reason=c["finish_reason"],
+                    )
+                    for idx, c in enumerate(resp["choices"])
+                ],
+                usage=ChatUsage(
+                    prompt_tokens=resp["usage"]["prompt_tokens"],
+                    completion_tokens=resp["usage"]["completion_tokens"],
+                    total_tokens=resp["usage"]["total_tokens"],
+                ),
+            )
+
+        import mlflow.gateway.schemas.chat
+
+        mlflow.gateway.schemas.chat.ResponseMessage = ResponseMessage
+        mlflow.gateway.schemas.chat.ResponsePayload = ResponsePayload
+        mlflow.gateway.schemas.chat.Choice = Choice
+        mlflow.gateway.schemas.chat.ChatUsage = ChatUsage
+
+        import mlflow.gateway.providers.openai
+
+        mlflow.gateway.providers.openai.OpenAIProvider.chat = chat_with_tools
+
         # https://slowapi.readthedocs.io/en/latest/#limitations-and-known-issues
         async def _chat(
             request: fastRequest, payload: chat.RequestPayload
         ) -> Union[chat.ResponsePayload, chat.StreamResponsePayload]:
-            cassette = Path(capture_directory) / "replay.json"
+            _logger.info(f"REPLAY SERVER::Chat endpoint with headers {request.headers}")
+            filename_suffix = (
+                REPLAY_SERVER_INPUT_FILE_SUFFIX
+                if replay
+                else REPLAY_SERVER_OUTPUT_FILE_SUFFIX
+            )
+            filename_prefix = (
+                f"{request.headers[SCENARIO_NAME_HEADER]}-"
+                if SCENARIO_NAME_HEADER in request.headers
+                else ""
+            )
+            filename = f"{filename_prefix}{filename_suffix}"
             _logger.warning(
-                f"REPLAY SERVER::Replay mode {replay} for {config.model.name}, patching chat endpoint to cassette {cassette}"
+                f"REPLAY SERVER::Replay mode {replay} for {config.model.name}, "
+                f"patching chat endpoint to cassette dir {capture_directory} and filename {filename}"
             )
 
             with vcr.use_cassette(
-                cassette,
+                path=filename,
+                cassette_library_dir=capture_directory,
                 serializer="json",
                 record_mode=recording_mode,
                 # Warning, this is only for requests
@@ -200,101 +307,7 @@ class ReplayRunner(Runner):
                 str(self.workers),
                 "--worker-class",
                 "uvicorn.workers.UvicornWorker",
-                "replay_server:create_app_from_env()",  # This is the magic to hook into the child processes
+                "mindctrl.replay_server:create_app_from_env()",  # This is the magic to hook into the child processes
             ],
             env={**os.environ, **new_env},
         )
-
-
-def validate_replay_path(_ctx, _param, cassette_path: Optional[str]):
-    # throws, so just invoke it
-    if not cassette_path:
-        raise click.BadParameter(f"{cassette_path} not provided")
-
-    # Doesn't work for empty file in recording mode
-    # try:
-    #     FilesystemPersister.load_cassette(cassette_path, jsonserializer)
-    #     return cassette_path
-    # except Exception as e:
-    # if not os.path.exists(cassette_path):
-    #     raise click.BadParameter(f"{cassette_path} does not exist")
-    return cassette_path
-
-
-@click.command("serve", help="Start the mindctrl replay server")
-@click.option(
-    "--config-path",
-    envvar=MLFLOW_DEPLOYMENTS_CONFIG.name,
-    callback=validate_config_path,
-    required=True,
-    help="The path to the deployments configuration file.",
-)
-@click.option(
-    "--host",
-    default="0.0.0.0",
-    help="The network address to listen on (default: 0.0.0.0).",
-)
-@click.option(
-    "--port",
-    default=5001,
-    help="The port to listen on (default: 5001).",
-)
-@click.option(
-    "--workers",
-    default=1,
-    help="The number of workers.",
-)
-@click.option(
-    "--replay-dir",
-    envvar="MINDCTRL_REPLAY_DIR",
-    required=True,
-    help="The path to the vcr casette file.",
-)
-@click.option(
-    "--recording-dir",
-    envvar="MINDCTRL_RECORDING_DIR",
-    required=True,
-    help="The path to the vcr casette file.",
-)
-@click.option(
-    "--replay",
-    is_flag=True,
-    required=False,
-    help="replay or live",
-)
-def serve(
-    config_path: str,
-    host: str,
-    port: int,
-    workers: int,
-    replay_dir: str,
-    recording_dir: str,
-    replay: bool,
-):
-    click.echo(
-        f"Replay server starting on {host}:{port} with {workers} workers with config {config_path} and replay mode {replay} at {replay_dir} and recording to {recording_dir}"
-    )
-    replay_path = replay_dir if replay else recording_dir
-    files = os.listdir(replay_path)
-    _logger.warning(f"Replay server starting in replay mode at {', '.join(files)}")
-
-    # https://github.com/mlflow/mlflow/blob/master/mlflow/deployments/server/runner.py#L96
-    config_path = os.path.abspath(os.path.normpath(os.path.expanduser(config_path)))
-    with ReplayRunner(
-        config_path=config_path,
-        host=host,
-        port=port,
-        workers=workers,
-        replay_path=replay_path,
-        replay=replay,
-    ) as runner:
-        for _ in monitor_config(config_path):
-            _logger.info("Configuration updated, reloading workers")
-            runner.reload()
-
-    files = os.listdir(replay_path)
-    _logger.warning(f"Replay server finishing in replay mode at {', '.join(files)}")
-
-
-if __name__ == "__main__":
-    serve()

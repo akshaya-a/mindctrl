@@ -177,7 +177,11 @@ def prepare_apps(
         target_app = target_spec_dir / app.name
 
         # Don't push until the registry is created later
-        if "postgres" not in app.name and "mosquitto" not in app.name:
+        if (
+            "postgres" not in app.name
+            and "mosquitto" not in app.name
+            and "dashboard" not in app.name
+        ):
             source_app = services_dir / app.stem
             assert (
                 source_app / "Dockerfile"

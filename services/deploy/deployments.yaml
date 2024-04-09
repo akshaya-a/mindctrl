@@ -84,11 +84,8 @@ spec:
             - name: route-config
               mountPath: /config/route-config.yaml # This should be your final destination
               subPath: route-config.yaml # The name of the file to be placed inside /config, the filename used here and in mountPath should be same.
-            # - mountPath: "/replays"
-            #   name: replay-pv-storage
-            - name: replay-pv-storage
-              mountPath: "/replays/replay.json"
-              subPath: replay.json
+            - mountPath: "/replays"
+              name: replay-pv-storage
             - mountPath: "/recordings"
               name: recording-pv-storage
           imagePullPolicy: Always
@@ -100,13 +97,8 @@ spec:
               - key: route-config.yaml # Name of the item we had used inside our ConfigMap (under data:)
                 path: route-config.yaml # Name of the file to be placed inside /config
         - name: replay-pv-storage
-          # persistentVolumeClaim:
-          #   claimName: deployments-replay-pv-claim
-          configMap:
-            name: mindctrl-config # Name of the configMap
-            items:
-              - key: replay.json # Name of the item we had used inside our ConfigMap (under data:)
-                path: replay.json # Name of the file to be placed inside /config
+          persistentVolumeClaim:
+            claimName: deployments-replay-pv-claim
         - name: recording-pv-storage
           persistentVolumeClaim:
             claimName: deployments-recording-pv-claim

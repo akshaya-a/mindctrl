@@ -14,6 +14,9 @@ classifiers = [
     "Private :: Do Not Upload" # Currently just for local + cluster packaging. Publish once evals are in
 ]
 
+[project.scripts]
+mindctrl = "mindctrl.cli:cli"
+
 [project.urls]
 Homepage = "https://github.com/akshaya-a/mindctrl"
 Issues = "https://github.com/akshaya-a/mindctrl/issues"

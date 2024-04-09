@@ -1,0 +1,142 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-3.5-turbo",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are a helpful assistant"
+                        },
+                        {
+                            "role": "user",
+                            "content": "what is the weather in Seattle?"
+                        }
+                    ],
+                    "tools": [
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "get_current_weather",
+                                "description": "Get the current weather in a given location",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "location": {
+                                            "type": "string",
+                                            "description": "The city and state, e.g. San Francisco, CA"
+                                        },
+                                        "unit": {
+                                            "type": "string",
+                                            "enum": [
+                                                "celsius",
+                                                "fahrenheit"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "location"
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "tool_choice": "auto"
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Mon, 08 Apr 2024 00:00:28 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "Access-Control-Allow-Origin": [
+                        "*"
+                    ],
+                    "Cache-Control": [
+                        "no-cache, must-revalidate"
+                    ],
+                    "openai-model": [
+                        "gpt-3.5-turbo-0125"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "358"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "10000"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "60000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "9998"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "59967"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "16.371s"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "33ms"
+                    ],
+                    "x-request-id": [
+                        "req_68c30eb6528b0d4ea04c71790fd33d0b"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "870dfa2da8b8ebaf-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9BWixdg1KMYA1JupLFW8yNW0BQQFa\",\n  \"object\": \"chat.completion\",\n  \"created\": 1712534427,\n  \"model\": \"gpt-3.5-turbo-0125\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n            \"id\": \"call_tlX3wHQSlRirGeaxHwzHd7V0\",\n            \"type\": \"function\",\n            \"function\": {\n              \"name\": \"get_current_weather\",\n              \"arguments\": \"{\\\"location\\\":\\\"Seattle\\\",\\\"unit\\\":\\\"celsius\\\"}\"\n            }\n          }\n        ]\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"tool_calls\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 87,\n    \"completion_tokens\": 20,\n    \"total_tokens\": 107\n  },\n  \"system_fingerprint\": \"fp_b28b39ffa8\"\n}\n"
+                }
+            }
+        }
+    ]
+}

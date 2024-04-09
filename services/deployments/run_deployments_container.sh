@@ -10,7 +10,7 @@ export MLFLOW_DEPLOYMENTS_CONFIG=${MLFLOW_DEPLOYMENTS_CONFIG:="/config/route-con
 # If the environment variable MINDCTRL_CONFIG_REPLAY is set, set the --replay-path arg
 if [ -z "$MINDCTRL_CONFIG_REPLAY" ]; then
     echo "MINDCTRL_CONFIG_REPLAY is not set. Running replay server in live mode"
-    python3 replay_server.py
+    mindctrl serve
 else
-    python3 replay_server.py --replay
+    mindctrl serve --replay
 fi

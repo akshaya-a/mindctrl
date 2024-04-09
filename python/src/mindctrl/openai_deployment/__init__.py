@@ -27,7 +27,7 @@ from mlflow.models.utils import _save_example
 from mlflow.protos.databricks_pb2 import INVALID_PARAMETER_VALUE
 from mlflow.tracking._model_registry import DEFAULT_AWAIT_MAX_SLEEP_SECONDS
 from mlflow.tracking.artifact_utils import _download_artifact_from_uri
-from mlflow.types import ColSpec, Schema, TensorSpec
+from mlflow.types import ColSpec, Schema, TensorSpec, ParamSchema, ParamSpec
 from mlflow.utils.annotations import experimental
 from mlflow.utils.databricks_utils import (
     check_databricks_secret_scope_access,
@@ -63,6 +63,17 @@ from mlflow.utils.openai_utils import (
 )
 from mlflow.utils.requirements_utils import _get_pinned_requirement
 
+from mlflow.utils.rest_utils import augmented_raise_for_status, http_request
+from mlflow.utils.credentials import get_default_host_creds
+from mlflow.environment_variables import (
+    MLFLOW_HTTP_REQUEST_TIMEOUT,
+)
+from mlflow.deployments.constants import (
+    MLFLOW_DEPLOYMENT_CLIENT_REQUEST_RETRY_CODES,
+)
+
+from mindctrl.const import SCENARIO_NAME_PARAM, SCENARIO_NAME_HEADER
+
 FLAVOR_NAME = "openai_deployment"
 MODEL_FILENAME = "model.yaml"
 _PYFUNC_SUPPORTED_TASKS = ("chat.completions", "embeddings", "completions")
@@ -71,6 +82,36 @@ model_data_artifact_paths = []
 
 _logger = logging.getLogger(__name__)
 
+
+def _build_header_caller(headers: dict[str, str], target_uri: str):
+    def _call_endpoint_with_headers(
+        # self,
+        method: str,
+        route: str,
+        json_body: Optional[str] = None,
+        timeout: Optional[int] = None,
+    ):
+        call_kwargs = {}
+        if method.lower() == "get":
+            call_kwargs["params"] = json_body
+        else:
+            call_kwargs["json"] = json_body
+
+        response = http_request(
+            host_creds=get_default_host_creds(target_uri),
+            endpoint=route,
+            method=method,
+            timeout=MLFLOW_HTTP_REQUEST_TIMEOUT.get() if timeout is None else timeout,
+            retry_codes=MLFLOW_DEPLOYMENT_CLIENT_REQUEST_RETRY_CODES,
+            raise_on_status=False,
+            ## THE POINT OF THE PATCH
+            extra_headers=headers,
+            ##
+            **call_kwargs,
+        )
+        augmented_raise_for_status(response)
+        return response.json()
+    return _call_endpoint_with_headers
 
 @experimental
 def get_default_pip_requirements():
@@ -322,6 +363,16 @@ def save_model(
             inputs=Schema([ColSpec(type="string", name=None)]),
             outputs=Schema([TensorSpec(type=np.dtype("float64"), shape=(-1,))]),
         )
+
+    ## Find a better way to do it
+    ## Add params."scenario_name" to the model signature
+    scenario_param = ParamSpec(name=SCENARIO_NAME_PARAM, dtype="string", default="unknown")
+    if mlflow_model.signature.params is None:
+        mlflow_model.signature.params = ParamSchema(params=[scenario_param])
+    else:
+        mlflow_model.signature.params.params.append(scenario_param)
+    _logger.info(f"Added scenario name param to model signature: {mlflow_model.signature}")
+    ## end of the patch
 
     if input_example is not None:
         _save_example(mlflow_model, input_example, path, example_no_conversion)
@@ -616,10 +667,34 @@ class _OpenAIDeploymentWrapper:
         else:
             return data[self.formater.variables].to_dict(orient="records")
 
-    def _predict_chat(self, data, params):
+
+
+    def _predict_chat(self, data, params: dict):
         # Don't get into this business for now
         # from mlflow.openai.api_request_parallel_processor import process_api_requests
+
         from mlflow.deployments import MlflowDeploymentClient
+
+        _logger.info(f"Sending requests to {get_deployments_target()}")
+
+        deploy_client = None
+        try:
+            scenario_name: str = params.pop(SCENARIO_NAME_PARAM)
+            # TODO: [mlflow] you should be able to pass headers into get_deploy_client(..., headers=...)
+            # normally i would just monkeypatch like a madman, but i'm already doing so much...
+            # deploy_client = get_deploy_client(headers={SCENARIO_NAME_HEADER: scenario_name})
+            deploy_client = get_deploy_client()
+            # for typing - why bother with typing when i'm patching the bejeezus out of things?
+            assert isinstance(deploy_client, MlflowDeploymentClient)
+            _logger.info(f"Using patched client with scenario name {scenario_name}")
+            # I actually don't understand why this patch breaks instance vs free function calling... what happened to self
+            deploy_client._call_endpoint = _build_header_caller(headers={SCENARIO_NAME_HEADER: scenario_name}, target_uri=deploy_client.target_uri)
+        except KeyError:
+            deploy_client = get_deploy_client()
+
+
+        assert deploy_client is not None
+        assert isinstance(deploy_client, MlflowDeploymentClient)
 
         _validate_model_params(self.task, self.model, params)
         messages_list = self.format_completions(self.get_params_list(data))
@@ -634,10 +709,8 @@ class _OpenAIDeploymentWrapper:
             for messages in messages_list
         ]
 
-        _logger.info(f"Making {len(requests)} requests to {get_deployments_target()}")
-        deploy_client = get_deploy_client()
-        assert deploy_client is not None
-        assert isinstance(deploy_client, MlflowDeploymentClient)
+        _logger.info(f"Sending {len(requests)} requests")
+
 
         available_endpoints = deploy_client.list_endpoints()
         _logger.info(
@@ -654,7 +727,8 @@ class _OpenAIDeploymentWrapper:
         matched_models = [
             endpoint
             for endpoint in matched_tasks
-            if self.model["model"] in endpoint.model.name
+            # gpt-3.5-turbo-0125 vs gpt-3.5-turbo - what should happen?
+            if self.model["model"] in endpoint.model.name or endpoint.model.name in self.model["model"]
             and endpoint.model.provider == "openai"
         ]
         if len(matched_models) == 0:
@@ -675,7 +749,13 @@ class _OpenAIDeploymentWrapper:
             )
             responses.append(response)
 
-        return [r["choices"][0]["message"]["content"] for r in responses]
+        result = []
+        for r in responses:
+            if r["choices"][0]["finish_reason"]== "tool_calls":
+                result.append(r["choices"][0]["message"]["tool_calls"])
+            else:
+                result.append(r["choices"][0]["message"]["content"])
+        return result
 
     def _predict_completions(self, data, params):
         raise NotImplementedError()
