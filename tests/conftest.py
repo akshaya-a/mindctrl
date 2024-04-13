@@ -28,8 +28,10 @@ from utils.common import (
 )
 from utils.local import (
     LocalMultiserver,
+    MlflowContainer,
     MosquittoContainer,
     DeploymentServerContainer,
+    TraefikContainer,
 )
 from utils.cluster import LocalRegistryK3dManager, prepare_apps
 from utils.addon import AddonContainer, create_mock_supervisor
@@ -83,6 +85,32 @@ def pytest_addoption(parser):
         default=ReplayMode.REPLAY.value,
         help=f"mindctrl replay mode for integration: {list(ReplayMode)}",
     )
+    parser.addoption(
+        "--dev",
+        action="store_true",
+        default=False,
+        help="special breakpoint test to hold fixtures",
+    )
+
+
+# https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "dev: mark dev test that's only useful interactive"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    dev_mode = config.getoption("--dev")
+    skip_reason = (
+        "skipping all tests due to --dev mode"
+        if dev_mode
+        else "need --dev option to run"
+    )
+    skip_mark = pytest.mark.skip(reason=skip_reason)
+    for item in items:
+        if ("dev" in item.keywords) != dev_mode:
+            item.add_marker(skip_mark)
 
 
 @pytest.fixture(scope="session")
@@ -244,6 +272,25 @@ def mlflow_storage(tmp_path_factory: pytest.TempPathFactory):
 
 
 @pytest.fixture(scope="session")
+def mlflow_server(
+    mlflow_storage: Path,
+    deploy_mode: DeployMode,
+):
+    if deploy_mode == DeployMode.K3D:
+        _logger.warning(f"Unsupported deploy mode: {deploy_mode}")
+        pytest.skip(f"Unsupported deploy mode: {deploy_mode}")
+
+    _logger.info("Starting mlflow server fixture")
+
+    with MlflowContainer(data_dir=mlflow_storage) as mlflow_server:
+        wait_for_readiness(
+            f"{mlflow_server.get_base_url()}/api/2.0/mlflow/experiments/search?max_results=1"
+        )
+        yield mlflow_server
+
+
+# TODO: value in keeping? or just move to unit tests
+@pytest.fixture(scope="session")
 def mlflow_fluent_session(
     mlflow_storage: Path,
     deployment_server: DeploymentServerContainer,
@@ -307,15 +354,8 @@ def deployment_server(
         replay_mode=replay_mode == ReplayMode.REPLAY,
         image=tag,
     ) as server:
-        external_port = server.get_exposed_port(server.port_to_expose)
-        import time
-
-        time.sleep(
-            5
-        )  # TODO: this should not be needed - why is /health responding and we get disconnects?
-        wait_for_readiness(
-            f"http://{server.get_container_host_ip()}:{external_port}/health"
-        )
+        # once the disconnect issue is solved, we can merge into ServiceContainer.start() override
+        wait_for_readiness(f"{server.get_base_url()}/health")
 
         yield server
 
@@ -323,6 +363,8 @@ def deployment_server(
             replay_server_execution_dir.save_recordings(test_data_dir)
 
 
+# TODO: This behemoth has gotten large enough to switch to docker compose
+# decide whether use testcontainers Compose container or yaml
 @pytest.fixture(scope="session")
 def local_app_settings(
     mosquitto,
@@ -331,6 +373,7 @@ def local_app_settings(
     deploy_mode: DeployMode,
     replay_mode: ReplayMode,
     deployment_server: DeploymentServerContainer,
+    mlflow_server: MlflowContainer,
 ):
     if deploy_mode != DeployMode.LOCAL:
         raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
@@ -341,10 +384,8 @@ def local_app_settings(
     db_url = sqlalchemy.engine.url.make_url(postgres.get_connection_url())
 
     with monkeypatch_session.context() as m:
-        m.setenv(
-            "MLFLOW_DEPLOYMENTS_TARGET",
-            f"http://{deployment_server.get_container_host_ip()}:{deployment_server.get_exposed_port(deployment_server.port_to_expose)}",
-        )
+        m.setenv("MLFLOW_DEPLOYMENTS_TARGET", deployment_server.get_base_url())
+        m.setenv("MLFLOW_TRACKING_URI", mlflow_server.get_base_url())
         m.setenv("STORE__STORE_TYPE", "psql")
         m.setenv("STORE__USER", db_url.username)
         m.setenv("STORE__PASSWORD", db_url.password)
@@ -557,6 +598,7 @@ def k3d_server_url(
 
             _logger.info("Applying multiserver k8s spec")
             cluster.apply(target_deploy_folder / "multiserver.yaml")
+            cluster.apply(target_deploy_folder / "ingress.yaml")
 
             _logger.info("Waiting for deployments to be available")
             cluster.wait_and_get_logs("multiserver", timeout=300)
@@ -571,7 +613,7 @@ def k3d_server_url(
                 f"http://{constants.K8S_INGRESS_HOST}:{constants.K8S_INGRESS_PORT}"
             )
 
-            wait_for_readiness(f"{multiserver_url}/version")
+            wait_for_readiness(f"{multiserver_url}/mindctrl/v1/health")
 
             yield multiserver_url
 
@@ -598,7 +640,10 @@ def k3d_server_url(
 @pytest.fixture(scope="session")
 def local_server_url(
     local_app_settings: AppSettings,
+    mlflow_server: MlflowContainer,
     deploy_mode: DeployMode,
+    tmp_path_factory: pytest.TempPathFactory,
+    repo_root_dir: Path,
 ):
     if deploy_mode != DeployMode.LOCAL:
         raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
@@ -609,8 +654,22 @@ def local_server_url(
 
     with LocalMultiserver as server:
         _logger.info(f"Starting shared multiserver fixture as pid {server.pid}")
-        wait_for_readiness(server.url)
-        yield server.url
+        wait_for_readiness(server.healthcheck_url)
+
+        ingress_folder = repo_root_dir / "services/ingress"
+        temp_ingress_folder = tmp_path_factory.mktemp("ingress")
+        shutil.copytree(ingress_folder, temp_ingress_folder, dirs_exist_ok=True)
+
+        _logger.info(
+            f"Starting ingress server fixture with config: {temp_ingress_folder}"
+        )
+        with TraefikContainer(
+            config_dir=temp_ingress_folder,
+            mlflow_tracking_uri=mlflow_server.get_base_url(),
+            mindctrl_server_uri=server.url,
+        ) as ingress_server:
+            wait_for_readiness(f"http://localhost:8080/ping")
+            yield ingress_server.get_base_url()
 
 
 @pytest.fixture(scope="session")
@@ -635,7 +694,7 @@ def addon_url(
     mock_supervisor = create_mock_supervisor(app_settings)
     with mock_supervisor as supervisor:
         _logger.info(f"Starting mock supervisor as pid {supervisor.pid}")
-        wait_for_readiness(supervisor.url)
+        wait_for_readiness(supervisor.healthcheck_url)
 
         with AddonContainer(
             supervisor.url,
@@ -675,10 +734,18 @@ async def server_client(
     request: pytest.FixtureRequest,
 ):
     headers = {"x-mctrl-scenario-name": request.node.name}
+    service_url = f"{app_url}/mindctrl/v1"
     async with httpx.AsyncClient(
-        base_url=app_url, headers=headers, timeout=10
+        base_url=service_url, headers=headers, timeout=10
     ) as client:
         yield client
+
+
+@pytest.fixture
+def mlflow_client(
+    app_url: str,
+):
+    return mlflow.MlflowClient(tracking_uri=app_url)
 
 
 @pytest.fixture

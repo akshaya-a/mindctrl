@@ -1,0 +1,39 @@
+# Traefik dynamic configuration file
+# See https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-dynamic-configuration
+
+# TODO: How to unify with k8s Ingress?
+http:
+  routers:
+    # Define a connection between requests and services
+    to-mindctrl:
+      rule: "PathPrefix(`/mindctrl/v1/`)"
+      service: mindctrl
+      priority: 2
+      middlewares:
+        - "addon-ipallowlist"
+      entryPoints:
+        - http
+    to-tracking:
+      rule: "PathPrefix(`/`)"
+      service: tracking
+      priority: 1
+      middlewares:
+        - "addon-ipallowlist"
+      entryPoints:
+        - http
+
+  middlewares:
+    addon-ipallowlist:
+      ipAllowList:
+        sourceRange:
+          - "{{ env "TRAEFIK_ALLOW_IP" }}/32"
+
+  services:
+    mindctrl:
+      loadBalancer:
+        servers:
+          - url: "{{ env "MINDCTRL_SERVER_URI" }}"
+    tracking:
+      loadBalancer:
+        servers:
+          - url: "{{ env "MLFLOW_TRACKING_URI" }}"

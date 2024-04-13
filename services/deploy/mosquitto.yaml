@@ -41,10 +41,7 @@ spec:
           args:
             - |
               mosquitto_passwd -c -b ./mqttpass.txt $USERNAME $PASSWORD
-              cat ./mqttpass.txt
-              pwd
               chown -R mosquitto:mosquitto ./mqttpass.txt
-              ls -la
               echo "listener 1883" > ./mosquitto.conf
               echo "password_file mqttpass.txt" >> ./mosquitto.conf
               cat ./mosquitto.conf

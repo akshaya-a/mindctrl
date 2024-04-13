@@ -6,7 +6,7 @@ from uvicorn import Config
 
 import constants
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
-from .common import ServiceContainer, UvicornServer
+from .common import ServiceContainer, UvicornServer, wait_for_readiness
 
 _logger = logging.getLogger(__name__)
 
@@ -20,6 +20,49 @@ class MosquittoContainer(ServiceContainer):
     ):
         super().__init__(image, port=port, log_debug=True, **kwargs)
         self.with_command("mosquitto -c /mosquitto-no-auth.conf")
+
+
+class TraefikContainer(ServiceContainer):
+    def __init__(
+        self,
+        config_dir: Path,
+        mlflow_tracking_uri: str,
+        mindctrl_server_uri: str,
+        image="traefik:latest",
+        port=80,
+        **kwargs,
+    ):
+        super().__init__(image, port=port, network_mode="host", **kwargs)
+        self.with_volume_mapping(str(config_dir), "/config", mode="ro")
+        self.with_env("MLFLOW_TRACKING_URI", mlflow_tracking_uri)
+        self.with_env("MINDCTRL_SERVER_URI", mindctrl_server_uri)
+        self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1")
+        self.with_command(
+            "traefik "
+            "--accesslog=true --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
+            "--entrypoints.http.address=':80' "
+            "--ping=true "
+            "--providers.file.filename=/config/traefik-config.yaml"
+        )
+
+
+class MlflowContainer(ServiceContainer):
+    def __init__(
+        self,
+        data_dir: Path,
+        image="ghcr.io/mlflow/mlflow:latest",
+        port=constants.LOCAL_TRACKING_SERVER_PORT,
+        **kwargs,
+    ):
+        super().__init__(image, port=port, **kwargs)
+        internal_volume = "/data"
+        self.with_volume_mapping(str(data_dir), internal_volume, mode="rw")
+        self.with_command(
+            "mlflow server "
+            f"--backend-store-uri sqlite://{internal_volume}/mlflow.db "
+            f"--artifacts-destination {internal_volume} "
+            f"--host 0.0.0.0 --port {port}"
+        )
 
 
 class DeploymentServerContainer(ServiceContainer):
@@ -88,5 +131,6 @@ LocalMultiserver = UvicornServer(
         host=constants.LOCAL_MULTISERVER_HOST,
         port=constants.LOCAL_MULTISERVER_PORT,
         log_level="debug",
-    )
+    ),
+    wait_suffix="/mindctrl/v1/health",
 )
