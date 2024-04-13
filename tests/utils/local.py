@@ -6,7 +6,7 @@ from uvicorn import Config
 
 import constants
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
-from .common import ServiceContainer, UvicornServer, wait_for_readiness
+from .common import ServiceContainer, UvicornServer
 
 _logger = logging.getLogger(__name__)
 

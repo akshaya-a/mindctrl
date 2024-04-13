@@ -668,7 +668,7 @@ def local_server_url(
             mlflow_tracking_uri=mlflow_server.get_base_url(),
             mindctrl_server_uri=server.url,
         ) as ingress_server:
-            wait_for_readiness(f"http://localhost:8080/ping")
+            wait_for_readiness("http://localhost:8080/ping")
             yield ingress_server.get_base_url()
 
 
