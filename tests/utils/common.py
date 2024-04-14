@@ -62,6 +62,10 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
             if response.status_code == 200:
                 _logger.info(f"fixture is ready at {url}")
                 return
+            elif response.status_code >= 400 or response.status_code < 500:
+                raise ValueError(f"Failed to reach {url}:\n{response}\n{response.text}")
+        except httpx.RemoteProtocolError as e:
+            _logger.debug(f"Waiting for fixture startup at {url}...{e}")
         except httpx.ConnectError as e:
             _logger.debug(f"Waiting for fixture startup at {url}...{e}")
         except httpx.ReadError as e:
@@ -75,14 +79,21 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
 
 
 class UvicornServer(multiprocessing.Process):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, wait_suffix: Optional[str] = None):
         super().__init__()
         self.server = Server(config=config)
         self.config = config
+        self.wait_suffix = wait_suffix
 
     @property
     def url(self):
         return f"http://{self.config.host}:{self.config.port}"
+
+    @property
+    def healthcheck_url(self):
+        suffix = self.wait_suffix or ""
+        suffix = suffix.lstrip("/")
+        return f"{self.url}/{suffix}"
 
     def stop(self):
         self.terminate()

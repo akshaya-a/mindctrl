@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import pytest
 import yaml
 
 from mindctrl.config import AppSettings
@@ -8,10 +9,15 @@ from mindctrl.config import AppSettings
 _logger = logging.getLogger(__name__)
 
 
-def test_addon_options_map_server_options(monkeypatch):
-    config_file = Path(__file__).parent.parent / "mindctrl-addon" / "config.yaml"
+@pytest.fixture
+def config_as_obj(repo_root_dir: Path):
+    config_file = repo_root_dir / "mindctrl-addon" / "config.yaml"
     config = yaml.safe_load(config_file.read_text())
-    options = config["options"]
+    return config
+
+
+def test_addon_options_map_server_options(monkeypatch, config_as_obj):
+    options = config_as_obj["options"]
 
     if os.environ.get("STORE__STORE_TYPE"):
         # This is not a clean environment, probably local
@@ -34,10 +40,25 @@ def test_addon_options_map_server_options(monkeypatch):
     AppSettings()  # pyright: ignore
 
 
-def test_addon_options_map_schema():
-    config_file = Path(__file__).parent.parent / "mindctrl-addon" / "config.yaml"
-    config = yaml.safe_load(config_file.read_text())
-    options = config["options"]
-    schema = config["schema"]
+def test_addon_options_map_schema(config_as_obj):
+    options = config_as_obj["options"]
+    schema = config_as_obj["schema"]
 
     assert set(options.keys()) == set(schema.keys())
+
+
+def test_addon_ingress(config_as_obj, repo_root_dir):
+    assert config_as_obj["ingress"] is True
+    # TODO: this is a bad assert but the command line is fixed in shell scripts right now
+    assert config_as_obj["ingress_port"] == 80
+    assert "TRAEFIK_ALLOW_IP" in config_as_obj["environment"].keys()
+    assert config_as_obj["environment"]["TRAEFIK_ALLOW_IP"] == "172.30.32.2"
+    assert config_as_obj["environment"]["TRAEFIK_ALLOW_IPV6"] == ""
+
+    traefik_text = (repo_root_dir / "services/ingress/traefik-config.yaml").read_text()
+    # just make sure these don't regress in a bunch of moves
+    assert "ipAllowList" in traefik_text
+    assert (
+        "TRAEFIK_ALLOW_IP" in traefik_text
+    )  # this doesn't actually test as it's a substring of v6
+    assert "TRAEFIK_ALLOW_IPV6" in traefik_text

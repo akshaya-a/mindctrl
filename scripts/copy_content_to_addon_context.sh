@@ -53,3 +53,6 @@ mkdir -p "$target_dir"
 cp -r "$src_dir"/* "$target_dir"
 
 echo "Services have been copied to $target_dir"
+
+echo "Copying install_traefik.sh to mindctrl-addon/rootfs/.context/install_traefik.sh"
+cp scripts/install_traefik.sh mindctrl-addon/rootfs/.context/install_traefik.sh

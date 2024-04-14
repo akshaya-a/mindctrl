@@ -45,6 +45,10 @@ RUN mkdir /dapr; \
 RUN dapr init --slim
 
 COPY rootfs /
+RUN chmod a+x /.context/install_traefik.sh
+ENV TRAEFIK_ARCH=${BUILD_ARCH}
+RUN /.context/install_traefik.sh
+
 COPY requirements.txt /
 RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
 # One day when builder workflow supports --build-context
@@ -54,6 +58,7 @@ RUN pip3 install --no-cache --break-system-packages /.context/pysrc/
 RUN chmod a+x /usr/bin/run_tracking.sh && \
     chmod a+x /usr/bin/run_gateway.sh && \
     chmod a+x /usr/bin/run_multiserver.sh && \
+    chmod a+x /usr/bin/run_traefik.sh && \
     chmod a+x /usr/bin/run_dashboard.sh && \
     chmod a+x /etc/s6-overlay/s6-rc.d/init-server-env/run && \
     chmod a+x /etc/s6-overlay/s6-rc.d/discovery/run && \

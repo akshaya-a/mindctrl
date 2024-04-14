@@ -1,7 +1,6 @@
 #!/usr/bin/env bashio
 
 echo "Starting MLflow Deployment Server in $PWD"
-# TODO: add the replay env var to k8s spec
 export MINDCTRL_CONFIG_REPLAY=${MINDCTRL_CONFIG_REPLAY:="false"}
 export MINDCTRL_REPLAY_DIR=${MINDCTRL_REPLAY_DIR:="/config"}
 export MINDCTRL_RECORDING_DIR=${MINDCTRL_RECORDING_DIR:="/config"}
@@ -15,17 +14,11 @@ else
     printenv
 fi
 
-# TODO: remove after replay server is built into mindctrl
-export PYTHONPATH="/.context/services/deployments"
-
 bashio::log.info "MINDCTRL_CONFIG_REPLAY: $MINDCTRL_CONFIG_REPLAY"
 bashio::log.info "MINDCTRL_REPLAY_DIR: $MINDCTRL_REPLAY_DIR"
 bashio::log.info "MINDCTRL_RECORDING_DIR: $MINDCTRL_RECORDING_DIR"
 bashio::log.info "MLFLOW_DEPLOYMENTS_CONFIG: $MLFLOW_DEPLOYMENTS_CONFIG"
-ls -la /
-ls -la $MINDCTRL_REPLAY_DIR || true
-ls -la $MINDCTRL_RECORDING_DIR || true
-ls -la $MLFLOW_DEPLOYMENTS_CONFIG || true
+
 #TODO: convert --replay into an enum and pass it down like another config
 bashio::log.info "Starting MLflow Deployment Server with Dapr..."
 if [ "$MINDCTRL_CONFIG_REPLAY" == "true" ]; then

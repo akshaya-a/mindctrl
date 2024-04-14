@@ -89,22 +89,3 @@ spec:
           ports:
             - containerPort: 5002
           imagePullPolicy: Always
-
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: ingress
-  annotations:
-    ingress.kubernetes.io/ssl-redirect: "false"
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: multiserver-service
-                port:
-                  number: 5002

@@ -3,7 +3,6 @@ import fastapi
 
 from uvicorn import Config
 
-import constants
 from .common import UvicornServer
 from mindctrl.config import AppSettings
 from .local import DeploymentServerContainer
@@ -67,14 +66,17 @@ def create_mock_supervisor(appSettings: AppSettings):
     )
 
 
+# Logically not a deployment server, but so much shared config
 class AddonContainer(DeploymentServerContainer):
     def __init__(
         self,
         supervisor_url: str,
         *args,
         image="addon:latest",
-        port=constants.LOCAL_MULTISERVER_PORT,
+        port=80,
         **kwargs,
     ):
         super().__init__(*args, image=image, network_mode="host", port=port, **kwargs)
         self.with_env("SUPERVISOR_API", supervisor_url)
+        self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1")
+        self.with_env("TRAEFIK_ALLOW_IPV6", "::1")

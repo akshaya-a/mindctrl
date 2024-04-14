@@ -1,0 +1,6 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+
+bashio::log.info "Starting traefik..."
+
+exec /usr/bin/run_traefik.sh

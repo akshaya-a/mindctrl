@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - http:
+        # TODO: See if this can be templated/kustomized too
+        paths:
+          - path: /mindctrl
+            pathType: Prefix
+            backend:
+              service:
+                name: multiserver-service
+                port:
+                  number: 5002
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 5000
