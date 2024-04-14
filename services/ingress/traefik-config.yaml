@@ -27,7 +27,9 @@ http:
       ipAllowList:
         sourceRange:
           - "{{ env "TRAEFIK_ALLOW_IP" }}/32"
+          {{- if (env "TRAEFIK_ALLOW_IPV6") }}
           - "{{ env "TRAEFIK_ALLOW_IPV6" }}"
+          {{- end }}
 
   services:
     mindctrl:
