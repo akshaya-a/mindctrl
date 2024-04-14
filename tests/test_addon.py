@@ -53,8 +53,12 @@ def test_addon_ingress(config_as_obj, repo_root_dir):
     assert config_as_obj["ingress_port"] == 80
     assert "TRAEFIK_ALLOW_IP" in config_as_obj["environment"].keys()
     assert config_as_obj["environment"]["TRAEFIK_ALLOW_IP"] == "172.30.32.2"
+    assert config_as_obj["environment"]["TRAEFIK_ALLOW_IPV6"] == ""
 
     traefik_text = (repo_root_dir / "services/ingress/traefik-config.yaml").read_text()
     # just make sure these don't regress in a bunch of moves
     assert "ipAllowList" in traefik_text
-    assert "TRAEFIK_ALLOW_IP" in traefik_text
+    assert (
+        "TRAEFIK_ALLOW_IP" in traefik_text
+    )  # this doesn't actually test as it's a substring of v6
+    assert "TRAEFIK_ALLOW_IPV6" in traefik_text

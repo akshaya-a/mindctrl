@@ -12,8 +12,8 @@ fi
 export MLFLOW_TRACKING_URI="http://localhost:5000"
 export MINDCTRL_SERVER_URI="http://localhost:5002"
 
-# echo $TRAEFIK_ALLOW_IP
 bashio::log.info "Using ${TRAEFIK_ALLOW_IP} as allowed source ips"
+bashio::log.info "Using ${TRAEFIK_ALLOW_IPV6} as allowed source ips"
 
 ingress_entry=$(bashio::addon.ingress_entry)
 bashio::log.info "ingress_entry: ${ingress_entry}"

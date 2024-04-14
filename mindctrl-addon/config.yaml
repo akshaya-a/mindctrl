@@ -26,6 +26,7 @@ map:
   - addon_config:rw # Used for replay server inputs and outputs
 environment:
   TRAEFIK_ALLOW_IP: "172.30.32.2" # Supervisor: https://developers.home-assistant.io/docs/add-ons/presentation#ingress
+  TRAEFIK_ALLOW_IPV6: ""
 image: "ghcr.io/akshaya-a/{arch}-mindctrl"
 options:
   STORE__STORE_TYPE: "psql"

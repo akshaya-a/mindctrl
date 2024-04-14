@@ -37,6 +37,7 @@ class TraefikContainer(ServiceContainer):
         self.with_env("MLFLOW_TRACKING_URI", mlflow_tracking_uri)
         self.with_env("MINDCTRL_SERVER_URI", mindctrl_server_uri)
         self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1")
+        self.with_env("TRAEFIK_ALLOW_IPV6", "::1")
         self.with_command(
             "traefik "
             "--accesslog=true --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
