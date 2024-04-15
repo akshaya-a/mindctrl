@@ -1,11 +1,9 @@
 import asyncio
 import logging
 
-from fastapi import APIRouter, Request, WebSocket
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, WebSocket
 from fastapi.templating import Jinja2Templates
 
-import mlflow
 
 from mindctrl.const import TEMPLATES_DIR
 
