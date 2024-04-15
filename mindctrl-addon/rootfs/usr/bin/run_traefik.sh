@@ -17,6 +17,7 @@ bashio::log.info "Using ${TRAEFIK_ALLOW_IP} as allowed source ips"
 
 ingress_entry=$(bashio::addon.ingress_entry)
 bashio::log.info "ingress_entry: ${ingress_entry}"
+export HASS_INGRESS_ENTRY="${ingress_entry}"
 
 bashio::log.info "Starting traefik..."
 /traefik version

@@ -89,6 +89,8 @@ async def listen_to_mqtt(
                         # {'event_type': 'config_entry_discovered', 'event_data': {}}
                         # WARNING:multiserver.mqtt:UNKNOWN EVENT TYPE:
                         # {'event_type': 'hue_event', 'event_data': {'id': 'main_bathroom_light_dial_button', 'device_id': '76ba15661915ae06765cf5c64f449fcc', 'unique_id': '5fd10e90-40b4-48d5-9caf-a0116404887d', 'type': 'short_release', 'subtype': 1}}
+                        # == APP == WARNING:mindctrl.mqtt:UNKNOWN EVENT TYPE:
+                        # == APP == {'event_type': 'repairs_issue_registry_updated', 'event_data': {'action': 'create', 'domain': 'hassio', 'issue_id': 'a2ecd6c3128b4e33ab1d822a2ce00930'}}
 
                     # Summarize the event and write it to storage
                     # https://docs.timescale.com/self-hosted/latest/configuration/telemetry/

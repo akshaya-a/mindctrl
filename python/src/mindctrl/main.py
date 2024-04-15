@@ -114,8 +114,11 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.get("/")
 def read_root(request: Request, response_class=HTMLResponse):
-    print("Request headers:")
-    print(request.headers)
+    _logger.info(
+        f"root received at {request.url} with {request.base_url} for {request.app} from {request.client}. Full scope: {request.scope}"
+    )
+    _logger.info("Request headers:")
+    _logger.info(request.headers)
     ingress_header = request.headers.get("X-Ingress-Path")
     _logger.info(f"ingress path: {ingress_header}")
 

@@ -28,6 +28,7 @@ http:
       priority: 2
       middlewares:
         - "addon-ipallowlist"
+        - "add-addon-ingress"
       entryPoints:
         - http
     root-ingress:
@@ -40,6 +41,9 @@ http:
         - http
 
   middlewares:
+    add-addon-ingress:
+      addPrefix:
+        prefix: "{{ env "HASS_INGRESS_ENTRY" }}"
     addon-ipallowlist:
       ipAllowList:
         sourceRange:
