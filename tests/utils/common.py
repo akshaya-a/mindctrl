@@ -6,6 +6,7 @@ from typing import Iterator, Optional, Union
 import httpx
 from python_on_whales import docker as docker_cli
 from docker import DockerClient
+import socket
 from uvicorn import Config, Server
 from testcontainers.core.container import DockerContainer
 from testcontainers.postgres import PostgresContainer
@@ -154,3 +155,14 @@ def get_external_host_port(
         container.get_container_host_ip(),
         int(container.get_exposed_port(container.port_to_expose)),
     )
+
+
+def get_local_ip():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.settimeout(0)
+        try:
+            # doesn't even have to be reachable
+            s.connect(("10.254.254.254", 1))
+            return s.getsockname()[0]
+        except Exception:
+            return "127.0.0.1"

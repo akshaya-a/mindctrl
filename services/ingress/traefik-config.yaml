@@ -4,18 +4,35 @@
 # TODO: How to unify with k8s Ingress?
 http:
   routers:
-    # Define a connection between requests and services
+    # https://github.com/mlflow/mlflow/issues/4484#issuecomment-919377871
     to-mindctrl:
-      rule: "PathPrefix(`/mindctrl/v1/`)"
+      rule: "PathPrefix(`/mindctrl`)"
       service: mindctrl
+      priority: 4
+      middlewares:
+        - "addon-ipallowlist"
+      entryPoints:
+        - http
+    # TODO: Mlflow API can't be prefixed and traefik rewrites are hard
+    mlflow-api:
+      rule: "PathPrefix(`/api`)"
+      service: tracking
+      priority: 3
+      middlewares:
+        - "addon-ipallowlist"
+      entryPoints:
+        - http
+    mlflow-ui:
+      rule: "PathPrefix(`/mlflow`)"
+      service: tracking
       priority: 2
       middlewares:
         - "addon-ipallowlist"
       entryPoints:
         - http
-    to-tracking:
+    root-ingress:
       rule: "PathPrefix(`/`)"
-      service: tracking
+      service: mindctrl
       priority: 1
       middlewares:
         - "addon-ipallowlist"
@@ -26,7 +43,7 @@ http:
     addon-ipallowlist:
       ipAllowList:
         sourceRange:
-          - "{{ env "TRAEFIK_ALLOW_IP" }}/32"
+          - "{{ env "TRAEFIK_ALLOW_IP" }}"
           {{- if (env "TRAEFIK_ALLOW_IPV6") }}
           - "{{ env "TRAEFIK_ALLOW_IPV6" }}"
           {{- end }}

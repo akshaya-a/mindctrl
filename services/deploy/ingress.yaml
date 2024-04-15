@@ -16,10 +16,24 @@ spec:
                 name: multiserver-service
                 port:
                   number: 5002
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: tracking-service
                 port:
                   number: 5000
+          - path: /mlflow
+            pathType: Prefix
+            backend:
+              service:
+                name: tracking-service
+                port:
+                  number: 5000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: multiserver-service
+                port:
+                  number: 5002

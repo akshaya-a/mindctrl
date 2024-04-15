@@ -22,6 +22,7 @@ from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
 from utils.common import (
     build_app,
     dump_container_logs,
+    get_local_ip,
     push_app,
     wait_for_readiness,
     get_external_host_port,
@@ -283,9 +284,7 @@ def mlflow_server(
     _logger.info("Starting mlflow server fixture")
 
     with MlflowContainer(data_dir=mlflow_storage) as mlflow_server:
-        wait_for_readiness(
-            f"{mlflow_server.get_base_url()}/api/2.0/mlflow/experiments/search?max_results=1"
-        )
+        wait_for_readiness(f"{mlflow_server.get_base_url()}/health")
         yield mlflow_server
 
 
@@ -431,6 +430,22 @@ def addon_app_settings(
     pg_host, pg_port = get_external_host_port(postgres)
 
     addon_folder = repo_root_dir / "mindctrl-addon"
+    # TODO: make all the bash scripts just call these things factored out into utils without pytest
+    # copy_content_to_addon_context.sh
+    shutil.copytree(
+        repo_root_dir / "python",
+        addon_folder / "rootfs/.context/pysrc",
+        dirs_exist_ok=True,
+    )
+    shutil.copytree(
+        repo_root_dir / "services",
+        addon_folder / "rootfs/.context/services",
+        dirs_exist_ok=True,
+    )
+    shutil.copyfile(
+        repo_root_dir / "scripts/install_traefik.sh",
+        addon_folder / "rootfs/.context/install_traefik.sh",
+    )
     tag = build_app(addon_folder, None, None)
 
     # TODO: maybe just take a connection string as a setting instead of exploded
@@ -644,6 +659,7 @@ def local_server_url(
     deploy_mode: DeployMode,
     tmp_path_factory: pytest.TempPathFactory,
     repo_root_dir: Path,
+    request: pytest.FixtureRequest,
 ):
     if deploy_mode != DeployMode.LOCAL:
         raise ValueError(f"Unsupported deploy mode: {deploy_mode}")
@@ -663,10 +679,27 @@ def local_server_url(
         _logger.info(
             f"Starting ingress server fixture with config: {temp_ingress_folder}"
         )
+
+        allowed_ip = "127.0.0.1/32"
+        if request.config.getoption("--dev"):
+            local_ip = get_local_ip()
+            _logger.warning(
+                f"Inferred ip {local_ip} won't work through vscode forwarded ports - modify this"
+            )
+            breakpoint()
+            allowed_ip = f"{local_ip}/32"
+
+        allowed_ipv6 = None
+        # Github Actions uses ipv6, so if CI, allow ::1
+        if os.environ.get("CI", "false") == "true":
+            allowed_ipv6 = "::1"
+
         with TraefikContainer(
             config_dir=temp_ingress_folder,
             mlflow_tracking_uri=mlflow_server.get_base_url(),
             mindctrl_server_uri=server.url,
+            allowed_ip=allowed_ip,
+            allowed_ipv6=allowed_ipv6,
         ) as ingress_server:
             wait_for_readiness("http://localhost:8080/ping")
             yield ingress_server.get_base_url()
@@ -737,6 +770,18 @@ async def server_client(
     service_url = f"{app_url}/mindctrl/v1"
     async with httpx.AsyncClient(
         base_url=service_url, headers=headers, timeout=10
+    ) as client:
+        yield client
+
+
+@pytest.fixture
+async def ingress_client(
+    app_url: str,
+    request: pytest.FixtureRequest,
+):
+    headers = {"x-mctrl-scenario-name": request.node.name}
+    async with httpx.AsyncClient(
+        base_url=app_url, headers=headers, timeout=10
     ) as client:
         yield client
 

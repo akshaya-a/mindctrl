@@ -20,4 +20,5 @@ mlflow server \
   --backend-store-uri ${dbpath} \
   --artifacts-destination ${ARTIFACTS_DESTINATION} \
   --host 0.0.0.0 \
-  --port 5000
+  --port 5000 \
+  --static-prefix /mlflow

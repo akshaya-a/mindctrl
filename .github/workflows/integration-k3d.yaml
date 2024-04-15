@@ -44,4 +44,4 @@ jobs:
           wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
       - name: Test with pytest
         run: |
-          pytest -v -s -c tests/pytest.ini --deploy-mode=k3d --replay-mode=replay
+          pytest -v -s -rA -c tests/pytest.ini --deploy-mode=k3d --replay-mode=replay
