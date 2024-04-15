@@ -7,9 +7,13 @@ from contextlib import asynccontextmanager
 import asyncio
 
 # Core functionality
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 
 import collections
+
+from fastapi.templating import Jinja2Templates
+import mlflow
 
 
 from .mlmodels import log_system_models
@@ -18,7 +22,7 @@ from .mlflow_bridge import connect_to_mlflow, poll_registry
 from .db.setup import setup_db, insert_summary
 from .config import AppSettings
 from .routers import deployed_models, info, ui
-from .const import ROUTE_PREFIX
+from .const import ROUTE_PREFIX, TEMPLATES_DIR
 
 
 _logger = logging.getLogger(__name__)
@@ -96,3 +100,49 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(deployed_models.router, prefix=ROUTE_PREFIX)
 app.include_router(info.router, prefix=ROUTE_PREFIX)
 app.include_router(ui.router, prefix=ROUTE_PREFIX)
+
+
+# TODO: decide if redirects are better
+# @app.get("/")
+# def read_root():
+#     return RedirectResponse(url=f"{ROUTE_PREFIX}/ui/", status_code=302)
+
+
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+
+@app.get("/")
+def read_root(request: Request, response_class=HTMLResponse):
+    ingress_header = request.headers.get("X-Ingress-Path")
+    _logger.info(f"ingress path: {ingress_header}")
+
+    ws_url = (
+        f"{ingress_header}/ws"
+        if ingress_header
+        else f"{request.url_for('websocket_endpoint')}"
+    )
+    ingress_header = ingress_header or ""
+    chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
+    mlflow_url = request.base_url.replace(port=5000)
+    _logger.info(f"mlflow url: {mlflow_url}")
+    mlflow_url = (
+        f"{request.base_url}mlflow"  # // if /mlflow - use urljoin or something better
+    )
+    _logger.info(f"mlflow url: {mlflow_url}")
+    dashboard_url = request.base_url.replace(port=9999)
+    _logger.info(f"dapr dashboard: {dashboard_url}")
+    _logger.info(f"root_path: {request.scope.get('root_path')}")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "request": request,
+            "tracking_store": mlflow.get_tracking_uri(),
+            "model_registry": mlflow.get_registry_uri(),
+            "ws_url": ws_url,
+            "chat_url": chat_url,
+            "mlflow_url": mlflow_url,
+            "dashboard_url": dashboard_url,
+        },
+    )

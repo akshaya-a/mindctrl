@@ -52,7 +52,7 @@ def test_addon_ingress(config_as_obj, repo_root_dir):
     # TODO: this is a bad assert but the command line is fixed in shell scripts right now
     assert config_as_obj["ingress_port"] == 80
     assert "TRAEFIK_ALLOW_IP" in config_as_obj["environment"].keys()
-    assert config_as_obj["environment"]["TRAEFIK_ALLOW_IP"] == "172.30.32.2"
+    assert config_as_obj["environment"]["TRAEFIK_ALLOW_IP"] == "172.30.32.2/32"
     assert config_as_obj["environment"]["TRAEFIK_ALLOW_IPV6"] == ""
 
     traefik_text = (repo_root_dir / "services/ingress/traefik-config.yaml").read_text()

@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 import os
+from typing import Optional
 
 from uvicorn import Config
 
@@ -28,6 +29,8 @@ class TraefikContainer(ServiceContainer):
         config_dir: Path,
         mlflow_tracking_uri: str,
         mindctrl_server_uri: str,
+        allowed_ip: str = "127.0.0.1/32",
+        allowed_ipv6: Optional[str] = None,
         image="traefik:latest",
         port=80,
         **kwargs,
@@ -36,8 +39,9 @@ class TraefikContainer(ServiceContainer):
         self.with_volume_mapping(str(config_dir), "/config", mode="ro")
         self.with_env("MLFLOW_TRACKING_URI", mlflow_tracking_uri)
         self.with_env("MINDCTRL_SERVER_URI", mindctrl_server_uri)
-        self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1")
-        self.with_env("TRAEFIK_ALLOW_IPV6", "::1")
+        self.with_env("TRAEFIK_ALLOW_IP", allowed_ip)
+        if allowed_ipv6:
+            self.with_env("TRAEFIK_ALLOW_IPV6", allowed_ipv6)
         self.with_command(
             "traefik "
             "--accesslog=true --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
@@ -62,7 +66,8 @@ class MlflowContainer(ServiceContainer):
             "mlflow server "
             f"--backend-store-uri sqlite://{internal_volume}/mlflow.db "
             f"--artifacts-destination {internal_volume} "
-            f"--host 0.0.0.0 --port {port}"
+            f"--host 0.0.0.0 --port {port} "
+            "--static-prefix /mlflow"
         )
 
 

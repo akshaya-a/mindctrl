@@ -26,4 +26,5 @@ s6-notifyoncheck dapr run --log-level warn --app-id tracking --app-port 5000 --a
   --backend-store-uri ${dbpath} \
   --artifacts-destination /share/tracking/mlflow-hass \
   --host 0.0.0.0 \
-  --port 5000
+  --port 5000 \
+  --static-prefix /mlflow

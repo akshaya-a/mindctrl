@@ -78,5 +78,5 @@ class AddonContainer(DeploymentServerContainer):
     ):
         super().__init__(*args, image=image, network_mode="host", port=port, **kwargs)
         self.with_env("SUPERVISOR_API", supervisor_url)
-        self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1")
+        self.with_env("TRAEFIK_ALLOW_IP", "127.0.0.1/32")
         self.with_env("TRAEFIK_ALLOW_IPV6", "::1")

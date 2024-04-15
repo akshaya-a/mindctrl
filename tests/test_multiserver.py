@@ -4,8 +4,6 @@ import pandas as pd
 import logging
 from pathlib import Path
 
-import pytest
-
 
 _logger = logging.getLogger(__name__)
 
@@ -96,15 +94,3 @@ async def test_summarize(server_client, mqtt_client):
     assert "garage" in answers[1].lower()
 
     assert "no" in answers[2].lower()
-
-
-# pytest ... --dev will run this test and basically halt fixture teardown
-# Then you can poke around the environment etc
-@pytest.mark.dev
-def test_dev(server_client, mqtt_client, mlflow_client):
-    # Request every fixture that matters to trigger setup
-    print("DEV MODE ENABLED -- HALTING FIXTURE TEARDOWN")
-    print(f"Server client: {server_client.base_url}")
-    print(f"MQTT client: {mqtt_client._hostname}:{mqtt_client._port}")
-    print(f"MLflow client: {mlflow_client.tracking_uri}")
-    breakpoint()

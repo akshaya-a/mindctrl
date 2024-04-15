@@ -32,4 +32,4 @@ jobs:
           ruff check .
       - name: Test with pytest
         run: |
-          pytest -v -s -c tests/pytest.ini --deploy-mode=local --replay-mode=replay
+          pytest -v -s -rA -c tests/pytest.ini --deploy-mode=local --replay-mode=replay
