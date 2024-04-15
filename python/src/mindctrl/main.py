@@ -128,10 +128,11 @@ def read_root(request: Request, response_class=HTMLResponse):
     chat_url = (
         f"{ingress_header}{ROUTE_PREFIX}/deployed-models/chat/labels/latest/invocations"
     )
+    # TODO: get it from the mlflow static prefix env var or constant
     mlflow_url = (
-        f"{ingress_header}/mlflow"
+        f"{ingress_header}/mlflow/"
         if ingress_header
-        else f"{request.base_url}mlflow"  # // if /mlflow - use urljoin or something better
+        else f"{request.base_url}mlflow/"  # // if /mlflow - use urljoin or something better
     )
     _logger.info(f"mlflow url: {mlflow_url}")
     # TODO: fix dashboard ingress and then add this later. Or, just an exposed port not via ingress
