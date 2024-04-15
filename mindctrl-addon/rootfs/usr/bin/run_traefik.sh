@@ -22,7 +22,7 @@ export HASS_INGRESS_ENTRY="${ingress_entry}"
 bashio::log.info "Starting traefik..."
 /traefik version
 # TODO: until this is unified, keep in sync with testcontainer
-/traefik --accesslog=true --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true \
+/traefik --accesslog=true --accesslog.format=json --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true \
     --entrypoints.http.address=':80' \
     --ping=true \
     --providers.file.filename /.context/services/ingress/traefik-config.yaml

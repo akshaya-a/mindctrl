@@ -44,7 +44,7 @@ class TraefikContainer(ServiceContainer):
             self.with_env("TRAEFIK_ALLOW_IPV6", allowed_ipv6)
         self.with_command(
             "traefik "
-            "--accesslog=true --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
+            "--accesslog=true --accesslog.format=json --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
             "--entrypoints.http.address=':80' "
             "--ping=true "
             "--providers.file.filename=/config/traefik-config.yaml"
