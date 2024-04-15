@@ -26,6 +26,7 @@ from .const import ROUTE_PREFIX, TEMPLATES_DIR
 
 
 _logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def write_healthcheck_file(settings: AppSettings):
@@ -113,6 +114,8 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @app.get("/")
 def read_root(request: Request, response_class=HTMLResponse):
+    print("Request headers:")
+    print(request.headers)
     ingress_header = request.headers.get("X-Ingress-Path")
     _logger.info(f"ingress path: {ingress_header}")
 
@@ -122,13 +125,16 @@ def read_root(request: Request, response_class=HTMLResponse):
         else f"{request.url_for('websocket_endpoint')}"
     )
     ingress_header = ingress_header or ""
-    chat_url = f"{ingress_header}/deployed-models/chat/labels/latest/invocations"
-    mlflow_url = request.base_url.replace(port=5000)
-    _logger.info(f"mlflow url: {mlflow_url}")
+    chat_url = (
+        f"{ingress_header}{ROUTE_PREFIX}/deployed-models/chat/labels/latest/invocations"
+    )
     mlflow_url = (
-        f"{request.base_url}mlflow"  # // if /mlflow - use urljoin or something better
+        f"{ingress_header}/mlflow"
+        if ingress_header
+        else f"{request.base_url}mlflow"  # // if /mlflow - use urljoin or something better
     )
     _logger.info(f"mlflow url: {mlflow_url}")
+    # TODO: fix dashboard ingress and then add this later. Or, just an exposed port not via ingress
     dashboard_url = request.base_url.replace(port=9999)
     _logger.info(f"dapr dashboard: {dashboard_url}")
     _logger.info(f"root_path: {request.scope.get('root_path')}")
