@@ -8,7 +8,7 @@ http:
     to-mindctrl:
       rule: "PathPrefix(`/mindctrl`)"
       service: mindctrl
-      priority: 4
+      priority: 5
       middlewares:
         - "addon-ipallowlist"
       entryPoints:
@@ -17,7 +17,7 @@ http:
     mlflow-api:
       rule: "PathPrefix(`/api`)"
       service: tracking
-      priority: 3
+      priority: 4
       middlewares:
         - "addon-ipallowlist"
       entryPoints:
@@ -25,6 +25,15 @@ http:
     mlflow-ui:
       rule: "PathPrefix(`/mlflow`)"
       service: tracking
+      priority: 3
+      middlewares:
+        - "addon-ipallowlist"
+        - "add-addon-ingress"
+      entryPoints:
+        - http
+    dapr-dashboard:
+      rule: "PathPrefix(`/dapr-dashboard`)"
+      service: daprdashboard
       priority: 2
       middlewares:
         - "addon-ipallowlist"
@@ -61,3 +70,7 @@ http:
       loadBalancer:
         servers:
           - url: "{{ env "MLFLOW_TRACKING_URI" }}"
+    daprdashboard:
+      loadBalancer:
+        servers:
+          - url: "{{ env "DAPR_DASHBOARD_URI" }}"

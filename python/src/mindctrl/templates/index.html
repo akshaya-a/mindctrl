@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <title>Real time streaming</title>
+    <title>Mindctrl Dashboard</title>
     <meta charset="utf-8" />
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
@@ -54,6 +54,7 @@
         font-size: 16px;
         margin: 4px 2px;
         cursor: pointer;
+        border-radius: 10px;
         transition-duration: 0.4s;
     }
 
@@ -147,8 +148,9 @@
 
     #sendButton {
         padding: 10px;
+        border-radius: 5px;
         background-color: #0b93f6;
-        color: white;
+        color: #e7f1fb;
         border: none;
         cursor: pointer;
         transition: background-color 0.3s ease;
@@ -167,13 +169,16 @@
         right: 0;
         width: 100%;
         margin-bottom: 10px;
+        background-color: #0b3574;
     }
 
     .tabButton {
         cursor: pointer;
         padding: 10px;
         border: none;
-        background-color: #ddd;
+        background-color: #0b3574;
+        border-radius: 5px;
+        color: #e7f1fb;
         margin-right: 10px;
         /* Add some space between the buttons */
         flex-grow: 0;
@@ -181,23 +186,24 @@
     }
 
     .tabButton.active {
-        background-color: #bbb;
+        background-color: #43c9ed;
+        border-bottom-color: #43c9ed;
     }
 
     .tabContent {
         width: 100%;
         height: calc(100vh - 50px);
-        /* Adjust as needed */
+        padding-top: 50px;
     }
 </style>
 
 <body>
     <div id="tabBar">
-        <button id="debugButton" class="tabButton">Debug</button>
-        <button id="mlflowButton" class="tabButton active">MLflow</button>
+        <button id="chatButton" class="tabButton active">Chat</button>
+        <button id="mlflowButton" class="tabButton">MLflow</button>
         <button id="dashboardButton" class="tabButton">Cluster Dashboard</button>
     </div>
-    <div id="debugContent" class="tabContent">
+    <div id="chatContent" class="tabContent">
 
         <div id="chatcontainer">
             <div id="chatbox">
@@ -238,7 +244,7 @@
 
                 // Send the message
                 const chat_url = '{{ chat_url }}';
-                console.debug(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
+                console.chat(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
                 fetch(chat_url, {
                     method: 'POST',
                     headers: {
@@ -248,7 +254,7 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.debug(data);
+                        console.chat(data);
                         const replyLi = document.createElement('li');
                         replyLi.className = 'reply-message';
                         replyLi.innerHTML = `<strong>Mindctrl:</strong> ${data[0]}`;
@@ -345,12 +351,12 @@
             };
 
             const ws_url = '{{ ws_url }}';
-            console.debug(`"Listening to ${ws_url}"`);
+            console.info(`"Listening to ${ws_url}"`);
             const ws = new WebSocket(ws_url);
             ws.onmessage = function (event) {
                 // const eventPayload = JSON.parse(event.data);
                 eventData.push({ time: new Date().toISOString(), value: event.data });
-                // Rolling window debug view
+                // Rolling window chat view
                 if (eventData.length > 10) {
                     eventData = eventData.slice(1);
                 }
@@ -372,8 +378,8 @@
         <iframe src="{{ dashboard_url }}" width="100%" height="100%"></iframe>
     </div>
     <script>
-        document.getElementById('debugButton').addEventListener('click', function () {
-            document.getElementById('debugContent').style.display = 'block';
+        document.getElementById('chatButton').addEventListener('click', function () {
+            document.getElementById('chatContent').style.display = 'block';
             document.getElementById('mlflowContent').style.display = 'none';
             document.getElementById('dashboardContent').style.display = 'none';
             this.classList.add('active');
@@ -382,20 +388,20 @@
         });
 
         document.getElementById('mlflowButton').addEventListener('click', function () {
-            document.getElementById('debugContent').style.display = 'none';
+            document.getElementById('chatContent').style.display = 'none';
             document.getElementById('mlflowContent').style.display = 'block';
             document.getElementById('dashboardContent').style.display = 'none';
             this.classList.add('active');
-            document.getElementById('debugButton').classList.remove('active');
+            document.getElementById('chatButton').classList.remove('active');
             document.getElementById('dashboardButton').classList.remove('active');
         });
 
         document.getElementById('dashboardButton').addEventListener('click', function () {
-            document.getElementById('debugContent').style.display = 'none';
+            document.getElementById('chatContent').style.display = 'none';
             document.getElementById('mlflowContent').style.display = 'none';
             document.getElementById('dashboardContent').style.display = 'block';
             this.classList.add('active');
-            document.getElementById('debugButton').classList.remove('active');
+            document.getElementById('chatButton').classList.remove('active');
             document.getElementById('mlflowButton').classList.remove('active');
         });
     </script>
