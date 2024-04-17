@@ -1,6 +1,6 @@
 name: "Mindctrl"
 description: "LLMOps for Homeassistant"
-version: "0.0.58"
+version: "0.0.59"
 url: "https://github.com/akshaya-a/mindctrl/tree/main/addons/mindctrl"
 slug: "mindctrl"
 init: false
