@@ -244,7 +244,7 @@
 
                 // Send the message
                 const chat_url = '{{ chat_url }}';
-                console.chat(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
+                console.info(`"Chatting ${chat_url} with ${JSON.stringify(payload)}"`);
                 fetch(chat_url, {
                     method: 'POST',
                     headers: {
@@ -254,7 +254,7 @@
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.chat(data);
+                        console.info(data);
                         const replyLi = document.createElement('li');
                         replyLi.className = 'reply-message';
                         replyLi.innerHTML = `<strong>Mindctrl:</strong> ${data[0]}`;

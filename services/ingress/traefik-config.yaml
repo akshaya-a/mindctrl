@@ -37,7 +37,7 @@ http:
       priority: 2
       middlewares:
         - "addon-ipallowlist"
-        - "add-addon-ingress"
+        - "strip-dapr-prefix"
       entryPoints:
         - http
     root-ingress:
@@ -50,6 +50,10 @@ http:
         - http
 
   middlewares:
+    strip-dapr-prefix:
+      stripPrefix:
+        prefixes:
+          - "/dapr-dashboard"
     add-addon-ingress:
       addPrefix:
         prefix: "{{ env "HASS_INGRESS_ENTRY" }}"
