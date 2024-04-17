@@ -12,7 +12,6 @@ from fastapi.responses import HTMLResponse
 
 import collections
 
-from fastapi.templating import Jinja2Templates
 import mlflow
 
 
@@ -22,7 +21,8 @@ from .mlflow_bridge import connect_to_mlflow, poll_registry
 from .db.setup import setup_db, insert_summary
 from .config import AppSettings
 from .routers import deployed_models, info, ui
-from .const import ROUTE_PREFIX, TEMPLATES_DIR
+from .routers.ui import templates
+from .const import ROUTE_PREFIX
 
 
 _logger = logging.getLogger(__name__)
@@ -107,9 +107,6 @@ app.include_router(ui.router, prefix=ROUTE_PREFIX)
 # @app.get("/")
 # def read_root():
 #     return RedirectResponse(url=f"{ROUTE_PREFIX}/ui/", status_code=302)
-
-
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
 @app.get("/")

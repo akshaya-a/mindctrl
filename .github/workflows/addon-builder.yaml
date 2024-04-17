@@ -43,6 +43,11 @@ jobs:
           changed=$(echo ${changed_addons[@]} | rev | cut -c 2- | rev)
 
           if [[ -n ${changed} ]]; then
+            if [[ ! "${{ steps.changed_files.outputs.all }}" =~ "config.yaml" ]]; then
+              echo "Error: config.yaml has not been changed but the add-on has been. Please update the version"
+              exit 1
+            fi
+
             echo "Changed add-ons: $changed";
             echo "changed=true" >> $GITHUB_OUTPUT;
             echo "addons=[$changed]" >> $GITHUB_OUTPUT;
