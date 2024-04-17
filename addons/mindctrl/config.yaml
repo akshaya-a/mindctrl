@@ -16,7 +16,7 @@ panel_title: Mindctrl
 ingress: true
 ingress_port: 80
 ports:
-  80/tcp: 80 # ingress
+  80/tcp: 80 # traefik ingress
 ports_description:
   80/tcp: "mindctrl ingress"
 discovery:

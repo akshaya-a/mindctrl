@@ -5,6 +5,7 @@ env:
   BUILD_ARGS: "--test"
   MINDCTRL_SRC_DIR: "python/src/"
   MINDCTRL_SERVICES_DIR: "services/"
+  ADDONS_DIR: "addons/"
 
 on:
   push:
@@ -26,16 +27,13 @@ jobs:
         id: changed_files
         uses: masesgroup/retrieve-changed-files@v3
 
-      - name: Find add-on directories
-        id: addons
-        uses: home-assistant/actions/helpers/find-addons@master
-
       - name: Get changed add-ons
         id: changed_addons
         run: |
           declare -a changed_addons
-          for addon in ${{ steps.addons.outputs.addons }}; do
-            if [[ "${{ steps.changed_files.outputs.all }}" =~ $addon/ ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SRC_DIR}" ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SERVICES_DIR}" ]]; then
+          declare -a all_addons=("addons/mindctrl")
+          for addon in "${all_addons[@]}"; do
+            if [[ "${{ steps.changed_files.outputs.all }}" =~ "${ADDONS_DIR}" ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SRC_DIR}" ]] || [[ "${{ steps.changed_files.outputs.all }}" =~ "${MINDCTRL_SERVICES_DIR}" ]]; then
               if [[ ! "${changed_addons[@]}" =~ $addon ]]; then
                 changed_addons+=("\"${addon}\",");
               fi
