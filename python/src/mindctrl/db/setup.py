@@ -48,6 +48,9 @@ async def setup_db(settings: PostgresStoreSettings) -> AsyncEngine:
         await conn.execute(text(ENABLE_PGVECTOR))
         await conn.execute(text(CREATE_SUMMARY_TABLE))
         await conn.execute(text(CONVERT_TO_HYPERTABLE))
+        # TODO: add an index on metadata columns (entity type? etc)
+        # https://docs.timescale.com/tutorials/latest/financial-ingest-real-time/financial-ingest-dataset/#creating-a-hypertable
+
         # Not available for apache licensed version
         # await conn.execute(text(ADD_RETENTION_POLICY))
         await conn.commit()

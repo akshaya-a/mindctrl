@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def config_as_obj(repo_root_dir: Path):
-    config_file = repo_root_dir / "mindctrl-addon" / "config.yaml"
+    config_file = repo_root_dir / "addons/mindctrl" / "config.yaml"
     config = yaml.safe_load(config_file.read_text())
     return config
 

@@ -17,11 +17,7 @@
                 "--port",
                 "5002"
             ],
-            "jinja": true,
-            "cwd": "${workspaceFolder}/mindctrl-addon/rootfs/usr/bin",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/mindctrl-addon/rootfs/usr/bin"
-            }
+            "jinja": true
         }
     ]
 }

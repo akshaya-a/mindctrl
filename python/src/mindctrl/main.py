@@ -122,10 +122,11 @@ def read_root(request: Request, response_class=HTMLResponse):
 
     ws_base = str(request.base_url).replace("http", "ws").rstrip("/")
     ws_url = (
-        f"ws://{ws_base}{ingress_header}{ROUTE_PREFIX}/ui/ws"  # lol - do this better
+        f"{ws_base}{ingress_header}{ROUTE_PREFIX}/ui/ws"  # lol - do this better
         if ingress_header
         else f"{request.url_for('websocket_endpoint')}"
     )
+    _logger.info(f"websocket url: {ws_url}")
     ingress_header = ingress_header or ""
     chat_url = (
         f"{ingress_header}{ROUTE_PREFIX}/deployed-models/chat/labels/latest/invocations"
