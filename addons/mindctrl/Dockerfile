@@ -24,9 +24,7 @@ RUN set -eux; \
     \
     python3 --version
 
-RUN pip3 --version
-
-
+RUN pip3 install --no-cache --break-system-packages uv
 
 ENV SENTENCE_TRANSFORMERS_HOME=/model_cache
 ENV HF_HUB_CACHE=/model_cache
@@ -50,10 +48,10 @@ ENV TRAEFIK_ARCH=${BUILD_ARCH}
 RUN /.context/install_traefik.sh
 
 COPY requirements.txt /
-RUN pip3 install --no-cache --break-system-packages -r /requirements.txt
+RUN uv pip install --no-cache --break-system-packages --python python3 -r /requirements.txt
 # One day when builder workflow supports --build-context
 # COPY --from=mindctrl_source / /pysrc
-RUN pip3 install --no-cache --break-system-packages /.context/pysrc/
+RUN uv pip install --no-cache --break-system-packages --python python3 /.context/pysrc/
 
 RUN chmod a+x /usr/bin/run_tracking.sh && \
     chmod a+x /usr/bin/run_gateway.sh && \
