@@ -429,7 +429,7 @@ def addon_app_settings(
     mqtt_host, mqtt_port = get_external_host_port(mosquitto)
     pg_host, pg_port = get_external_host_port(postgres)
 
-    addon_folder = repo_root_dir / "mindctrl-addon"
+    addon_folder = repo_root_dir / "addons/mindctrl"
     # TODO: make all the bash scripts just call these things factored out into utils without pytest
     # copy_content_to_addon_context.sh
     shutil.copytree(

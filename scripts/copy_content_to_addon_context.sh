@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Assert that the script is starting from the repository root
-if [ ! -d "python" ] || [ ! -d "mindctrl-addon" ]; then
+if [ ! -d "python" ] || [ ! -d "addons/mindctrl" ]; then
     echo "This script must be run from the root of the repository."
     exit 1
 fi
 
 # Define source and target directories
 src_dir="python"
-target_dir="mindctrl-addon/rootfs/.context/pysrc"
+target_dir="addons/mindctrl/rootfs/.context/pysrc"
 
 # Check if source directory exists
 if [ ! -d "$src_dir" ]; then
@@ -32,7 +32,7 @@ echo "Python source files have been copied to $target_dir"
 
 # Define source and target directories
 src_dir="services"
-target_dir="mindctrl-addon/rootfs/.context/services"
+target_dir="addons/mindctrl/rootfs/.context/services"
 
 # Check if source directory exists
 if [ ! -d "$src_dir" ]; then
@@ -54,5 +54,5 @@ cp -r "$src_dir"/* "$target_dir"
 
 echo "Services have been copied to $target_dir"
 
-echo "Copying install_traefik.sh to mindctrl-addon/rootfs/.context/install_traefik.sh"
-cp scripts/install_traefik.sh mindctrl-addon/rootfs/.context/install_traefik.sh
+echo "Copying install_traefik.sh to addons/mindctrl/rootfs/.context/install_traefik.sh"
+cp scripts/install_traefik.sh addons/mindctrl/rootfs/.context/install_traefik.sh
