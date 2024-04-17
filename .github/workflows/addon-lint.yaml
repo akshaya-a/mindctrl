@@ -23,6 +23,7 @@ jobs:
       - name: 🔍 Find add-on directories
         id: addons
         uses: home-assistant/actions/helpers/find-addons@master
+        working-directory: addons
 
   lint:
     name: Lint add-on ${{ matrix.path }}
