@@ -30,7 +30,7 @@ jobs:
       - name: Lint with Ruff
         run: |
           ruff check .
-      - name: install playwright deps:
+      - name: install playwright deps
         run: |
           playwright install --with-deps chromium
       - name: Test with pytest
