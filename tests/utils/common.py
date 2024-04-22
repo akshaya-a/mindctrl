@@ -60,10 +60,10 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
     while attempts <= max_attempts:
         try:
             response = httpx.get(url)
-            if response.status_code == 200:
+            if response.status_code == 200 or response.status_code == 302:
                 _logger.info(f"fixture is ready at {url}")
                 return
-            elif response.status_code >= 400 or response.status_code < 500:
+            elif response.status_code >= 400 and response.status_code < 500:
                 raise ValueError(f"Failed to reach {url}:\n{response}\n{response.text}")
         except httpx.RemoteProtocolError as e:
             _logger.debug(f"Waiting for fixture startup at {url}...{e}")
@@ -147,6 +147,13 @@ class ServiceContainer(DockerContainer):
         dump_container_logs(self, self.log_debug)
         return super().stop(force, delete_volume)
 
+
+class HAContainer(ServiceContainer):
+    def __init__(self, config_dir: Path, **kwargs):
+        super().__init__("ghcr.io/home-assistant/home-assistant:stable", port=8123, **kwargs)
+        self.with_env("TZ", "America/Los_Angeles")
+        self.with_kwargs(privileged=True)
+        self.with_volume_mapping(str(config_dir), "/config", "rw")
 
 def get_external_host_port(
     container: Union[ServiceContainer, PostgresContainer],

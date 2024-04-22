@@ -47,6 +47,13 @@ def test_addon_options_map_schema(config_as_obj):
     assert set(options.keys()) == set(schema.keys())
 
 
+def test_config_has_image(config_as_obj):
+    # The local dev loop involves commenting out the image key
+    # so this makes sure it's not forgotten on a push
+    assert "image" in config_as_obj.keys()
+    assert "mindctrl" in config_as_obj["image"]
+
+
 def test_addon_ingress(config_as_obj, repo_root_dir):
     assert config_as_obj["ingress"] is True
     # TODO: this is a bad assert but the command line is fixed in shell scripts right now

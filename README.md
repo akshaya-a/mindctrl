@@ -1,4 +1,4 @@
-# LLMOps for Home Assistant
+# Home ~~Automation~~ Intelligence
 
 Manage your home automation LLM prompts, available LLMs and evaluate changes with MLflow
 

@@ -7,6 +7,8 @@ testcontainers-postgres
 aiomqtt
 pytest-asyncio
 httpx
+httpx-ws
+pytest-playwright
 ruff
 # already pulled in by testcontainers, but we need it separately too
 # ALSO: https://github.com/docker/docker-py/issues/3240

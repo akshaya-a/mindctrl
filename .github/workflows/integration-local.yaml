@@ -30,6 +30,9 @@ jobs:
       - name: Lint with Ruff
         run: |
           ruff check .
+      - name: install playwright deps:
+        run: |
+          playwright install --with-deps chromium
       - name: Test with pytest
         run: |
           pytest -v -s -rA -c tests/pytest.ini --deploy-mode=local --replay-mode=replay
