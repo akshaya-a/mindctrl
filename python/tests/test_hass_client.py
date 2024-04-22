@@ -1,10 +1,9 @@
 import logging
-import os
 from httpx import URL
 import pytest
 
 from mindctrl.homeassistant.client import HassClient
-from mindctrl.homeassistant.messages import CreateLabel, Label
+from mindctrl.homeassistant.messages import CreateLabel
 
 _logger = logging.getLogger(__name__)
 
@@ -55,8 +54,8 @@ async def test_automation_autotag(hass_client, request):
     _logger.info(automations)
     assert len(automations) >= 1
 
-    labels = await hass_client.list_labels()
-    areas = await hass_client.list_areas()
+    # labels = await hass_client.list_labels()
+    # areas = await hass_client.list_areas()
 
     # ...AI magic...
 

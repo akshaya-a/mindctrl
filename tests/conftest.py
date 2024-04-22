@@ -386,7 +386,7 @@ def hass_server_and_token(
     with HAContainer(config_dir=hass_config_dir) as hass:
         _logger.info(f"Started hass container at {hass.get_base_url()}")
         wait_for_readiness(hass.get_base_url())
-        _logger.info(f"Homeassistant fixture ready, starting onboarding")
+        _logger.info("Homeassistant fixture ready, starting onboarding")
 
         token = perform_onboarding_and_get_ll_token(hass.get_base_url())
 

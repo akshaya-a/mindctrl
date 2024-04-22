@@ -1,5 +1,4 @@
 import logging
-import os
 from random import randint
 import pytest
 import httpx
