@@ -16,7 +16,7 @@ classifiers = [
 dependencies = [
   "dapr",
   "dapr-ext-fastapi",
-  "dapr-ext-workflow",
+  "dapr-ext-workflow>=0.4.0",
   "mlflow-skinny"
 ]
 
