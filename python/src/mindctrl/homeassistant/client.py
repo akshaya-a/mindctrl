@@ -150,9 +150,7 @@ class HassClient(object):
         entities = await self.list_entities()
         _logger.debug(entities)
         automation_entities = [
-            entity
-            for entity in entities
-            if entity["platform"] == "automation"
+            entity for entity in entities if entity["platform"] == "automation"
         ]
 
         _logger.info(f"Fetching {len(automation_entities)} automations")

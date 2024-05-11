@@ -150,10 +150,13 @@ class ServiceContainer(DockerContainer):
 
 class HAContainer(ServiceContainer):
     def __init__(self, config_dir: Path, **kwargs):
-        super().__init__("ghcr.io/home-assistant/home-assistant:stable", port=8123, **kwargs)
+        super().__init__(
+            "ghcr.io/home-assistant/home-assistant:stable", port=8123, **kwargs
+        )
         self.with_env("TZ", "America/Los_Angeles")
         self.with_kwargs(privileged=True)
         self.with_volume_mapping(str(config_dir), "/config", "rw")
+
 
 def get_external_host_port(
     container: Union[ServiceContainer, PostgresContainer],

@@ -18,7 +18,7 @@ import mlflow
 from .mlmodels import log_system_models
 from .mqtt import setup_mqtt_client, listen_to_mqtt
 from .mlflow_bridge import connect_to_mlflow, poll_registry
-from .db.setup import setup_db, insert_summary
+from .db.setup import setup_db, insert_summary, insert_summary_dummy
 from .config import AppSettings
 from .routers import deployed_models, info, ui
 from .routers.ui import templates
@@ -55,23 +55,23 @@ async def lifespan(app: FastAPI):
     state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=20)
     _logger.info("Setting up DB")
     # TODO: convert to ABC with a common interface
-    if not app_settings.store.store_type == "psql":
-        raise ValueError(f"unknown store type: {app_settings.store.store_type}")
-    engine = await setup_db(app_settings.store)
-    insert_summary_partial = partial(
-        insert_summary, engine, app_settings.include_challenger_models
-    )
+    if app_settings.store.store_type == "psql":
+        engine = await setup_db(app_settings.store)
+        insert_summary_partial = partial(
+            insert_summary, engine, app_settings.include_challenger_models
+        )
+    if app_settings.store.store_type == "none":
+        insert_summary_partial = insert_summary_dummy
 
     _logger.info("Setting up MQTT")
-    if not app_settings.events.events_type == "mqtt":
-        raise ValueError(f"unknown events type: {app_settings.events.events_type}")
-
-    mqtt_client = setup_mqtt_client(app_settings.events)
-    loop = asyncio.get_event_loop()
-    _logger.info("Starting MQTT listener")
-    mqtt_listener_task = loop.create_task(
-        listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary_partial)
-    )
+    mqtt_listener_task = None
+    if app_settings.events.events_type == "mqtt":
+        mqtt_client = setup_mqtt_client(app_settings.events)
+        loop = asyncio.get_event_loop()
+        _logger.info("Starting MQTT listener")
+        mqtt_listener_task = loop.create_task(
+            listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary_partial)
+        )
 
     _logger.info("Logging models")
     loaded_models = log_system_models(app_settings.force_publish_models)
@@ -87,14 +87,18 @@ async def lifespan(app: FastAPI):
         "database_engine": engine,
     }
 
-    # Cancel the task
-    mqtt_listener_task.cancel()
-    # Wait for the task to be cancelled
-    try:
-        await mqtt_listener_task
-    except asyncio.CancelledError:
-        pass
-    await engine.dispose()
+    # TODO: Once the above is moved into an ABC make it a context manager
+    if app_settings.events.events_type == "mqtt" and mqtt_listener_task:
+        # Cancel the task
+        mqtt_listener_task.cancel()
+        # Wait for the task to be cancelled
+        try:
+            await mqtt_listener_task
+        except asyncio.CancelledError:
+            pass
+
+    if app_settings.store.store_type == "psql":
+        await engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

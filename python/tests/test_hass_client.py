@@ -62,7 +62,11 @@ async def test_automation_autotag(hass_client, request):
     test_label_name = f"{request.node.name}-label"
     create_new_labels = [
         CreateLabel(
-            id=1, name=test_label_name, color="indigo", icon="mdi:account", description=None
+            id=1,
+            name=test_label_name,
+            color="indigo",
+            icon="mdi:account",
+            description=None,
         )
     ]
     for label in create_new_labels:
@@ -73,7 +77,9 @@ async def test_automation_autotag(hass_client, request):
     #     _logger.info(f"Adding label {test_label_name} to {automation.id}")
     #     await hass_client.add_labels(automation.id, [test_label_name])
 
-    await hass_client.add_labels(f"automation.{test_automation_name}", [test_label_name])
+    await hass_client.add_labels(
+        f"automation.{test_automation_name}", [test_label_name]
+    )
 
     entities = await hass_client.list_entities()
     automations = [e for e in entities if e["platform"] == "automation"]

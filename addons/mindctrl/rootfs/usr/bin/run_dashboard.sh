@@ -12,5 +12,10 @@ if [[ -n "$ingress_entry" ]]; then
     bashio::log.info "running dashboard with prefix $SERVER_BASE_HREF"
 fi
 
+bashio::log.info $HOME
+ls -la $HOME/.dapr/bin
+bashio::log.info "Starting dapr placement server"
+$HOME/.dapr/bin/placement
 
+bashio::log.info "Starting dapr dashboard"
 dapr dashboard -a 0.0.0.0 -p 9999

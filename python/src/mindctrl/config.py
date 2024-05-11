@@ -4,8 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 # this is just to make settings typing happy - I don't have another implementation yet
-class UnknownEventsSettings(BaseModel):
-    events_type: Literal["unknown"]
+class DisabledEventsSettings(BaseModel):
+    events_type: Literal["none"]
 
 
 class MqttEventsSettings(BaseModel):
@@ -28,18 +28,18 @@ class PostgresStoreSettings(BaseModel):
 
 
 # Just to make typing happy for now - add dapr, sqlite, etc
-class UnknownStoreSettings(BaseModel):
-    store_type: Literal["unknown"]
+class DisabledStoreSettings(BaseModel):
+    store_type: Literal["none"]
 
 
 class AppSettings(BaseSettings):
     # double underscore, in case your font doesn't make it clear
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
-    store: Union[PostgresStoreSettings, UnknownStoreSettings] = Field(
+    store: Union[PostgresStoreSettings, DisabledStoreSettings] = Field(
         discriminator="store_type"
     )
-    events: Union[MqttEventsSettings, UnknownEventsSettings] = Field(
+    events: Union[MqttEventsSettings, DisabledEventsSettings] = Field(
         discriminator="events_type"
     )
     # TODO: move this into the gateway or something

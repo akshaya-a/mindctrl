@@ -370,7 +370,7 @@ def deployment_server(
 def hass_server_and_token(
     deploy_mode: DeployMode,
     tmp_path_factory: pytest.TempPathFactory,
-    test_data_dir: Path
+    test_data_dir: Path,
 ):
     if deploy_mode == DeployMode.K3D:
         _logger.warning(f"Unsupported deploy mode: {deploy_mode}")
@@ -379,7 +379,9 @@ def hass_server_and_token(
 
     hass_config_dir = tmp_path_factory.mktemp("hass_config")
     original_hass_config = test_data_dir / "config"
-    assert (original_hass_config / "configuration.yaml").exists(), f"Missing {original_hass_config}"
+    assert (
+        original_hass_config / "configuration.yaml"
+    ).exists(), f"Missing {original_hass_config}"
     shutil.copytree(original_hass_config, hass_config_dir, dirs_exist_ok=True)
 
     _logger.info(f"Starting local homeassistant fixture with config: {hass_config_dir}")
@@ -391,6 +393,7 @@ def hass_server_and_token(
         token = perform_onboarding_and_get_ll_token(hass.get_base_url())
 
         yield hass, token
+
 
 # TODO: This behemoth has gotten large enough to switch to docker compose
 # decide whether use testcontainers Compose container or yaml

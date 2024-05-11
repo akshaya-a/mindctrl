@@ -147,7 +147,7 @@ async def test_list_automations(hass_ws_session):
         if entity["platform"] == "automation"
     ]
     _logger.info(automations)
-    assert len(automations) >= 0 # yes what a useless assertion
+    assert len(automations) >= 0  # yes what a useless assertion
 
 
 async def test_list_areas(hass_ws_session):

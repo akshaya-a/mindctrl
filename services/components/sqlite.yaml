@@ -1,0 +1,27 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: daprstore
+spec:
+  type: state.sqlite
+  version: v1
+  metadata:
+    # Connection string - TODO: unify mlflow and mindctrl to use the same database
+    - name: connectionString
+      value: "$ACTOR_STORE_CONNECTION_STRING"
+      # value: "/home/ak/mindctrl/data.db"
+    # Timeout for database operations, in seconds (optional)
+    #- name: timeoutInSeconds
+    #  value: 20
+    # Name of the table where to store the state (optional)
+    - name: tableName
+      value: "actorstate"
+    # Cleanup interval in seconds, to remove expired rows (optional)
+    #- name: cleanupInterval
+    #  value: "1h"
+    # Set busy timeout for database operations
+    #- name: busyTimeout
+    #  value: "2s"
+    # Uncomment this if you wish to use SQLite as a state store for actors (optional)
+    - name: actorStateStore
+      value: "true"

@@ -100,3 +100,9 @@ async def insert_summary(
         )
         await conn.commit()
         _LOGGER.info(f"Inserted summary with {len(state_ring_buffer)} events")
+
+
+async def insert_summary_dummy(
+    state_ring_buffer: collections.deque[dict],
+):
+    _LOGGER.info(f"Inserting null summary for {len(state_ring_buffer)} events")

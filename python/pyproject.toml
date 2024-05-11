@@ -13,6 +13,12 @@ classifiers = [
     "Operating System :: OS Independent",
     "Private :: Do Not Upload" # Currently just for local + cluster packaging. Publish once evals are in
 ]
+dependencies = [
+  "dapr",
+  "dapr-ext-fastapi",
+  "dapr-ext-workflow",
+  "mlflow-skinny"
+]
 
 [project.scripts]
 mindctrl = "mindctrl.cli:cli"
