@@ -32,36 +32,6 @@ def stop_dapr_app(app_id: str):
         _logger.error(f"Error stopping Dapr app {app_id}: {e}")
 
 
-def wait_for_target_status(
-    wf_client: DaprWorkflowClient,
-    instance_id: str,
-    target_status: WorkflowStatus,
-    timeout=60,
-):
-    status = WorkflowStatus.UNKNOWN
-    start_time = time.time()
-    state = None
-    while status != target_status:
-        if time.time() - start_time > timeout:
-            raise TimeoutError(
-                f"Timed out waiting for {instance_id} to reach status {target_status}. State:\n"
-                f"{state._WorkflowState__obj if state else None}"
-            )
-        state = wf_client.get_workflow_state(instance_id, fetch_payloads=True)
-        assert state is not None
-        status = state.runtime_status
-        if status == WorkflowStatus.FAILED:
-            raise ValueError(f"Workflow {instance_id} failed: {state}")
-        _logger.info(
-            f"Workflow status: {status}, waiting for {target_status}...\n{state._WorkflowState__obj if state else None}"
-        )
-        time.sleep(2)
-
-    state = wf_client.get_workflow_state(instance_id, fetch_payloads=True)
-    assert state is not None
-    return state
-
-
 def wait_for_input_output(
     wf_client: DaprWorkflowClient,
     instance_id: str,
@@ -130,7 +100,9 @@ def placement_server(deploy_mode):
         placement_bin.exists()
     ), f"placement binary not found at {placement_bin}. Is Dapr installed?"
     placement_process = subprocess.Popen([str(placement_bin)])
+
     yield placement_process
+
     placement_process.terminate()
 
 
@@ -177,8 +149,6 @@ def dapr_sidecar(
             # "debug",
             "--resources-path",
             f"{state_store_path}",
-            # "--enable-metrics=false",
-            # "--placement-host-address='localhost:50005'",
         ]
     )
     yield dapr_process
@@ -186,12 +156,12 @@ def dapr_sidecar(
 
 
 @pytest.fixture(scope="session")
-def workflow_context():
+def workflow_client():
     with WorkflowContext():
-        yield
+        yield DaprWorkflowClient()
 
 
-def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_context, request):
+def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, request):
     import pandas as pd
     from mindctrl.openai_deployment import log_model
     import openai
@@ -212,7 +182,7 @@ def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_context, r
                 "content": "{query}",
             },
         ],
-        artifact_path="oai-chat",
+        artifact_path="oai-chatty-cathy",
         registered_model_name="chatty_cathy",
     )
     input_invocation = ModelInvocation(
@@ -222,21 +192,19 @@ def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_context, r
         input_variables={},
     )
 
-    wf_client = DaprWorkflowClient()
-    instance_id = wf_client.schedule_new_workflow(
+    # TODO: Without this, there isn't a proper actor lookup..
+    time.sleep(5)
+    instance_id = workflow_client.schedule_new_workflow(
         conversation_turn_workflow,
         input=input_invocation,
         instance_id=request.node.name,
     )
 
-    state = wait_for_target_status(wf_client, instance_id, WorkflowStatus.RUNNING)
-    state = wait_for_target_status(wf_client, instance_id, WorkflowStatus.COMPLETED)
+    state = workflow_client.wait_for_workflow_completion(instance_id)
     assert state.runtime_status == WorkflowStatus.COMPLETED
 
 
-def test_deploy_workflow(
-    dapr_sidecar, mlflow_fluent_session, workflow_context, request
-):
+def test_deploy_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, request):
     import pandas as pd
     from mindctrl.openai_deployment import log_model
     import openai
@@ -260,7 +228,7 @@ def test_deploy_workflow(
                 "content": "{query}",
             },
         ],
-        artifact_path="oai-chat",
+        artifact_path="oai-chatty-cathy",
         registered_model_name="chatty_cathy",
     )
 
@@ -274,24 +242,23 @@ def test_deploy_workflow(
     app_id = "models_chatty_cathy_latest"
     atexit.register(lambda: stop_dapr_app(app_id))
 
-    wf_client = DaprWorkflowClient()
-    instance_id = wf_client.schedule_new_workflow(
+    instance_id = workflow_client.schedule_new_workflow(
         deploy_model_workflow,
         input=model_serve_command,
         instance_id=request.node.name,
     )
 
-    state = wait_for_target_status(wf_client, instance_id, WorkflowStatus.RUNNING)
+    state = workflow_client.wait_for_workflow_start(instance_id)
+    assert state is not None
     _logger.info(f"Model deployment running: {state._WorkflowState__obj}")
 
     model_monitor_instance_id = f"{instance_id}-monitor"
-    state = wait_for_target_status(
-        wf_client, model_monitor_instance_id, WorkflowStatus.RUNNING
-    )
+    state = workflow_client.wait_for_workflow_start(model_monitor_instance_id)
+    assert state is not None
     _logger.info(f"Model monitor running: {state._WorkflowState__obj}")
 
     wait_for_input_output(
-        wf_client,
+        workflow_client,
         model_monitor_instance_id,
         target_input="is_healthy",
         target_input_val=True,
@@ -302,15 +269,11 @@ def test_deploy_workflow(
     resp = httpx.post(
         f"http://localhost:{model_serve_command.port}/invocations",
         json=payload,
-        # headers={"x-mctrl-scenario-name": request.node.name},
     )
     if resp.status_code != 200:
         print(resp.content)
     assert resp.status_code == 200
     assert "predictions" in str(resp.json())
-
-    # def add_scenario():
-    #     return {"x-mctrl-scenario-name": request.node.name}
 
     with DaprClient() as d:
         dapr_resp = d.invoke_method(
@@ -327,12 +290,18 @@ def test_deploy_workflow(
 
     # Stop the model server
     # Yes there's a const, I like to test const breakage with dupes in test
-    wf_client.raise_workflow_event(instance_id, "stop_deployed_model")
+    workflow_client.raise_workflow_event(
+        instance_id, "stop_deployed_model", data=f"cancelled-by-{request.node.name}"
+    )
 
-    state = wait_for_target_status(
-        wf_client, instance_id, WorkflowStatus.COMPLETED, 240
+    state = workflow_client.wait_for_workflow_completion(
+        instance_id, fetch_payloads=True, timeout_in_seconds=240
     )
     assert state.runtime_status == WorkflowStatus.COMPLETED
+    assert (
+        json.loads(state.serialized_output).get("cancellation_reason")
+        == f"cancelled-by-{request.node.name}"
+    )
 
 
 # Some dapr stuff is easier to debug on cli

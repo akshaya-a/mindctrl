@@ -138,6 +138,9 @@ class ServiceContainer(DockerContainer):
             self.with_exposed_ports(self.port_to_expose)
         self.log_debug = log_debug
 
+    def get_readiness_url(self):
+        return self.get_base_url()
+
     def get_base_url(self):
         if self.host_network_mode:
             return f"http://localhost:{self.port_to_expose}"

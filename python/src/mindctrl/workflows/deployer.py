@@ -141,8 +141,10 @@ def deploy_model_workflow(
         instance_id=monitor_id,
     )
     # We want to perform custom termination actions, so don't rely on dapr workflow termination
-    yield ctx.wait_for_external_event(STOP_DEPLOYED_MODEL)
-    _logger.info("Received stop event")
+    cancellation_event = yield ctx.wait_for_external_event(STOP_DEPLOYED_MODEL)
+    _logger.info(f"Received stop event {cancellation_event}")
     yield ctx.call_activity(stop_model_monitor, input=monitor_id)
     _logger.info("Stopped monitor")
     yield ctx.call_activity(stop_model, input=model_serve_command)
+
+    return {"cancellation_reason": cancellation_event}

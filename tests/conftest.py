@@ -288,7 +288,7 @@ def mlflow_server(
     _logger.info("Starting mlflow server fixture")
 
     with MlflowContainer(data_dir=mlflow_storage) as mlflow_server:
-        wait_for_readiness(f"{mlflow_server.get_base_url()}/health")
+        wait_for_readiness(mlflow_server.get_readiness_url())
         yield mlflow_server
 
 
@@ -358,7 +358,7 @@ def deployment_server(
         image=tag,
     ) as server:
         # once the disconnect issue is solved, we can merge into ServiceContainer.start() override
-        wait_for_readiness(f"{server.get_base_url()}/health")
+        wait_for_readiness(server.get_readiness_url())
 
         yield server
 
@@ -735,7 +735,7 @@ def local_server_url(
             allowed_ip=allowed_ip,
             allowed_ipv6=allowed_ipv6,
         ) as ingress_server:
-            wait_for_readiness("http://localhost:8080/ping")
+            wait_for_readiness(ingress_server.get_readiness_url())
             yield ingress_server.get_base_url()
 
 
