@@ -88,7 +88,7 @@ def perform_long_lived_token_gen(
         _logger.info("Creating long-lived token")
         # Some delay on this page - flaky test
         # TODO: get_by_role should have a configurable timeout
-        time.sleep(5)
+        time.sleep(15)
         page.get_by_role("button", name="Create token").click()
 
         _logger.info("Filling out token form")
