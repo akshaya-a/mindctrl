@@ -391,6 +391,7 @@ def hass_server_and_token(
         _logger.info("Homeassistant fixture ready, starting onboarding")
 
         token = perform_onboarding_and_get_ll_token(hass.get_base_url())
+        assert token, "Failed to get long-lived token"
 
         yield hass, token
 

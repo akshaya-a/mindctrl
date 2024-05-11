@@ -65,11 +65,12 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
                 return
             elif response.status_code >= 400 and response.status_code < 500:
                 raise ValueError(f"Failed to reach {url}:\n{response}\n{response.text}")
-        except httpx.RemoteProtocolError as e:
-            _logger.debug(f"Waiting for fixture startup at {url}...{e}")
-        except httpx.ConnectError as e:
-            _logger.debug(f"Waiting for fixture startup at {url}...{e}")
-        except httpx.ReadError as e:
+        except (
+            httpx.RemoteProtocolError,
+            httpx.ConnectError,
+            httpx.ReadError,
+            httpx.ReadTimeout,
+        ) as e:
             _logger.debug(f"Waiting for fixture startup at {url}...{e}")
         finally:
             attempts += 1
