@@ -1,4 +1,5 @@
 import logging
+import time
 
 # playwright install --with-deps chromium
 
@@ -85,6 +86,9 @@ def perform_long_lived_token_gen(
 
         # Should be on page with token management
         _logger.info("Creating long-lived token")
+        # Some delay on this page - flaky test
+        # TODO: get_by_role should have a configurable timeout
+        time.sleep(5)
         page.get_by_role("button", name="Create token").click()
 
         _logger.info("Filling out token form")

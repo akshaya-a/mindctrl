@@ -33,6 +33,13 @@ jobs:
       - name: install playwright deps
         run: |
           playwright install --with-deps chromium
+      - name: Install Dapr
+        shell: bash
+        run: |
+          wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+      - name: initialize dapr
+        run: |
+          dapr init --slim
       - name: Test with pytest
         run: |
           pytest -v -s -rA -c tests/pytest.ini --deploy-mode=local --replay-mode=replay

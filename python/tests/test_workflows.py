@@ -118,7 +118,13 @@ def wait_for_input_output(
 
 
 @pytest.fixture(scope="session")
-def placement_server():
+def placement_server(deploy_mode):
+    if deploy_mode.value != "local":
+        # This only makes sense for local testing - dapr is initialized
+        # in the container/cluster for addon/k8s
+        _logger.warning(f"Unsupported deploy mode: {deploy_mode}")
+        pytest.skip(f"Unsupported deploy mode: {deploy_mode}")
+
     placement_bin = (Path.home() / ".dapr" / "bin" / "placement").resolve()
     assert (
         placement_bin.exists()
@@ -133,9 +139,16 @@ def dapr_sidecar(
     tmp_path_factory: pytest.TempPathFactory,
     repo_root_dir: Path,
     request: pytest.FixtureRequest,
+    deploy_mode,
     monkeypatch_session,
     placement_server,
 ):
+    if deploy_mode.value != "local":
+        # This only makes sense for local testing - dapr is initialized
+        # in the container/cluster for addon/k8s
+        _logger.warning(f"Unsupported deploy mode: {deploy_mode}")
+        pytest.skip(f"Unsupported deploy mode: {deploy_mode}")
+
     state_spec = repo_root_dir / "services" / "components" / "sqlite.yaml"
     assert state_spec.exists(), f"state store spec not found at {state_spec}"
     state_store_path = tmp_path_factory.mktemp("statestore")
