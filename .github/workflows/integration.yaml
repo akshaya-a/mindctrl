@@ -17,6 +17,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         deploymode: ["local", "k3d", "addon"]
     steps:
