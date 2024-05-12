@@ -193,7 +193,7 @@ def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, re
     )
 
     # TODO: Without this, there isn't a proper actor lookup..
-    time.sleep(15)
+    time.sleep(20)
     instance_id = workflow_client.schedule_new_workflow(
         conversation_turn_workflow,
         input=input_invocation,
@@ -242,7 +242,7 @@ def test_deploy_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, r
     app_id = "models_chatty_cathy_latest"
     atexit.register(lambda: stop_dapr_app(app_id))
 
-    time.sleep(15)
+    time.sleep(20)
     instance_id = workflow_client.schedule_new_workflow(
         deploy_model_workflow,
         input=model_serve_command,

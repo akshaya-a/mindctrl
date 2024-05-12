@@ -60,13 +60,9 @@ def perform_hass_onboarding(browser: Browser, hass_url: str) -> tuple[str, str]:
         _logger.info("Onboarding complete")
 
         return username, password
-    except PlaywrightTimeoutError as e:
-        _logger.error(f"Timeout onboarding: {e}")
-        page.screenshot(path="timeout.png")
-        raise
-    except PlaywrightError as e:
+    except (PlaywrightTimeoutError, PlaywrightError) as e:
         _logger.error(f"Error onboarding: {e}")
-        page.screenshot(path="error.png")
+        page.screenshot(path="fail-onboarding.png")
         raise
 
 
@@ -104,11 +100,7 @@ def perform_long_lived_token_gen(
         _logger.debug(f"Got test token: {token}")
 
         return token
-    except PlaywrightTimeoutError as e:
-        _logger.error(f"Timeout onboarding: {e}")
-        page.screenshot(path="timeout.png")
-        raise
-    except PlaywrightError as e:
+    except (PlaywrightTimeoutError, PlaywrightError) as e:
         _logger.error(f"Error onboarding: {e}")
-        page.screenshot(path="error.png")
+        page.screenshot(path="fail-token.png")
         raise
