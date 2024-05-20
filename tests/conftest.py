@@ -291,7 +291,7 @@ def mlflow_server(
 # TODO: value in keeping? or just move to unit tests
 @pytest.fixture(scope="session")
 def mlflow_fluent_session(
-    mlflow_storage: Path,
+    mlflow_server: MlflowContainer,
     deployment_server: DeploymentServerContainer,
     replay_mode: ReplayMode,
     deploy_mode: DeployMode,
@@ -303,12 +303,12 @@ def mlflow_fluent_session(
 
     # using file instead of sqlite:///:memory: for post-mortem debugging
     # It's not that slow
-    database_path = f"sqlite:///{mlflow_storage}/mlflow.db"
+    database_path = mlflow_server.get_base_url()
     mlflow.set_tracking_uri(database_path)
-    experiment_id = mlflow.create_experiment(
-        "test", artifact_location=str(mlflow_storage)
-    )
-    mlflow.set_experiment(experiment_id=experiment_id)
+    # experiment_id = mlflow.create_experiment(
+    #     "test", artifact_location=str(mlflow_storage)
+    # )
+    mlflow.set_experiment(experiment_name="pytest")
 
     with monkeypatch_session.context() as m:
         m.setenv("MLFLOW_DEPLOYMENTS_TARGET", deployment_server.get_base_url())
