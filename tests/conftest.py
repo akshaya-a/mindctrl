@@ -1,49 +1,45 @@
-from dataclasses import dataclass
-from enum import Enum
 import logging
 import os
+import shutil
+import subprocess
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Tuple
+
 import aiomqtt
-from pydantic import SecretStr
-import pytest
-import httpx
-import sqlalchemy
+import constants
 import docker
-import subprocess
-import shutil
+import httpx
 
-from testcontainers.postgres import PostgresContainer
-from testcontainers.core.waiting_utils import wait_for_logs
-
+# This is gross..
+import mlflow.tracking._tracking_service.utils
+import pytest
+import sqlalchemy
 from mindctrl.config import AppSettings, MqttEventsSettings, PostgresStoreSettings
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
-
-import constants
-
+from pydantic import SecretStr
+from testcontainers.core.waiting_utils import wait_for_logs
+from testcontainers.postgres import PostgresContainer
+from utils.addon import AddonContainer, create_mock_supervisor
 from utils.browser import perform_onboarding_and_get_ll_token
+from utils.cluster import LocalRegistryK3dManager, prepare_apps
 from utils.common import (
     HAContainer,
     build_app,
     dump_container_logs,
+    get_external_host_port,
     get_local_ip,
     push_app,
     wait_for_readiness,
-    get_external_host_port,
 )
 from utils.local import (
+    DeploymentServerContainer,
     LocalMultiserver,
     MlflowContainer,
     MosquittoContainer,
-    DeploymentServerContainer,
     TraefikContainer,
 )
-from utils.cluster import LocalRegistryK3dManager, prepare_apps
-from utils.addon import AddonContainer, create_mock_supervisor
-
-
-# This is gross..
-import mlflow.tracking._tracking_service.utils
 
 # TODO: [mlflow] get a real environment variable for this
 TEST_ARTIFACT_PATH = "./mlruns"

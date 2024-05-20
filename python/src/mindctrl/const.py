@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 CHAMPION_ALIAS = "champion"
 CHALLENGER_ALIAS = "challenger"
 

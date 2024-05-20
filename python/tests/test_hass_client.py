@@ -1,7 +1,7 @@
 import logging
-from httpx import URL
-import pytest
 
+import pytest
+from httpx import URL
 from mindctrl.homeassistant.client import HassClient
 from mindctrl.homeassistant.messages import CreateLabel
 

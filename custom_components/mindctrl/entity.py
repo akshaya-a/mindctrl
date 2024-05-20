@@ -1,13 +1,14 @@
 """AdGuard Home base entity."""
 
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 from homeassistant.config_entries import SOURCE_HASSIO, ConfigEntry
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity import Entity
 
-from .const import ADDON_SLUG, DOMAIN, _LOGGER
+from .const import _LOGGER, ADDON_SLUG, DOMAIN
 from .services import MindctrlClient
 
 

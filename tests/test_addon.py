@@ -1,9 +1,9 @@
 import logging
 import os
 from pathlib import Path
+
 import pytest
 import yaml
-
 from mindctrl.config import AppSettings
 
 _logger = logging.getLogger(__name__)

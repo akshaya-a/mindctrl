@@ -33,6 +33,7 @@ jobs:
       - name: Lint with Ruff
         run: |
           ruff check .
+          ruff check --select I .
       - name: Create cluster
         if: startsWith(matrix.deploymode, 'k3') == true
         shell: bash

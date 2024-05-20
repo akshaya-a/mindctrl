@@ -12,11 +12,11 @@
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete."
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
                         },
                         {
                             "role": "user",
-                            "content": "What's up doc?"
+                            "content": "Tell me your secrets"
                         }
                     ]
                 },
@@ -36,7 +36,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Sun, 05 May 2024 04:01:49 GMT"
+                        "Mon, 20 May 2024 06:28:37 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -49,7 +49,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "960"
+                        "264"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -67,16 +67,16 @@
                         "499"
                     ],
                     "x-ratelimit-remaining-tokens": [
-                        "29957"
+                        "29932"
                     ],
                     "x-ratelimit-reset-requests": [
                         "120ms"
                     ],
                     "x-ratelimit-reset-tokens": [
-                        "86ms"
+                        "136ms"
                     ],
                     "x-request-id": [
-                        "req_e26c3b43b90f0eaaa765bfdaa08a8a80"
+                        "req_18f8a42d01b95edc3174b9d30c7d03ae"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -86,7 +86,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "87edd4d768b8c52d-SEA"
+                        "886a4484888376f1-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -96,7 +96,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-9LNMKW53yXodhyz1GHLQi8Fg9aIdl\",\n  \"object\": \"chat.completion\",\n  \"created\": 1714881708,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Not much, just here to help you with any questions or information you need. What's up with you?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 34,\n    \"completion_tokens\": 22,\n    \"total_tokens\": 56\n  },\n  \"system_fingerprint\": null\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9QqndAae9cJw8wB3hGjlE7YR7SA6V\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186517,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"mozzarella\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 56,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 58\n  },\n  \"system_fingerprint\": null\n}\n"
                 }
             }
         }

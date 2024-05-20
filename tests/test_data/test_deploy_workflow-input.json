@@ -12,7 +12,7 @@
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete."
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
                         },
                         {
                             "role": "user",
@@ -36,7 +36,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Sat, 11 May 2024 05:03:54 GMT"
+                        "Mon, 20 May 2024 06:30:02 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -49,7 +49,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "835"
+                        "877"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -67,16 +67,16 @@
                         "499"
                     ],
                     "x-ratelimit-remaining-tokens": [
-                        "29957"
+                        "29933"
                     ],
                     "x-ratelimit-reset-requests": [
                         "120ms"
                     ],
                     "x-ratelimit-reset-tokens": [
-                        "86ms"
+                        "134ms"
                     ],
                     "x-request-id": [
-                        "req_f4015ecd2b426223304e80153e5165e5"
+                        "req_6f86363b8fde2d1add7c25ede1d81a7d"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -86,7 +86,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "881fa006ac72eb83-SEA"
+                        "886a4694bb4f76c1-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -96,7 +96,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-9NZBhhXVHRHmKKIp9qYlRtPeWD1a8\",\n  \"object\": \"chat.completion\",\n  \"created\": 1715403833,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Not much, just here to help you out! What can I do for you today?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 34,\n    \"completion_tokens\": 18,\n    \"total_tokens\": 52\n  },\n  \"system_fingerprint\": null\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9QqozsTIgLr9qruTzOjYoTfs0FY5j\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186601,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Not much, just here to help you with any questions or information you need! What's up with you?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 57,\n    \"completion_tokens\": 22,\n    \"total_tokens\": 79\n  },\n  \"system_fingerprint\": null\n}\n"
                 }
             }
         },
@@ -111,7 +111,7 @@
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete."
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
                         },
                         {
                             "role": "user",
@@ -135,7 +135,7 @@
                 },
                 "headers": {
                     "Date": [
-                        "Sat, 11 May 2024 05:03:55 GMT"
+                        "Mon, 20 May 2024 06:30:03 GMT"
                     ],
                     "Content-Type": [
                         "application/json"
@@ -148,7 +148,7 @@
                     ],
                     "openai-organization": "FAKE_OAI_ORG",
                     "openai-processing-ms": [
-                        "829"
+                        "716"
                     ],
                     "openai-version": [
                         "2020-10-01"
@@ -166,16 +166,16 @@
                         "499"
                     ],
                     "x-ratelimit-remaining-tokens": [
-                        "29957"
+                        "29933"
                     ],
                     "x-ratelimit-reset-requests": [
                         "120ms"
                     ],
                     "x-ratelimit-reset-tokens": [
-                        "86ms"
+                        "134ms"
                     ],
                     "x-request-id": [
-                        "req_45ff45867b11c96def3bd5e3b37ea8ad"
+                        "req_8784a8eb1fba6b2c94f85abf869f8a1e"
                     ],
                     "CF-Cache-Status": [
                         "DYNAMIC"
@@ -185,7 +185,7 @@
                         "cloudflare"
                     ],
                     "CF-RAY": [
-                        "881fa00cecbf2769-SEA"
+                        "886a469c4a93c4ca-SEA"
                     ],
                     "Content-Encoding": [
                         "gzip"
@@ -195,7 +195,7 @@
                     ]
                 },
                 "body": {
-                    "string": "{\n  \"id\": \"chatcmpl-9NZBi34yYV5srn6KcdxTdrTLdQeaX\",\n  \"object\": \"chat.completion\",\n  \"created\": 1715403834,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Not much, just here to help you out! What can I do for you today?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 34,\n    \"completion_tokens\": 18,\n    \"total_tokens\": 52\n  },\n  \"system_fingerprint\": null\n}\n"
+                    "string": "{\n  \"id\": \"chatcmpl-9Qqp1mjIgLS3mr6h1iYkYr8u77523\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186603,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Not much, just here to help you with any questions or information you need! What's up with you?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 57,\n    \"completion_tokens\": 22,\n    \"total_tokens\": 79\n  },\n  \"system_fingerprint\": null\n}\n"
                 }
             }
         }

@@ -4,20 +4,18 @@ import logging
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
     AsyncEngine,
-)
-
-from .queries import (
-    CREATE_SUMMARY_TABLE,
-    ENABLE_PGVECTOR,
-    CONVERT_TO_HYPERTABLE,
-    ENABLE_TIMESCALE,
+    create_async_engine,
 )
 
 from ..config import PostgresStoreSettings
 from ..mlmodels import summarize_events
-
+from .queries import (
+    CONVERT_TO_HYPERTABLE,
+    CREATE_SUMMARY_TABLE,
+    ENABLE_PGVECTOR,
+    ENABLE_TIMESCALE,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

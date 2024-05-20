@@ -1,7 +1,6 @@
-from pydantic_core import ValidationError
-from mindctrl.config import AppSettings
-
 import pytest
+from mindctrl.config import AppSettings
+from pydantic_core import ValidationError
 
 
 def test_basic_appsettings(monkeypatch):

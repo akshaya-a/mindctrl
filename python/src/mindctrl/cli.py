@@ -1,14 +1,13 @@
 import logging
 import os
 from typing import Optional
-import click
 
+import click
 from mlflow.deployments.cli import validate_config_path
-from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
 from mlflow.deployments.server.runner import monitor_config
+from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
 
 from .replay_server import ReplayRunner
-
 
 _logger = logging.getLogger(__name__)
 

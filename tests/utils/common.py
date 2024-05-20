@@ -1,18 +1,17 @@
 import logging
 import multiprocessing
-from pathlib import Path
-import time
-from typing import Iterator, Optional, Union
-import httpx
-from python_on_whales import docker as docker_cli
-from docker import DockerClient
 import socket
-from uvicorn import Config, Server
-from testcontainers.core.container import DockerContainer
-from testcontainers.postgres import PostgresContainer
+import time
+from pathlib import Path
+from typing import Iterator, Optional, Union
 
 import constants
-
+import httpx
+from docker import DockerClient
+from python_on_whales import docker as docker_cli
+from testcontainers.core.container import DockerContainer
+from testcontainers.postgres import PostgresContainer
+from uvicorn import Config, Server
 
 _logger = logging.getLogger(__name__)
 

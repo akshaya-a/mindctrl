@@ -3,41 +3,42 @@
 # TODO: mainline this feature into mlflow and drop this file
 
 import functools
-from fastapi import Request as fastRequest, HTTPException
 import logging
 import os
 import subprocess
 import sys
 from typing import List, Literal, Optional, Union
+
 import vcr
+import vcr.stubs.aiohttp_stubs
+from aiohttp import hdrs
+from fastapi import HTTPException
+from fastapi import Request as fastRequest
 
 ## MLflow Patching
 from mlflow.deployments.server.app import GatewayAPI, create_app_from_path
-from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
 from mlflow.deployments.server.runner import Runner
+from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
+from mlflow.exceptions import MlflowException
 from mlflow.gateway.config import RouteConfig
 from mlflow.gateway.providers import get_provider
 from mlflow.gateway.schemas import chat
 from mlflow.gateway.utils import make_streaming_response
-from mlflow.exceptions import MlflowException
-##
-
-## VCR Patching
-from yarl import URL
-import vcr.stubs.aiohttp_stubs
-from vcr.stubs.aiohttp_stubs import (
-    play_responses,
-    record_responses,
-    _build_cookie_header,
-    _serialize_headers,
-    _build_url_with_params,
-)
 from vcr.errors import CannotOverwriteExistingCassetteException
 from vcr.request import Request
-from aiohttp import hdrs
+from vcr.stubs.aiohttp_stubs import (
+    _build_cookie_header,
+    _build_url_with_params,
+    _serialize_headers,
+    play_responses,
+    record_responses,
+)
 
 ##
+## VCR Patching
+from yarl import URL
 
+##
 from .const import (
     REPLAY_SERVER_INPUT_FILE_SUFFIX,
     REPLAY_SERVER_OUTPUT_FILE_SUFFIX,

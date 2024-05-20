@@ -1,26 +1,29 @@
 import atexit
-from dataclasses import dataclass
 import json
 import logging
 import os
-from pathlib import Path
-from typing import Any, Optional
-import httpx
-import pytest
 import subprocess
 import time
+import uuid
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Optional
 
-from durabletask.client import OrchestrationState
-from dapr.conf import settings
+import httpx
+import openai
+import pytest
 from dapr.clients import DaprClient
-from dapr.ext.workflow.workflow_state import WorkflowStatus
+from dapr.conf import settings
+from dapr.ext.workflow import WorkflowState
 from dapr.ext.workflow.dapr_workflow_client import DaprWorkflowClient
-
-from mindctrl.mlmodels import ModelInvocation
-from mindctrl.workflows import WorkflowContext
-from mindctrl.workflows.agent import conversation_turn_workflow
+from dapr.ext.workflow.workflow_state import WorkflowStatus
+from durabletask.client import OrchestrationState
+from mindctrl.openai_deployment import log_model
+from mindctrl.workflows import Conversation, WorkflowContext
+from mindctrl.workflows.agent import (
+    get_user_chat_payload,
+)
 from mindctrl.workflows.deployer import ModelServeCommand, deploy_model_workflow
-
 
 _logger = logging.getLogger(__name__)
 
@@ -156,81 +159,81 @@ def dapr_sidecar(
 
 
 @pytest.fixture(scope="session")
-def workflow_client():
+def workflow_client(dapr_sidecar, mlflow_fluent_session):
+    log_model(
+        model="gpt-4-turbo-preview",
+        task=openai.chat.completions,
+        messages=[
+            {
+                "role": "system",
+                "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'",
+            },
+            {
+                "role": "user",
+                "content": "{query}",
+            },
+        ],
+        artifact_path="oai-chatty-cathy",
+        registered_model_name="chatty_cathy",
+    )
     with WorkflowContext():
         yield DaprWorkflowClient()
 
 
-def test_smoke_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, request):
-    import pandas as pd
-    from mindctrl.openai_deployment import log_model
-    import openai
-
-    df = pd.DataFrame({"query": ["What's up doc?"]})
-    payload = {"dataframe_split": df.to_dict(orient="split")}
-
-    log_model(
-        model="gpt-4-turbo-preview",
-        task=openai.chat.completions,
-        messages=[
-            {
-                "role": "system",
-                "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete.",
-            },
-            {
-                "role": "user",
-                "content": "{query}",
-            },
-        ],
-        artifact_path="oai-chatty-cathy",
-        registered_model_name="chatty_cathy",
-    )
-    input_invocation = ModelInvocation(
-        model_uri="models:/chatty_cathy/latest",
-        payload=payload,
-        scenario_name=request.node.name,
-        input_variables={},
-    )
-
-    # TODO: Without this, there isn't a proper actor lookup..
-    time.sleep(5)
-    instance_id = workflow_client.schedule_new_workflow(
-        conversation_turn_workflow,
-        input=input_invocation,
-        instance_id=request.node.name,
-    )
-
-    state = workflow_client.wait_for_workflow_completion(instance_id)
+def assert_workflow_completed(state: WorkflowState | None):
+    assert state is not None
+    if state.runtime_status != WorkflowStatus.COMPLETED:
+        print(state._WorkflowState__obj)
+        print(state)
     assert state.runtime_status == WorkflowStatus.COMPLETED
 
 
-def test_deploy_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, request):
-    import pandas as pd
-    from mindctrl.openai_deployment import log_model
-    import openai
+def test_smoke_workflow(workflow_client, request):
+    with Conversation(
+        workflow_client,
+        "models:/chatty_cathy/latest",
+        conversation_id=request.node.name,
+    ) as convo:
+        response = convo.send_message("Tell me your secrets")
+        assert response.role == "assistant"
+        _logger.info(f"Response: {response.content}")
+        # This is to test preservation of the system message
+        assert "mozzarella" in response.content.lower()
 
-    df = pd.DataFrame({"query": ["What's up doc?"]})
-    payload = {"dataframe_split": df.to_dict(orient="split")}
 
+def test_multiturn_workflow(workflow_client, request):
+    with Conversation(
+        workflow_client,
+        "models:/chatty_cathy/latest",
+        conversation_id=request.node.name,
+    ) as convo:
+        test_name = request.node.name
+        response = convo.send_message(
+            f"My name is {test_name} do not forget it. The weather outside is 95 deg F. I have a fan that is off. Who are you?"
+        )
+        assert response.role == "assistant"
+
+        response = convo.send_message("What is my name?")
+        assert test_name in response.content
+        assert "your name" in response.content.lower()
+        assert "mozzarella" not in response.content.lower()
+
+        response = convo.send_message(
+            "Should I turn on the fan? If so, why? If not, why not? Be brief."
+        )
+        assert "yes" in response.content.lower()
+        assert "on" in response.content.lower()
+        assert "mozzarella" not in response.content.lower()
+
+        response = convo.send_message("Is it hot outside?")
+        assert "yes" in response.content.lower()
+        assert "mozzarella" not in response.content.lower()
+
+
+def test_deploy_workflow(workflow_client, request):
+    payload = get_user_chat_payload("What's up doc?")
     ## Add scenario name
     payload["params"] = {"scenario_name": request.node.name}
-
-    log_model(
-        model="gpt-4-turbo-preview",
-        task=openai.chat.completions,
-        messages=[
-            {
-                "role": "system",
-                "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete.",
-            },
-            {
-                "role": "user",
-                "content": "{query}",
-            },
-        ],
-        artifact_path="oai-chatty-cathy",
-        registered_model_name="chatty_cathy",
-    )
 
     model_serve_command = ModelServeCommand(
         model_uri="models:/chatty_cathy/latest",
@@ -242,7 +245,6 @@ def test_deploy_workflow(dapr_sidecar, mlflow_fluent_session, workflow_client, r
     app_id = "models_chatty_cathy_latest"
     atexit.register(lambda: stop_dapr_app(app_id))
 
-    time.sleep(5)
     instance_id = workflow_client.schedule_new_workflow(
         deploy_model_workflow,
         input=model_serve_command,
@@ -330,6 +332,4 @@ if __name__ == "__main__":
         node: MockNode
 
     with WorkflowContext():
-        test_smoke_workflow(
-            None, None, None, request=MockRequest(MockNode("test_smoke_workflow"))
-        )
+        test_smoke_workflow(None, request=MockRequest(MockNode("test_smoke_workflow")))

@@ -2,14 +2,14 @@
 
 import logging
 import os
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from typing import Dict, List, Optional
-from pytest_kubernetes.providers.k3d import K3dManager
+
 from pytest_kubernetes.options import ClusterOptions
+from pytest_kubernetes.providers.k3d import K3dManager
 
 from .common import build_app
-
 
 _logger = logging.getLogger(__name__)
 

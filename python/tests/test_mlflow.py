@@ -1,9 +1,9 @@
 import json
+import uuid
+
 import mlflow
 import mlflow.openai
 import openai
-import uuid
-
 from mindctrl.const import SCENARIO_NAME_PARAM
 from mindctrl.mlmodels import log_system_models
 from mindctrl.openai_deployment import log_model

@@ -1,29 +1,28 @@
-from functools import lru_cache, partial
+import asyncio
+import collections
 import logging
 import os
 
 # Eventing - move this to plugin
 from contextlib import asynccontextmanager
-import asyncio
+from functools import lru_cache, partial
+
+import mlflow
 
 # Core functionality
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
-import collections
+from mindctrl.workflows import WorkflowContext
 
-import mlflow
-
-
-from .mlmodels import log_system_models
-from .mqtt import setup_mqtt_client, listen_to_mqtt
-from .mlflow_bridge import connect_to_mlflow, poll_registry
-from .db.setup import setup_db, insert_summary, insert_summary_dummy
 from .config import AppSettings
+from .const import ROUTE_PREFIX
+from .db.setup import insert_summary, insert_summary_dummy, setup_db
+from .mlflow_bridge import connect_to_mlflow, poll_registry
+from .mlmodels import log_system_models
+from .mqtt import listen_to_mqtt, setup_mqtt_client
 from .routers import deployed_models, info, ui
 from .routers.ui import templates
-from .const import ROUTE_PREFIX
-
 
 _logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -48,8 +47,6 @@ async def lifespan(app: FastAPI):
     app_settings = get_settings()
     _logger.info("Starting mindctrl server with settings:")
     _logger.info(app_settings.model_dump())
-
-    asyncio.create_task(poll_registry(10.0))
 
     # The buffer should be enhanced to be token-aware
     state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=20)
@@ -77,15 +74,20 @@ async def lifespan(app: FastAPI):
     loaded_models = log_system_models(app_settings.force_publish_models)
     connect_to_mlflow(app_settings)
 
-    write_healthcheck_file(app_settings)
+    _logger.info("Starting workflow manager")
+    with WorkflowContext() as wfc:
+        asyncio.create_task(poll_registry(wfc, 10.0))
 
-    _logger.info("Finished server setup")
-    # Make resources available to requests via .state
-    yield {
-        "state_ring_buffer": state_ring_buffer,
-        "loaded_models": loaded_models,
-        "database_engine": engine,
-    }
+        write_healthcheck_file(app_settings)
+
+        _logger.info("Finished server setup")
+        # Make resources available to requests via .state
+        yield {
+            "state_ring_buffer": state_ring_buffer,
+            "loaded_models": loaded_models,
+            "database_engine": engine,
+            "workflow_context": wfc,
+        }
 
     # TODO: Once the above is moved into an ABC make it a context manager
     if app_settings.events.events_type == "mqtt" and mqtt_listener_task:

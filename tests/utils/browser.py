@@ -1,13 +1,15 @@
 import logging
 from pathlib import Path
 
-# playwright install --with-deps chromium
-
-from playwright.sync_api import sync_playwright, Browser
 from playwright._impl._errors import (
-    TimeoutError as PlaywrightTimeoutError,
     Error as PlaywrightError,
 )
+from playwright._impl._errors import (
+    TimeoutError as PlaywrightTimeoutError,
+)
+
+# playwright install --with-deps chromium
+from playwright.sync_api import Browser, sync_playwright
 
 _logger = logging.getLogger(__name__)
 

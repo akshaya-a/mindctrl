@@ -1,15 +1,13 @@
-from dataclasses import dataclass
-from datetime import timedelta
 import logging
 import subprocess
-
+from dataclasses import dataclass
+from datetime import timedelta
 
 from dapr.clients import DaprClient
-from dapr.ext.workflow import DaprWorkflowContext, WorkflowActivityContext, RetryPolicy
+from dapr.ext.workflow import DaprWorkflowContext, RetryPolicy, WorkflowActivityContext
 from dapr.ext.workflow.dapr_workflow_client import DaprWorkflowClient
 
 from mindctrl.const import STOP_DEPLOYED_MODEL
-
 
 _logger = logging.getLogger(__name__)
 

@@ -1,9 +1,8 @@
-import uuid
-from mlflow import MlflowClient
 import logging
+import uuid
 
 import pytest
-
+from mlflow import MlflowClient
 
 _logger = logging.getLogger(__name__)
 

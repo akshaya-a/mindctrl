@@ -1,7 +1,8 @@
 import asyncio
 import logging
-from typing import Union
 import time
+from typing import Union
+
 import httpx
 from httpx_ws import aconnect_ws
 from pydantic import ValidationError

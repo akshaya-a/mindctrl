@@ -1,12 +1,12 @@
 import logging
-from pathlib import Path
 import os
+from pathlib import Path
 from typing import Optional
-
-from uvicorn import Config
 
 import constants
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
+from uvicorn import Config
+
 from .common import ServiceContainer, UvicornServer
 
 _logger = logging.getLogger(__name__)

@@ -1,7 +1,8 @@
 import collections
 import logging
-from fastapi import APIRouter, Request, HTTPException
+
 import mlflow
+from fastapi import APIRouter, HTTPException, Request
 
 from mindctrl.const import SCENARIO_NAME_HEADER
 from mindctrl.mlmodels import (

@@ -1,10 +1,10 @@
 import logging
-import fastapi
 
+import fastapi
+from mindctrl.config import AppSettings
 from uvicorn import Config
 
 from .common import UvicornServer
-from mindctrl.config import AppSettings
 from .local import DeploymentServerContainer
 
 _logger = logging.getLogger(__name__)
