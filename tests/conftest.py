@@ -284,7 +284,9 @@ def mlflow_server(
     _logger.info("Starting mlflow server fixture")
 
     with MlflowContainer(data_dir=mlflow_storage) as mlflow_server:
-        wait_for_readiness(mlflow_server.get_readiness_url())
+        wait_for_readiness(
+            mlflow_server.get_readiness_url(), timeout_callback=mlflow_server.dump_logs
+        )
         yield mlflow_server
 
 
@@ -354,7 +356,9 @@ def deployment_server(
         image=tag,
     ) as server:
         # once the disconnect issue is solved, we can merge into ServiceContainer.start() override
-        wait_for_readiness(server.get_readiness_url())
+        wait_for_readiness(
+            server.get_readiness_url(), timeout_callback=server.dump_logs
+        )
 
         yield server
 
@@ -383,7 +387,7 @@ def hass_server_and_token(
     _logger.info(f"Starting local homeassistant fixture with config: {hass_config_dir}")
     with HAContainer(config_dir=hass_config_dir) as hass:
         _logger.info(f"Started hass container at {hass.get_base_url()}")
-        wait_for_readiness(hass.get_base_url())
+        wait_for_readiness(hass.get_base_url(), timeout_callback=hass.dump_logs)
         playwright_screenshots = tmp_path_factory.mktemp("onboarding_screenshots")
         _logger.info(
             f"Homeassistant fixture ready, onboarding with screenshots in {playwright_screenshots}"
@@ -735,7 +739,10 @@ def local_server_url(
             allowed_ip=allowed_ip,
             allowed_ipv6=allowed_ipv6,
         ) as ingress_server:
-            wait_for_readiness(ingress_server.get_readiness_url())
+            wait_for_readiness(
+                ingress_server.get_readiness_url(),
+                timeout_callback=ingress_server.dump_logs,
+            )
             yield ingress_server.get_base_url()
 
 

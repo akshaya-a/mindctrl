@@ -64,8 +64,13 @@ class WorkflowContext:
         self.host = host
         self.port = port
         self._workflow_runtime = WorkflowRuntime(host=host, port=port)
-        self._register_turn_workflow()
-        self._register_deployer_workflow()
+        try:
+            self._register_turn_workflow()
+            self._register_deployer_workflow()
+        except ValueError as e:
+            if "already registered" not in str(e):
+                raise e
+            _logger.info(f"Already registered turn workflow: {e}")
         self.initialized = False
 
     def __enter__(self):

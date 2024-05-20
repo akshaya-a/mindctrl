@@ -3,7 +3,7 @@ import multiprocessing
 import socket
 import time
 from pathlib import Path
-from typing import Iterator, Optional, Union
+from typing import Callable, Iterator, Optional, Union
 
 import constants
 import httpx
@@ -53,7 +53,11 @@ def push_app(tag: str, client: DockerClient):
         _logger.debug(line)
 
 
-def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
+def wait_for_readiness(
+    url: str,
+    max_attempts=constants.MAX_ATTEMPTS,
+    timeout_callback: Optional[Callable] = None,
+):
     _logger.info(f"Waiting for fixture startup at {url}...........")
     attempts = 1
     while attempts <= max_attempts:
@@ -76,7 +80,9 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
             time.sleep(2)
 
     if attempts > max_attempts:
-        raise RuntimeError(f"Failed to reach {url} after {max_attempts} attempts")
+        if timeout_callback:
+            timeout_callback()
+        raise TimeoutError(f"Failed to reach {url} after {max_attempts} attempts")
 
 
 class UvicornServer(multiprocessing.Process):
@@ -144,6 +150,9 @@ class ServiceContainer(DockerContainer):
         if self.host_network_mode:
             return f"http://localhost:{self.port_to_expose}"
         return f"http://{self.get_container_host_ip()}:{self.get_exposed_port(self.port_to_expose)}"
+
+    def dump_logs(self):
+        dump_container_logs(self, self.log_debug)
 
     def stop(self, force=True, delete_volume=True):
         _logger.info(f"Stopping {self.__class__.__name__}")
