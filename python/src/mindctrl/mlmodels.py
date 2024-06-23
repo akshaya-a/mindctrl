@@ -1,14 +1,14 @@
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 
 import mlflow
 import openai
-from mlflow.entities.model_registry import RegisteredModel
 from mlflow import MlflowClient
+from mlflow.entities.model_registry import RegisteredModel
+from mlflow.utils.proto_json_utils import dataframe_from_parsed_json
 
-
+from .const import CHALLENGER_ALIAS, CHAMPION_ALIAS, SCENARIO_NAME_PARAM
 from .openai_deployment import log_model
-from .const import CHALLENGER_ALIAS, CHAMPION_ALIAS
 
 _logger = logging.getLogger(__name__)
 
@@ -186,3 +186,31 @@ def embed_summary(summary: str) -> list[float]:
     model = mlflow.sentence_transformers.load_model("models:/localembeddings/latest")
     # return model.predict(summary)
     return model.encode(summary).tolist()
+
+
+def invoke_model_impl(
+    model: mlflow.pyfunc.PyFuncModel,
+    payload: dict,
+    scenario_name: Optional[str],
+    input_variables: dict[str, str],
+):
+    # TODO: need a better api for this from mlflow.
+    # predict() has expensive side effects so shouldn't simply catch invalid_params
+    model_has_params = hasattr(model.metadata, "get_params_schema")
+    params = None
+    if scenario_name:
+        _logger.info(f"Scenario: {scenario_name}")
+        if not model_has_params:
+            _logger.warning(
+                f"Model {model.metadata} does not have params schema, ignoring scenario header"
+            )
+        else:
+            _logger.info(
+                f"Model has params schema: {model.metadata.get_params_schema()}"
+            )
+            params = {SCENARIO_NAME_PARAM: scenario_name}
+    input = dataframe_from_parsed_json(payload["dataframe_split"], "split")
+    for key, value in input_variables.items():
+        _logger.debug(f"Setting input variable {key}")
+        input[key] = value
+    return model.predict(input, params=params)

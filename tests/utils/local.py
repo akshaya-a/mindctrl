@@ -1,12 +1,12 @@
 import logging
-from pathlib import Path
 import os
+from pathlib import Path
 from typing import Optional
-
-from uvicorn import Config
 
 import constants
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
+from uvicorn import Config
+
 from .common import ServiceContainer, UvicornServer
 
 _logger = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ class TraefikContainer(ServiceContainer):
         allowed_ipv6: Optional[str] = None,
         image="traefik:latest",
         port=80,
+        ping_port=8082,
         **kwargs,
     ):
         super().__init__(image, port=port, network_mode="host", **kwargs)
@@ -40,15 +41,20 @@ class TraefikContainer(ServiceContainer):
         self.with_env("MLFLOW_TRACKING_URI", mlflow_tracking_uri)
         self.with_env("MINDCTRL_SERVER_URI", mindctrl_server_uri)
         self.with_env("TRAEFIK_ALLOW_IP", allowed_ip)
+        self.ping_port = ping_port
         if allowed_ipv6:
             self.with_env("TRAEFIK_ALLOW_IPV6", allowed_ipv6)
+        # TODO: Unify command with addon via shared bash script?
         self.with_command(
             "traefik "
-            "--accesslog=true --accesslog.format=json --log.level=DEBUG --api=true --api.dashboard=true --api.insecure=true "
+            "--accesslog=true --accesslog.format=json --log.level=DEBUG --api=true "
             "--entrypoints.http.address=':80' "
-            "--ping=true "
+            f"--ping=true --entryPoints.ping.address=:{ping_port} --ping.entryPoint=ping "
             "--providers.file.filename=/config/traefik-config.yaml"
         )
+
+    def get_readiness_url(self):
+        return f"http://localhost:{self.ping_port}/ping"
 
 
 class MlflowContainer(ServiceContainer):
@@ -69,6 +75,9 @@ class MlflowContainer(ServiceContainer):
             f"--host 0.0.0.0 --port {port} "
             "--static-prefix /mlflow"
         )
+
+    def get_readiness_url(self):
+        return super().get_readiness_url() + "/health"
 
 
 class DeploymentServerContainer(ServiceContainer):
@@ -129,6 +138,9 @@ class DeploymentServerContainer(ServiceContainer):
                 len(input_recordings) > 0
             ), f"No input recordings found in {self.replays_dir}"
             self.with_env("MINDCTRL_CONFIG_REPLAY", "true")
+
+    def get_readiness_url(self):
+        return super().get_readiness_url() + "/health"
 
 
 LocalMultiserver = UvicornServer(

@@ -1,0 +1,769 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What areas are in the house?",
+                            "tool_call_id": "None",
+                            "name": "None"
+                        }
+                    ],
+                    "tools": [
+                        {
+                            "function": {
+                                "description": "List all areas(rooms) in the home with their area_id and friendly name.",
+                                "name": "list_areas",
+                                "parameters": {
+                                    "properties": {},
+                                    "required": [],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn on the light in the area",
+                                "name": "light_turn_on",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn off the light in the area",
+                                "name": "light_turn_off",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Toggle the light in the area",
+                                "name": "light_toggle",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Wed, 22 May 2024 14:48:15 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "680"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29930"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "140ms"
+                    ],
+                    "x-request-id": [
+                        "req_685725fd0fd666a6c697b1ed0d46de76"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "887d9b23c8c9c4c3-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9RhYFbpZyqNwH1DkjEr0tJtZIjkVN\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716389295,\n  \"model\": \"gpt-4o-2024-05-13\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n            \"id\": \"call_AeNmURALqJYJg4YWuIOqM56L\",\n            \"type\": \"function\",\n            \"function\": {\n              \"name\": \"list_areas\",\n              \"arguments\": \"{}\"\n            }\n          }\n        ]\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"tool_calls\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 167,\n    \"completion_tokens\": 11,\n    \"total_tokens\": 178\n  },\n  \"system_fingerprint\": \"fp_927397958d\"\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What areas are in the house?"
+                        },
+                        {
+                            "role": "assistant",
+                            "tool_calls": [
+                                {
+                                    "id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                                    "function": {
+                                        "name": "list_areas",
+                                        "arguments": "{}"
+                                    },
+                                    "type": "function"
+                                }
+                            ]
+                        },
+                        {
+                            "role": "tool",
+                            "content": "{\"type\":\"result\",\"id\":1,\"success\":true,\"result\":[{\"area_id\":\"living_room\",\"name\":\"Living Room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"kitchen\",\"name\":\"Kitchen\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement\",\"name\":\"Basement\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bedroom\",\"name\":\"Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"den\",\"name\":\"Den\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bedroom\",\"name\":\"Guest Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"office\",\"name\":\"Office\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"dining_room\",\"name\":\"Dining room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_hallway\",\"name\":\"Front hallway\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"sun_room\",\"name\":\"Sun room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"garage\",\"name\":\"Garage\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"deck\",\"name\":\"Deck\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"upstairs_hallway\",\"name\":\"Upstairs Hallway\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"patio\",\"name\":\"Patio\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_exercise_area\",\"name\":\"Basement Exercise Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_storage_area\",\"name\":\"Basement Storage Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_stairs\",\"name\":\"Basement Stairs\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_porch\",\"name\":\"Front Porch\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bathroom\",\"name\":\"Master Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"driveway\",\"name\":\"Driveway\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"main_floor_bathroom\",\"name\":\"Main Floor Bathroom\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bathroom\",\"name\":\"Guest Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"laundry_room\",\"name\":\"Laundry room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"utility_room\",\"name\":\"Utility Room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null}]}",
+                            "tool_call_id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                            "name": "list_areas"
+                        }
+                    ],
+                    "tools": [
+                        {
+                            "function": {
+                                "description": "List all areas(rooms) in the home with their area_id and friendly name.",
+                                "name": "list_areas",
+                                "parameters": {
+                                    "properties": {},
+                                    "required": [],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn on the light in the area",
+                                "name": "light_turn_on",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn off the light in the area",
+                                "name": "light_turn_off",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Toggle the light in the area",
+                                "name": "light_toggle",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Wed, 22 May 2024 14:48:20 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "3047"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29175"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "1.65s"
+                    ],
+                    "x-request-id": [
+                        "req_37213edd569fae1f89d78c8537bb5c20"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "887d9b324e277669-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9RhYHXtZZ3swjHBZymuOb2nEFcnyE\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716389297,\n  \"model\": \"gpt-4o-2024-05-13\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Here are the areas in the house:\\n\\n1. Living Room\\n2. Kitchen\\n3. Basement\\n4. Bedroom (Master Bedroom)\\n5. Den\\n6. Guest Bedroom\\n7. Office\\n8. Dining Room\\n9. Front Hallway\\n10. Sun Room\\n11. Garage\\n12. Deck\\n13. Upstairs Hallway\\n14. Patio\\n15. Basement Exercise Area\\n16. Basement Storage Area\\n17. Basement Stairs\\n18. Front Porch\\n19. Master Bathroom\\n20. Driveway\\n21. Main Floor Bathroom\\n22. Guest Bathroom\\n23. Laundry Room\\n24. Utility Room\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 971,\n    \"completion_tokens\": 129,\n    \"total_tokens\": 1100\n  },\n  \"system_fingerprint\": \"fp_729ea513f7\"\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What areas are in the house?"
+                        },
+                        {
+                            "role": "assistant",
+                            "tool_calls": [
+                                {
+                                    "id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                                    "function": {
+                                        "name": "list_areas",
+                                        "arguments": "{}"
+                                    },
+                                    "type": "function"
+                                }
+                            ]
+                        },
+                        {
+                            "role": "tool",
+                            "content": "{\"type\":\"result\",\"id\":1,\"success\":true,\"result\":[{\"area_id\":\"living_room\",\"name\":\"Living Room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"kitchen\",\"name\":\"Kitchen\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement\",\"name\":\"Basement\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bedroom\",\"name\":\"Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"den\",\"name\":\"Den\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bedroom\",\"name\":\"Guest Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"office\",\"name\":\"Office\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"dining_room\",\"name\":\"Dining room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_hallway\",\"name\":\"Front hallway\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"sun_room\",\"name\":\"Sun room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"garage\",\"name\":\"Garage\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"deck\",\"name\":\"Deck\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"upstairs_hallway\",\"name\":\"Upstairs Hallway\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"patio\",\"name\":\"Patio\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_exercise_area\",\"name\":\"Basement Exercise Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_storage_area\",\"name\":\"Basement Storage Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_stairs\",\"name\":\"Basement Stairs\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_porch\",\"name\":\"Front Porch\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bathroom\",\"name\":\"Master Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"driveway\",\"name\":\"Driveway\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"main_floor_bathroom\",\"name\":\"Main Floor Bathroom\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bathroom\",\"name\":\"Guest Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"laundry_room\",\"name\":\"Laundry room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"utility_room\",\"name\":\"Utility Room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null}]}",
+                            "tool_call_id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                            "name": "list_areas"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Here are the areas in the house:\n\n1. Living Room\n2. Kitchen\n3. Basement\n4. Bedroom (Master Bedroom)\n5. Den\n6. Guest Bedroom\n7. Office\n8. Dining Room\n9. Front Hallway\n10. Sun Room\n11. Garage\n12. Deck\n13. Upstairs Hallway\n14. Patio\n15. Basement Exercise Area\n16. Basement Storage Area\n17. Basement Stairs\n18. Front Porch\n19. Master Bathroom\n20. Driveway\n21. Main Floor Bathroom\n22. Guest Bathroom\n23. Laundry Room\n24. Utility Room"
+                        },
+                        {
+                            "role": "user",
+                            "content": "It's too dark in the kitchen",
+                            "tool_call_id": "None",
+                            "name": "None"
+                        }
+                    ],
+                    "tools": [
+                        {
+                            "function": {
+                                "description": "List all areas(rooms) in the home with their area_id and friendly name.",
+                                "name": "list_areas",
+                                "parameters": {
+                                    "properties": {},
+                                    "required": [],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn on the light in the area",
+                                "name": "light_turn_on",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn off the light in the area",
+                                "name": "light_turn_off",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Toggle the light in the area",
+                                "name": "light_toggle",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Wed, 22 May 2024 14:48:25 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "820"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29059"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "1.882s"
+                    ],
+                    "x-request-id": [
+                        "req_65be0db505f40eb8bbf16e9841c42bb7"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "887d9b60ec0b094c-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9RhYOtc6Hve3gaRPPYS7F1Cw6SDcC\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716389304,\n  \"model\": \"gpt-4o-2024-05-13\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n            \"id\": \"call_JH2VxBtwQj3GFkXKSZbOjiFZ\",\n            \"type\": \"function\",\n            \"function\": {\n              \"name\": \"light_turn_on\",\n              \"arguments\": \"{\\\"area_id\\\":\\\"kitchen\\\"}\"\n            }\n          }\n        ]\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"tool_calls\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1115,\n    \"completion_tokens\": 17,\n    \"total_tokens\": 1132\n  },\n  \"system_fingerprint\": \"fp_729ea513f7\"\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4o",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What areas are in the house?"
+                        },
+                        {
+                            "role": "assistant",
+                            "tool_calls": [
+                                {
+                                    "id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                                    "function": {
+                                        "name": "list_areas",
+                                        "arguments": "{}"
+                                    },
+                                    "type": "function"
+                                }
+                            ]
+                        },
+                        {
+                            "role": "tool",
+                            "content": "{\"type\":\"result\",\"id\":1,\"success\":true,\"result\":[{\"area_id\":\"living_room\",\"name\":\"Living Room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"kitchen\",\"name\":\"Kitchen\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement\",\"name\":\"Basement\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bedroom\",\"name\":\"Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"den\",\"name\":\"Den\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bedroom\",\"name\":\"Guest Bedroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"office\",\"name\":\"Office\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"dining_room\",\"name\":\"Dining room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_hallway\",\"name\":\"Front hallway\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"sun_room\",\"name\":\"Sun room\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"garage\",\"name\":\"Garage\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"deck\",\"name\":\"Deck\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"upstairs_hallway\",\"name\":\"Upstairs Hallway\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"patio\",\"name\":\"Patio\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_exercise_area\",\"name\":\"Basement Exercise Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_storage_area\",\"name\":\"Basement Storage Area\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"basement_stairs\",\"name\":\"Basement Stairs\",\"aliases\":[],\"floor_id\":\"basement\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"front_porch\",\"name\":\"Front Porch\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"master_bathroom\",\"name\":\"Master Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"driveway\",\"name\":\"Driveway\",\"aliases\":[],\"floor_id\":\"exterior\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"main_floor_bathroom\",\"name\":\"Main Floor Bathroom\",\"aliases\":[],\"floor_id\":\"main_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"guest_bathroom\",\"name\":\"Guest Bathroom\",\"aliases\":[],\"floor_id\":\"upper_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"laundry_room\",\"name\":\"Laundry room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null},{\"area_id\":\"utility_room\",\"name\":\"Utility Room\",\"aliases\":[],\"floor_id\":\"lower_floor\",\"icon\":null,\"labels\":[],\"picture\":null}]}",
+                            "tool_call_id": "call_AeNmURALqJYJg4YWuIOqM56L",
+                            "name": "list_areas"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Here are the areas in the house:\n\n1. Living Room\n2. Kitchen\n3. Basement\n4. Bedroom (Master Bedroom)\n5. Den\n6. Guest Bedroom\n7. Office\n8. Dining Room\n9. Front Hallway\n10. Sun Room\n11. Garage\n12. Deck\n13. Upstairs Hallway\n14. Patio\n15. Basement Exercise Area\n16. Basement Storage Area\n17. Basement Stairs\n18. Front Porch\n19. Master Bathroom\n20. Driveway\n21. Main Floor Bathroom\n22. Guest Bathroom\n23. Laundry Room\n24. Utility Room"
+                        },
+                        {
+                            "role": "user",
+                            "content": "It's too dark in the kitchen"
+                        },
+                        {
+                            "role": "assistant",
+                            "tool_calls": [
+                                {
+                                    "id": "call_JH2VxBtwQj3GFkXKSZbOjiFZ",
+                                    "function": {
+                                        "name": "light_turn_on",
+                                        "arguments": "{\"area_id\":\"kitchen\"}"
+                                    },
+                                    "type": "function"
+                                }
+                            ]
+                        },
+                        {
+                            "role": "tool",
+                            "content": "null",
+                            "tool_call_id": "call_JH2VxBtwQj3GFkXKSZbOjiFZ",
+                            "name": "light_turn_on"
+                        }
+                    ],
+                    "tools": [
+                        {
+                            "function": {
+                                "description": "List all areas(rooms) in the home with their area_id and friendly name.",
+                                "name": "list_areas",
+                                "parameters": {
+                                    "properties": {},
+                                    "required": [],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn on the light in the area",
+                                "name": "light_turn_on",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Turn off the light in the area",
+                                "name": "light_turn_off",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        },
+                        {
+                            "function": {
+                                "description": "Toggle the light in the area",
+                                "name": "light_toggle",
+                                "parameters": {
+                                    "properties": {
+                                        "area_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "area_id"
+                                    ],
+                                    "type": "object"
+                                }
+                            },
+                            "type": "function"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Wed, 22 May 2024 14:48:27 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "696"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "28777"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "2.445s"
+                    ],
+                    "x-request-id": [
+                        "req_457cfff245633eef69fb6ed28d7198ba"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "887d9b6b9e2bc551-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9RhYQO8ewnwsuPdV0uorcSElaBZus\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716389306,\n  \"model\": \"gpt-4o-2024-05-13\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"The light in the kitchen has been turned on.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1140,\n    \"completion_tokens\": 11,\n    \"total_tokens\": 1151\n  },\n  \"system_fingerprint\": \"fp_729ea513f7\"\n}\n"
+                }
+            }
+        }
+    ]
+}

@@ -1,7 +1,10 @@
+import asyncio
 import logging
-from httpx import URL
-import pytest
+import os
+import random
 
+import pytest
+from httpx import URL
 from mindctrl.homeassistant.client import HassClient
 from mindctrl.homeassistant.messages import CreateLabel
 
@@ -9,12 +12,20 @@ _logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-async def hass_client(hass_server_and_token):
-    server, token = hass_server_and_token
+async def hass_client(request):
+    # TODO: if you run just this file, you get into an asyncio loop issue for playwright
+    # moving the env var overrides into the fixture itself and using proper fixture resolution
+    # probably will fix it?
+    if os.environ.get("HASS_SERVER") is None:
+        server, token = request.getfixturevalue("hass_server_and_token")
+        server_url = server.get_base_url()
+    else:
+        server_url = os.environ["HASS_SERVER"]
+        token = os.environ["HASS_TOKEN"]
     try:
         async with HassClient(
             id="pytest",
-            hass_url=URL(f"{server.get_base_url()}/api"),
+            hass_url=URL(f"{server_url}/api"),
             token=token,
         ) as client:
             yield client
@@ -36,15 +47,33 @@ async def test_mctrl_list_automations(hass_client):
 
 
 async def test_mctrl_list_areas(hass_client):
-    areas = await hass_client.list_areas()
+    areas_result = await hass_client.list_areas()
+    areas = areas_result.result
     _logger.info(areas)
     assert len(areas) >= 0
 
 
 async def test_mctrl_list_labels(hass_client):
-    labels = await hass_client.list_labels()
+    labels_result = await hass_client.list_labels()
+    labels = labels_result.result
     _logger.info(labels)
-    assert len(labels) >= 0
+    assert labels_result.success
+    assert len(labels.result) >= 0
+
+
+async def test_mctrl_control_lights(hass_client):
+    areas_result = await hass_client.list_areas()
+    areas = areas_result.result
+    assert len(areas) >= 1
+    random_area = random.choice(areas)
+    area_id = random_area.area_id
+    _logger.info(f"Controlling lights for {random_area}")
+    await hass_client.light_turn_on(area_id)
+    # TODO: Implement Get State api and assert
+    await asyncio.sleep(2)
+    await hass_client.light_turn_off(area_id)
+    await asyncio.sleep(2)
+    await hass_client.light_toggle(area_id)
 
 
 async def test_automation_autotag(hass_client, request):
@@ -62,7 +91,11 @@ async def test_automation_autotag(hass_client, request):
     test_label_name = f"{request.node.name}-label"
     create_new_labels = [
         CreateLabel(
-            id=1, name=test_label_name, color="indigo", icon="mdi:account", description=None
+            id=1,
+            name=test_label_name,
+            color="indigo",
+            icon="mdi:account",
+            description=None,
         )
     ]
     for label in create_new_labels:
@@ -73,9 +106,12 @@ async def test_automation_autotag(hass_client, request):
     #     _logger.info(f"Adding label {test_label_name} to {automation.id}")
     #     await hass_client.add_labels(automation.id, [test_label_name])
 
-    await hass_client.add_labels(f"automation.{test_automation_name}", [test_label_name])
+    await hass_client.add_labels(
+        f"automation.{test_automation_name}", [test_label_name]
+    )
 
-    entities = await hass_client.list_entities()
+    entities_result = await hass_client.list_entities()
+    entities = entities_result.result
     automations = [e for e in entities if e["platform"] == "automation"]
     _logger.info(automations)
     tagged_automations = [a for a in automations if test_label_name in a["labels"]]

@@ -1,49 +1,45 @@
-from dataclasses import dataclass
-from enum import Enum
 import logging
 import os
+import shutil
+import subprocess
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Tuple
+
 import aiomqtt
-from pydantic import SecretStr
-import pytest
-import httpx
-import sqlalchemy
+import constants
 import docker
-import subprocess
-import shutil
+import httpx
 
-from testcontainers.postgres import PostgresContainer
-from testcontainers.core.waiting_utils import wait_for_logs
-
+# This is gross..
+import mlflow.tracking._tracking_service.utils
+import pytest
+import sqlalchemy
 from mindctrl.config import AppSettings, MqttEventsSettings, PostgresStoreSettings
 from mindctrl.const import REPLAY_SERVER_INPUT_FILE_SUFFIX
-
-import constants
-
+from pydantic import SecretStr
+from testcontainers.core.waiting_utils import wait_for_logs
+from testcontainers.postgres import PostgresContainer
+from utils.addon import AddonContainer, create_mock_supervisor
 from utils.browser import perform_onboarding_and_get_ll_token
+from utils.cluster import LocalRegistryK3dManager, prepare_apps
 from utils.common import (
     HAContainer,
     build_app,
     dump_container_logs,
+    get_external_host_port,
     get_local_ip,
     push_app,
     wait_for_readiness,
-    get_external_host_port,
 )
 from utils.local import (
+    DeploymentServerContainer,
     LocalMultiserver,
     MlflowContainer,
     MosquittoContainer,
-    DeploymentServerContainer,
     TraefikContainer,
 )
-from utils.cluster import LocalRegistryK3dManager, prepare_apps
-from utils.addon import AddonContainer, create_mock_supervisor
-
-
-# This is gross..
-import mlflow.tracking._tracking_service.utils
 
 # TODO: [mlflow] get a real environment variable for this
 TEST_ARTIFACT_PATH = "./mlruns"
@@ -176,6 +172,7 @@ def postgres(deploy_mode: DeployMode):
             result = connection.execute(sqlalchemy.text("select version()"))
             (version,) = result.fetchone()  # pyright: ignore
             _logger.info(version)
+
         yield p
         dump_container_logs(p, debug=True)
 
@@ -288,14 +285,16 @@ def mlflow_server(
     _logger.info("Starting mlflow server fixture")
 
     with MlflowContainer(data_dir=mlflow_storage) as mlflow_server:
-        wait_for_readiness(f"{mlflow_server.get_base_url()}/health")
+        wait_for_readiness(
+            mlflow_server.get_readiness_url(), timeout_callback=mlflow_server.dump_logs
+        )
         yield mlflow_server
 
 
 # TODO: value in keeping? or just move to unit tests
 @pytest.fixture(scope="session")
 def mlflow_fluent_session(
-    mlflow_storage: Path,
+    mlflow_server: MlflowContainer,
     deployment_server: DeploymentServerContainer,
     replay_mode: ReplayMode,
     deploy_mode: DeployMode,
@@ -307,12 +306,12 @@ def mlflow_fluent_session(
 
     # using file instead of sqlite:///:memory: for post-mortem debugging
     # It's not that slow
-    database_path = f"sqlite:///{mlflow_storage}/mlflow.db"
+    database_path = mlflow_server.get_base_url()
     mlflow.set_tracking_uri(database_path)
-    experiment_id = mlflow.create_experiment(
-        "test", artifact_location=str(mlflow_storage)
-    )
-    mlflow.set_experiment(experiment_id=experiment_id)
+    # experiment_id = mlflow.create_experiment(
+    #     "test", artifact_location=str(mlflow_storage)
+    # )
+    mlflow.set_experiment(experiment_name="pytest")
 
     with monkeypatch_session.context() as m:
         m.setenv("MLFLOW_DEPLOYMENTS_TARGET", deployment_server.get_base_url())
@@ -358,7 +357,9 @@ def deployment_server(
         image=tag,
     ) as server:
         # once the disconnect issue is solved, we can merge into ServiceContainer.start() override
-        wait_for_readiness(f"{server.get_base_url()}/health")
+        wait_for_readiness(
+            server.get_readiness_url(), timeout_callback=server.dump_logs
+        )
 
         yield server
 
@@ -370,7 +371,7 @@ def deployment_server(
 def hass_server_and_token(
     deploy_mode: DeployMode,
     tmp_path_factory: pytest.TempPathFactory,
-    test_data_dir: Path
+    test_data_dir: Path,
 ):
     if deploy_mode == DeployMode.K3D:
         _logger.warning(f"Unsupported deploy mode: {deploy_mode}")
@@ -379,18 +380,26 @@ def hass_server_and_token(
 
     hass_config_dir = tmp_path_factory.mktemp("hass_config")
     original_hass_config = test_data_dir / "config"
-    assert (original_hass_config / "configuration.yaml").exists(), f"Missing {original_hass_config}"
+    assert (
+        original_hass_config / "configuration.yaml"
+    ).exists(), f"Missing {original_hass_config}"
     shutil.copytree(original_hass_config, hass_config_dir, dirs_exist_ok=True)
 
     _logger.info(f"Starting local homeassistant fixture with config: {hass_config_dir}")
     with HAContainer(config_dir=hass_config_dir) as hass:
         _logger.info(f"Started hass container at {hass.get_base_url()}")
-        wait_for_readiness(hass.get_base_url())
-        _logger.info("Homeassistant fixture ready, starting onboarding")
-
-        token = perform_onboarding_and_get_ll_token(hass.get_base_url())
+        wait_for_readiness(hass.get_base_url(), timeout_callback=hass.dump_logs)
+        playwright_screenshots = tmp_path_factory.mktemp("onboarding_screenshots")
+        _logger.info(
+            f"Homeassistant fixture ready, onboarding with screenshots in {playwright_screenshots}"
+        )
+        token = perform_onboarding_and_get_ll_token(
+            hass.get_base_url(), playwright_screenshots
+        )
+        assert token, "Failed to get long-lived token"
 
         yield hass, token
+
 
 # TODO: This behemoth has gotten large enough to switch to docker compose
 # decide whether use testcontainers Compose container or yaml
@@ -731,7 +740,10 @@ def local_server_url(
             allowed_ip=allowed_ip,
             allowed_ipv6=allowed_ipv6,
         ) as ingress_server:
-            wait_for_readiness("http://localhost:8080/ping")
+            wait_for_readiness(
+                ingress_server.get_readiness_url(),
+                timeout_callback=ingress_server.dump_logs,
+            )
             yield ingress_server.get_base_url()
 
 

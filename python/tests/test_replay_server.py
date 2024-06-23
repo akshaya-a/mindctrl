@@ -1,12 +1,10 @@
 import json
 import logging
 from pathlib import Path
+
 import pytest
-
 from fastapi.testclient import TestClient
-
 from mindctrl.replay_server import create_app_from_env
-
 
 _logger = logging.getLogger(__name__)
 

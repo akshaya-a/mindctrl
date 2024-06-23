@@ -8,7 +8,7 @@ from homeassistant.components.hassio import AddonManager
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.singleton import singleton
 
-from .const import ADDON_SLUG, DOMAIN, _LOGGER, ADDON_NAME
+from .const import _LOGGER, ADDON_NAME, ADDON_SLUG, DOMAIN
 
 DATA_ADDON_MANAGER = f"{DOMAIN}_addon_manager"
 

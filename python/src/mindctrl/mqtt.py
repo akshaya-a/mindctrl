@@ -1,12 +1,12 @@
+import asyncio
 import collections
 import json
 import logging
-from typing import Callable, Awaitable, Optional
+from typing import Awaitable, Callable, Optional
+
 import aiomqtt
-import asyncio
 
 from .config import MqttEventsSettings
-
 
 _logger = logging.getLogger(__name__)
 

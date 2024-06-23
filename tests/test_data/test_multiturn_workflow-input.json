@@ -1,0 +1,449 @@
+{
+    "version": 1,
+    "interactions": [
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "My name is test_multiturn_workflow do not forget it. The weather outside is 95 deg F. I have a fan that is off. Who are you?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Mon, 20 May 2024 06:28:39 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "1430"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29906"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "188ms"
+                    ],
+                    "x-request-id": [
+                        "req_fac4269a4202f157958f2779eeab369f"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "886a448b1ce4767b-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9QqnehW9cEFJrhf7WNkGsMt60Aokq\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186518,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"I'm an AI developed by OpenAI, here to help answer your questions and assist you with a wide range of topics. How can I assist you today, test_multiturn_workflow?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 86,\n    \"completion_tokens\": 38,\n    \"total_tokens\": 124\n  },\n  \"system_fingerprint\": null\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "My name is test_multiturn_workflow do not forget it. The weather outside is 95 deg F. I have a fan that is off. Who are you?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "I'm an AI developed by OpenAI, here to help answer your questions and assist you with a wide range of topics. How can I assist you today, test_multiturn_workflow?"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What is my name?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Mon, 20 May 2024 06:28:41 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "711"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29859"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "282ms"
+                    ],
+                    "x-request-id": [
+                        "req_afa045736d4e6e13fcfcc83c1334e122"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "886a44979c8e7571-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9QqngXlJVURQgQukVBRFM6RqQy2PZ\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186520,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Your name is test_multiturn_workflow. How can I assist you further?\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 137,\n    \"completion_tokens\": 16,\n    \"total_tokens\": 153\n  },\n  \"system_fingerprint\": null\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "My name is test_multiturn_workflow do not forget it. The weather outside is 95 deg F. I have a fan that is off. Who are you?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "I'm an AI developed by OpenAI, here to help answer your questions and assist you with a wide range of topics. How can I assist you today, test_multiturn_workflow?"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What is my name?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Your name is test_multiturn_workflow. How can I assist you further?"
+                        },
+                        {
+                            "role": "user",
+                            "content": "Should I turn on the fan? If so, why? If not, why not? Be brief."
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Mon, 20 May 2024 06:28:44 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "2161"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29824"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "352ms"
+                    ],
+                    "x-request-id": [
+                        "req_708717badd4a1744b1577d141fe78b1c"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "886a44a0becb2846-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9Qqnh2a9T2AO2nc2ORIj1NA59XGQp\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186521,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Yes, considering it's 95 degrees F outside, turning on the fan can help cool you down and make the environment more comfortable.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 182,\n    \"completion_tokens\": 27,\n    \"total_tokens\": 209\n  },\n  \"system_fingerprint\": null\n}\n"
+                }
+            }
+        },
+        {
+            "request": {
+                "method": "POST",
+                "uri": "https://api.openai.com/v1/chat/completions",
+                "body": {
+                    "model": "gpt-4-turbo-preview",
+                    "temperature": 0.0,
+                    "n": 1,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'"
+                        },
+                        {
+                            "role": "user",
+                            "content": "My name is test_multiturn_workflow do not forget it. The weather outside is 95 deg F. I have a fan that is off. Who are you?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "I'm an AI developed by OpenAI, here to help answer your questions and assist you with a wide range of topics. How can I assist you today, test_multiturn_workflow?"
+                        },
+                        {
+                            "role": "user",
+                            "content": "What is my name?"
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Your name is test_multiturn_workflow. How can I assist you further?"
+                        },
+                        {
+                            "role": "user",
+                            "content": "Should I turn on the fan? If so, why? If not, why not? Be brief."
+                        },
+                        {
+                            "role": "assistant",
+                            "content": "Yes, considering it's 95 degrees F outside, turning on the fan can help cool you down and make the environment more comfortable."
+                        },
+                        {
+                            "role": "user",
+                            "content": "Is it hot outside?"
+                        }
+                    ]
+                },
+                "headers": {
+                    "User-Agent": [
+                        "mindctrl/0.1.0"
+                    ],
+                    "Authorization": [
+                        "FAKE_BEARER"
+                    ]
+                }
+            },
+            "response": {
+                "status": {
+                    "code": 200,
+                    "message": "OK"
+                },
+                "headers": {
+                    "Date": [
+                        "Mon, 20 May 2024 06:28:45 GMT"
+                    ],
+                    "Content-Type": [
+                        "application/json"
+                    ],
+                    "Transfer-Encoding": [
+                        "chunked"
+                    ],
+                    "Connection": [
+                        "keep-alive"
+                    ],
+                    "openai-organization": "FAKE_OAI_ORG",
+                    "openai-processing-ms": [
+                        "518"
+                    ],
+                    "openai-version": [
+                        "2020-10-01"
+                    ],
+                    "strict-transport-security": [
+                        "max-age=15724800; includeSubDomains"
+                    ],
+                    "x-ratelimit-limit-requests": [
+                        "500"
+                    ],
+                    "x-ratelimit-limit-tokens": [
+                        "30000"
+                    ],
+                    "x-ratelimit-remaining-requests": [
+                        "499"
+                    ],
+                    "x-ratelimit-remaining-tokens": [
+                        "29786"
+                    ],
+                    "x-ratelimit-reset-requests": [
+                        "120ms"
+                    ],
+                    "x-ratelimit-reset-tokens": [
+                        "428ms"
+                    ],
+                    "x-request-id": [
+                        "req_2cb2dc83889210712efcfc18ec51650e"
+                    ],
+                    "CF-Cache-Status": [
+                        "DYNAMIC"
+                    ],
+                    "Set-Cookie": "FAKE_OAI_COOKIE",
+                    "Server": [
+                        "cloudflare"
+                    ],
+                    "CF-RAY": [
+                        "886a44b54f083076-SEA"
+                    ],
+                    "Content-Encoding": [
+                        "gzip"
+                    ],
+                    "alt-svc": [
+                        "h3=\":443\"; ma=86400"
+                    ]
+                },
+                "body": {
+                    "string": "{\n  \"id\": \"chatcmpl-9Qqnli1w5WmN3h03DZuMBiSe7ybMz\",\n  \"object\": \"chat.completion\",\n  \"created\": 1716186525,\n  \"model\": \"gpt-4-0125-preview\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Yes, at 95 degrees F, it is considered hot outside.\"\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 222,\n    \"completion_tokens\": 14,\n    \"total_tokens\": 236\n  },\n  \"system_fingerprint\": null\n}\n"
+                }
+            }
+        }
+    ]
+}

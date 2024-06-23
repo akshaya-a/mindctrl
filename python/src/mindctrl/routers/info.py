@@ -1,6 +1,7 @@
 import logging
-from fastapi import APIRouter, Request
+
 import mlflow
+from fastapi import APIRouter, Request
 
 router = APIRouter(tags=["info"])
 

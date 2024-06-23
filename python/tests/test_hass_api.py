@@ -1,9 +1,9 @@
 import logging
 from random import randint
-import pytest
-import httpx
-from httpx_ws import aconnect_ws
 
+import httpx
+import pytest
+from httpx_ws import aconnect_ws
 
 # https://developers.home-assistant.io/docs/api/websocket
 # Is there no open source non-GPL python client for Home Assistant? Ideally this exists independently
@@ -147,7 +147,7 @@ async def test_list_automations(hass_ws_session):
         if entity["platform"] == "automation"
     ]
     _logger.info(automations)
-    assert len(automations) >= 0 # yes what a useless assertion
+    assert len(automations) >= 0  # yes what a useless assertion
 
 
 async def test_list_areas(hass_ws_session):

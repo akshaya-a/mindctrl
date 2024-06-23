@@ -1,29 +1,28 @@
-from functools import lru_cache, partial
+import asyncio
+import collections
 import logging
 import os
 
 # Eventing - move this to plugin
 from contextlib import asynccontextmanager
-import asyncio
+from functools import partial
+
+import mlflow
 
 # Core functionality
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 
-import collections
+from mindctrl.workflows import WorkflowContext
 
-import mlflow
-
-
-from .mlmodels import log_system_models
-from .mqtt import setup_mqtt_client, listen_to_mqtt
+from .config import AppSettings, get_settings
+from .const import ROUTE_PREFIX
+from .db.setup import insert_summary, insert_summary_dummy, setup_db
 from .mlflow_bridge import connect_to_mlflow, poll_registry
-from .db.setup import setup_db, insert_summary
-from .config import AppSettings
+from .mlmodels import log_system_models
+from .mqtt import listen_to_mqtt, setup_mqtt_client
 from .routers import deployed_models, info, ui
 from .routers.ui import templates
-from .const import ROUTE_PREFIX
-
 
 _logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -37,64 +36,65 @@ def write_healthcheck_file(settings: AppSettings):
         os.close(int(notification_fd))
 
 
-@lru_cache
-def get_settings():
-    # env vars can populate the settings
-    return AppSettings()  # pyright: ignore
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app_settings = get_settings()
     _logger.info("Starting mindctrl server with settings:")
     _logger.info(app_settings.model_dump())
 
-    asyncio.create_task(poll_registry(10.0))
-
     # The buffer should be enhanced to be token-aware
     state_ring_buffer: collections.deque[dict] = collections.deque(maxlen=20)
     _logger.info("Setting up DB")
     # TODO: convert to ABC with a common interface
-    if not app_settings.store.store_type == "psql":
-        raise ValueError(f"unknown store type: {app_settings.store.store_type}")
-    engine = await setup_db(app_settings.store)
-    insert_summary_partial = partial(
-        insert_summary, engine, app_settings.include_challenger_models
-    )
+    if app_settings.store.store_type == "psql":
+        engine = await setup_db(app_settings.store)
+        insert_summary_partial = partial(
+            insert_summary, engine, app_settings.include_challenger_models
+        )
+    if app_settings.store.store_type == "none":
+        insert_summary_partial = insert_summary_dummy
 
     _logger.info("Setting up MQTT")
-    if not app_settings.events.events_type == "mqtt":
-        raise ValueError(f"unknown events type: {app_settings.events.events_type}")
-
-    mqtt_client = setup_mqtt_client(app_settings.events)
-    loop = asyncio.get_event_loop()
-    _logger.info("Starting MQTT listener")
-    mqtt_listener_task = loop.create_task(
-        listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary_partial)
-    )
+    mqtt_listener_task = None
+    if app_settings.events.events_type == "mqtt":
+        mqtt_client = setup_mqtt_client(app_settings.events)
+        loop = asyncio.get_event_loop()
+        _logger.info("Starting MQTT listener")
+        mqtt_listener_task = loop.create_task(
+            listen_to_mqtt(mqtt_client, state_ring_buffer, insert_summary_partial)
+        )
 
     _logger.info("Logging models")
     loaded_models = log_system_models(app_settings.force_publish_models)
     connect_to_mlflow(app_settings)
 
-    write_healthcheck_file(app_settings)
+    _logger.info("Starting workflow manager")
+    with WorkflowContext() as wfc:
+        asyncio.create_task(poll_registry(wfc, 10.0))
 
-    _logger.info("Finished server setup")
-    # Make resources available to requests via .state
-    yield {
-        "state_ring_buffer": state_ring_buffer,
-        "loaded_models": loaded_models,
-        "database_engine": engine,
-    }
+        write_healthcheck_file(app_settings)
 
-    # Cancel the task
-    mqtt_listener_task.cancel()
-    # Wait for the task to be cancelled
-    try:
-        await mqtt_listener_task
-    except asyncio.CancelledError:
-        pass
-    await engine.dispose()
+        _logger.info("Finished server setup")
+        # Make resources available to requests via .state
+        yield {
+            "state_ring_buffer": state_ring_buffer,
+            "loaded_models": loaded_models,
+            "database_engine": engine,
+            "workflow_context": wfc,
+        }
+
+    # TODO: Once the above is moved into an ABC make it a context manager
+    if app_settings.events.events_type == "mqtt" and mqtt_listener_task:
+        # Cancel the task
+        mqtt_listener_task.cancel()
+        # Wait for the task to be cancelled
+        try:
+            await mqtt_listener_task
+        except asyncio.CancelledError:
+            pass
+
+    if app_settings.store.store_type == "psql":
+        await engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

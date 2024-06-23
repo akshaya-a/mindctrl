@@ -1,4 +1,5 @@
 from typing import Any, Optional, Union
+
 from pydantic import BaseModel
 
 
@@ -59,6 +60,17 @@ class ListLabels(Command):
 
 class ListAreas(Command):
     type: str = "config/area_registry/list"
+
+
+class ServiceCall(BaseModel):
+    service: str
+    data: Optional[Any] = {}
+    target: Optional[dict[str, list[str]]]
+
+
+class ExecuteScript(Command):
+    type: str = "execute_script"
+    sequence: list[ServiceCall]
 
 
 # {"color":"indigo","description":null,"icon":"mdi:account","label_id":"test","name":"test"}

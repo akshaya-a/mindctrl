@@ -3,41 +3,43 @@
 # TODO: mainline this feature into mlflow and drop this file
 
 import functools
-from fastapi import Request as fastRequest, HTTPException
 import logging
 import os
 import subprocess
 import sys
 from typing import List, Literal, Optional, Union
+
+from pydantic import Field
 import vcr
+import vcr.stubs.aiohttp_stubs
+from aiohttp import hdrs
+from fastapi import HTTPException
+from fastapi import Request as fastRequest
 
 ## MLflow Patching
 from mlflow.deployments.server.app import GatewayAPI, create_app_from_path
-from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
 from mlflow.deployments.server.runner import Runner
+from mlflow.environment_variables import MLFLOW_DEPLOYMENTS_CONFIG
+from mlflow.exceptions import MlflowException
 from mlflow.gateway.config import RouteConfig
 from mlflow.gateway.providers import get_provider
 from mlflow.gateway.schemas import chat
 from mlflow.gateway.utils import make_streaming_response
-from mlflow.exceptions import MlflowException
-##
-
-## VCR Patching
-from yarl import URL
-import vcr.stubs.aiohttp_stubs
-from vcr.stubs.aiohttp_stubs import (
-    play_responses,
-    record_responses,
-    _build_cookie_header,
-    _serialize_headers,
-    _build_url_with_params,
-)
 from vcr.errors import CannotOverwriteExistingCassetteException
 from vcr.request import Request
-from aiohttp import hdrs
+from vcr.stubs.aiohttp_stubs import (
+    _build_cookie_header,
+    _build_url_with_params,
+    _serialize_headers,
+    play_responses,
+    record_responses,
+)
 
 ##
+## VCR Patching
+from yarl import URL
 
+##
 from .const import (
     REPLAY_SERVER_INPUT_FILE_SUFFIX,
     REPLAY_SERVER_OUTPUT_FILE_SUFFIX,
@@ -124,8 +126,24 @@ def create_app_from_env() -> GatewayAPI:
         # mctrl_header = {"User-Agent": f"mindctrl/{mindctrl.__version__}"}
         mctrl_header = {"User-Agent": "mindctrl/0.1.0"}
 
-        from mlflow.gateway.base_models import ResponseModel
+        from mlflow.gateway.base_models import ResponseModel, RequestModel
+        from mlflow.gateway.schemas.chat import (
+            BaseRequestPayload,
+            _REQUEST_PAYLOAD_EXTRA_SCHEMA,
+        )
         from mlflow.gateway.providers.utils import send_request
+
+        class RequestMessage(RequestModel):
+            role: str
+            content: Optional[str] = None
+            tool_call_id: Optional[str] = None
+            name: Optional[str] = None
+
+        class RequestPayload(BaseRequestPayload):
+            messages: List[RequestMessage] = Field(..., min_length=1)
+
+            class Config:
+                json_schema_extra = _REQUEST_PAYLOAD_EXTRA_SCHEMA
 
         class Function(ResponseModel):
             name: str
@@ -162,6 +180,7 @@ def create_app_from_env() -> GatewayAPI:
         async def chat_with_tools(self, payload):
             from fastapi.encoders import jsonable_encoder
 
+            print("AI REQUEST", payload)
             payload = jsonable_encoder(payload, exclude_none=True)
             self.check_for_model_field(payload)
             all_headers = {**self._request_headers, **mctrl_header}
@@ -171,7 +190,7 @@ def create_app_from_env() -> GatewayAPI:
                 path="chat/completions",
                 payload=self._add_model_to_payload_if_necessary(payload),
             )
-            print(resp)
+            print("AI RESPONSE", resp)
 
             return ResponsePayload(
                 id=resp["id"],
@@ -183,7 +202,7 @@ def create_app_from_env() -> GatewayAPI:
                         index=idx,
                         message=ResponseMessage(
                             role=c["message"]["role"],
-                            content=c["message"]["content"] or "",
+                            content=c["message"].get("content", ""),
                             tool_calls=c["message"].get("tool_calls"),  # type: ignore
                         ),
                         finish_reason=c["finish_reason"],
@@ -199,6 +218,8 @@ def create_app_from_env() -> GatewayAPI:
 
         import mlflow.gateway.schemas.chat
 
+        mlflow.gateway.schemas.chat.RequestMessage = RequestMessage
+        mlflow.gateway.schemas.chat.RequestPayload = RequestPayload
         mlflow.gateway.schemas.chat.ResponseMessage = ResponseMessage
         mlflow.gateway.schemas.chat.ResponsePayload = ResponsePayload
         mlflow.gateway.schemas.chat.Choice = Choice

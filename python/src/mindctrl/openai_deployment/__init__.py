@@ -219,7 +219,7 @@ def _log_secrets_yaml(local_model_dir, scope):
 
 def _parse_format_fields(s) -> Set[str]:
     """Parses format fields from a given string, e.g. "Hello {name}" -> ["name"]."""
-    return {fn for _, fn, _, _ in Formatter().parse(s) if fn is not None}
+    return {fn for _, fn, _, _ in Formatter().parse(s or "") if fn is not None}
 
 
 def _get_input_schema(task, content):
@@ -557,22 +557,12 @@ def _load_model(path):
 
 
 def _is_valid_message(d):
-    return isinstance(d, dict) and "content" in d and "role" in d
+    return isinstance(d, dict) and "role" in d and ("content" in d or "tool_calls" in d)
 
 
 class _ContentFormatter:
     def __init__(self, task, template=None):
-        if task == "completions":
-            template = template or "{prompt}"
-            if not isinstance(template, str):
-                raise mlflow.MlflowException.invalid_parameter_value(
-                    f"Template for task {task} expects type `str`, but got {type(template)}."
-                )
-
-            self.template = template
-            self.format_fn = self.format_prompt
-            self.variables = sorted(_parse_format_fields(self.template))
-        elif task == "chat.completions":
+        if task == "chat.completions":
             if not template:
                 template = [{"role": "user", "content": "{content}"}]
             if not all(map(_is_valid_message, template)):
@@ -583,18 +573,31 @@ class _ContentFormatter:
 
             self.template = template.copy()
             self.format_fn = self.format_chat
-            self.variables = sorted(
-                set(
-                    itertools.chain.from_iterable(
-                        _parse_format_fields(message.get("content"))
-                        | _parse_format_fields(message.get("role"))
-                        for message in self.template
-                    )
-                )
-            )
+            print("SKIPPING WEIRD AUTOPARSE")
+            self.variables = sorted(set())
+            # self.variables = sorted(
+            #     set(
+            #         itertools.chain.from_iterable(
+            #             _parse_format_fields(message.get("content", ""))
+            #             | _parse_format_fields(message.get("role"))
+            #             | _parse_format_fields(message.get("tool_call_id", ""))
+            #             | _parse_format_fields(message.get("name", ""))
+            #             for message in self.template
+            #         )
+            #     )
+            # )
             if not self.variables:
-                self.template.append({"role": "user", "content": "{content}"})
+                self.template.append({
+                    "role": "{role}",
+                    "content": "{content}",
+                    "name": "{name}",
+                    "tool_call_id": "{tool_call_id}"
+                })
                 self.variables.append("content")
+                self.variables.append("role")
+                self.variables.append("name")
+                self.variables.append("tool_call_id")
+
         else:
             raise mlflow.MlflowException.invalid_parameter_value(
                 f"Task type ``{task}`` is not supported for formatting."
@@ -613,13 +616,20 @@ class _ContentFormatter:
 
     def format_chat(self, **params):
         format_args = {v: params[v] for v in self.variables}
-        return [
-            {
-                "role": message.get("role").format(**format_args),
-                "content": message.get("content").format(**format_args),
-            }
-            for message in self.template
-        ]
+        result = []
+        for index, message in enumerate(self.template):
+            # Only do the templating on the first or last messages + system message
+            if index < 2 or index == len(self.template) - 1:
+                message["role"] = message.get("role").format(**format_args)
+                if "content" in message and message.get("content"):
+                    message["content"] = message.get("content").format(**format_args)
+                if "name" in message and message.get("name"):
+                    message["name"] = message.get("name").format(**format_args)
+                if "tool_call_id" in message and message.get("tool_call_id"):
+                    message["tool_call_id"] = message.get("tool_call_id").format(**format_args)
+
+            result.append(message)
+        return result
 
 
 def _first_string_column(pdf):
@@ -650,7 +660,7 @@ class _OpenAIDeploymentWrapper:
         if self.task == "chat.completions":
             self.template = self.model.get("messages", [])
         else:
-            self.template = self.model.get("prompt")
+            raise ValueError(f"Unsupported task: {self.task}")
         self.formater = _ContentFormatter(self.task, self.template)
 
     def format_completions(self, params_list):
@@ -743,12 +753,14 @@ class _OpenAIDeploymentWrapper:
 
         responses = []
         for r in requests:
+            print("SENDING AI REQUEST", r)
             response = deploy_client.predict(
                 endpoint=matched_endpoint.name,
                 inputs=r,
             )
             responses.append(response)
 
+        # TODO: Better to return a more complex object (tuple) that says it was a tool call
         result = []
         for r in responses:
             if r["choices"][0]["finish_reason"]== "tool_calls":

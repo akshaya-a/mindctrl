@@ -1,7 +1,9 @@
 import asyncio
 import logging
-from typing import Union
+import os
 import time
+from typing import Union
+
 import httpx
 from httpx_ws import aconnect_ws
 from pydantic import ValidationError
@@ -16,6 +18,7 @@ from .messages import (
     CreateAutomation,
     CreateLabel,
     Error,
+    ExecuteScript,
     Label,
     LabelsResult,
     ListAreas,
@@ -23,6 +26,7 @@ from .messages import (
     ListLabels,
     ManyResponsesWrapper,
     Result,
+    ServiceCall,
     SingleResponseWrapper,
     UpdateEntityLabels,
 )
@@ -59,7 +63,7 @@ class HassClient(object):
     @property
     def authenticated_session(self):
         if not self._authenticated_session:
-            raise ValueError("Session not authenticated")
+            raise ValueError("Session not authenticated or not started (enter context)")
         return self._authenticated_session
 
     async def __aenter__(self):
@@ -150,9 +154,7 @@ class HassClient(object):
         entities = await self.list_entities()
         _logger.debug(entities)
         automation_entities = [
-            entity
-            for entity in entities
-            if entity["platform"] == "automation"
+            entity for entity in entities if entity["platform"] == "automation"
         ]
 
         _logger.info(f"Fetching {len(automation_entities)} automations")
@@ -164,12 +166,12 @@ class HassClient(object):
     async def list_labels(self):
         any_result = await self._send_message(ListLabels(id=-1))
         labels = LabelsResult.model_validate_json(any_result.model_dump_json())
-        return labels.result
+        return labels
 
     async def list_areas(self):
         any_result = await self._send_message(ListAreas(id=-1))
         areas = AreasResult.model_validate_json(any_result.model_dump_json())
-        return areas.result
+        return areas
 
     async def create_label(self, label: Label):
         await self._send_message(
@@ -227,3 +229,84 @@ class HassClient(object):
         response.raise_for_status()
         # response.json() is just {'result': 'ok'}, need to do a get (why?)
         return await self.get_automation(str(current_milli_time))
+
+    @staticmethod
+    def _generate_service_call(service: str, target: dict):
+        return ExecuteScript(
+            id=-1, sequence=[ServiceCall(service=service, target=target)]
+        )
+
+    async def _send_service_call(self, service: str, target: dict):
+        message = HassClient._generate_service_call(service, target)
+        resp = await self._send_message(message)
+        if not resp.success:
+            raise HassClientError(f"Error: {resp}")
+
+    async def light_toggle(self, area_id: str):
+        return await self._send_service_call("light.toggle", {"area_id": [area_id]})
+
+    async def light_turn_on(self, area_id: str):
+        return await self._send_service_call("light.turn_on", {"area_id": [area_id]})
+
+    # TODO: After evaluating the prompting, see if a mixin approach would be better without params
+    # For example class Area(Targetable, Lightable, Switchable, Sonosable, etc.):
+    # This might be better than adding every targetting mechanism to each service?
+    async def light_turn_off(self, area_id: str):
+        return await self._send_service_call("light.turn_off", {"area_id": [area_id]})
+
+
+def hass_client_from_dapr():
+    from dapr.clients import DaprClient
+
+    DaprClient().get_secret("hass", "token")
+    raise NotImplementedError("Not implemented")
+
+
+def hass_client_from_env(id: str = ""):
+    # TODO: Move these to constants
+    url = os.environ["HASS_SERVER"]
+    token = os.environ["HASS_TOKEN"]
+    # print(f"TOKEN: {token[:10]}")
+    _logger.info(f"Connecting to Home Assistant at {url}")
+    return HassClient(id, httpx.URL(f"{url}/api"), token)
+
+
+async def run_api(client, func, *args, **kwargs):
+    async with client:
+        return await func(*args, **kwargs)
+
+
+def list_areas():
+    """List all areas(rooms) in the home with their area_id and friendly name."""
+    client = hass_client_from_env()
+    return asyncio.run(run_api(client, client.list_areas))
+
+
+def light_turn_on(area_id: str):
+    """Turn on the light in the area"""
+    client = hass_client_from_env()
+    return asyncio.run(run_api(client, client.light_turn_on, area_id))
+
+
+def light_turn_off(area_id: str):
+    """Turn off the light in the area"""
+    client = hass_client_from_env()
+    return asyncio.run(run_api(client, client.light_turn_off, area_id))
+
+
+def light_toggle(area_id: str):
+    """Toggle the light in the area"""
+    client = hass_client_from_env()
+    return asyncio.run(run_api(client, client.light_toggle, area_id))
+
+
+# TODO: This is going to grow past context limits
+# Need to run the intent query on phi/local/classifier
+# Or maybe embed every domain and embed the incoming chat
+# and add the top domain to the context
+TOOL_MAP = {
+    "list_areas": list_areas,
+    "light_turn_on": light_turn_on,
+    "light_turn_off": light_turn_off,
+    "light_toggle": light_toggle,
+}

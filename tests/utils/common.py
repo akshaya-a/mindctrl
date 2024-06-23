@@ -1,18 +1,17 @@
 import logging
 import multiprocessing
-from pathlib import Path
-import time
-from typing import Iterator, Optional, Union
-import httpx
-from python_on_whales import docker as docker_cli
-from docker import DockerClient
 import socket
-from uvicorn import Config, Server
-from testcontainers.core.container import DockerContainer
-from testcontainers.postgres import PostgresContainer
+import time
+from pathlib import Path
+from typing import Callable, Iterator, Optional, Union
 
 import constants
-
+import httpx
+from docker import DockerClient
+from python_on_whales import docker as docker_cli
+from testcontainers.core.container import DockerContainer
+from testcontainers.postgres import PostgresContainer
+from uvicorn import Config, Server
 
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +53,11 @@ def push_app(tag: str, client: DockerClient):
         _logger.debug(line)
 
 
-def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
+def wait_for_readiness(
+    url: str,
+    max_attempts=constants.MAX_ATTEMPTS,
+    timeout_callback: Optional[Callable] = None,
+):
     _logger.info(f"Waiting for fixture startup at {url}...........")
     attempts = 1
     while attempts <= max_attempts:
@@ -65,18 +68,21 @@ def wait_for_readiness(url: str, max_attempts=constants.MAX_ATTEMPTS):
                 return
             elif response.status_code >= 400 and response.status_code < 500:
                 raise ValueError(f"Failed to reach {url}:\n{response}\n{response.text}")
-        except httpx.RemoteProtocolError as e:
-            _logger.debug(f"Waiting for fixture startup at {url}...{e}")
-        except httpx.ConnectError as e:
-            _logger.debug(f"Waiting for fixture startup at {url}...{e}")
-        except httpx.ReadError as e:
+        except (
+            httpx.RemoteProtocolError,
+            httpx.ConnectError,
+            httpx.ReadError,
+            httpx.ReadTimeout,
+        ) as e:
             _logger.debug(f"Waiting for fixture startup at {url}...{e}")
         finally:
             attempts += 1
             time.sleep(2)
 
     if attempts > max_attempts:
-        raise RuntimeError(f"Failed to reach {url} after {max_attempts} attempts")
+        if timeout_callback:
+            timeout_callback()
+        raise TimeoutError(f"Failed to reach {url} after {max_attempts} attempts")
 
 
 class UvicornServer(multiprocessing.Process):
@@ -137,10 +143,16 @@ class ServiceContainer(DockerContainer):
             self.with_exposed_ports(self.port_to_expose)
         self.log_debug = log_debug
 
+    def get_readiness_url(self):
+        return self.get_base_url()
+
     def get_base_url(self):
         if self.host_network_mode:
             return f"http://localhost:{self.port_to_expose}"
         return f"http://{self.get_container_host_ip()}:{self.get_exposed_port(self.port_to_expose)}"
+
+    def dump_logs(self):
+        dump_container_logs(self, self.log_debug)
 
     def stop(self, force=True, delete_volume=True):
         _logger.info(f"Stopping {self.__class__.__name__}")
@@ -150,10 +162,13 @@ class ServiceContainer(DockerContainer):
 
 class HAContainer(ServiceContainer):
     def __init__(self, config_dir: Path, **kwargs):
-        super().__init__("ghcr.io/home-assistant/home-assistant:stable", port=8123, **kwargs)
+        super().__init__(
+            "ghcr.io/home-assistant/home-assistant:stable", port=8123, **kwargs
+        )
         self.with_env("TZ", "America/Los_Angeles")
         self.with_kwargs(privileged=True)
         self.with_volume_mapping(str(config_dir), "/config", "rw")
+
 
 def get_external_host_port(
     container: Union[ServiceContainer, PostgresContainer],

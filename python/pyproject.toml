@@ -13,6 +13,14 @@ classifiers = [
     "Operating System :: OS Independent",
     "Private :: Do Not Upload" # Currently just for local + cluster packaging. Publish once evals are in
 ]
+# TODO: Remove the prerelease
+dependencies = [
+  "dapr",
+  "dapr-ext-fastapi",
+  "dapr-ext-workflow>=0.4.0",
+  "durabletask>=0.1.1a1",
+  "mlflow-skinny"
+]
 
 [project.scripts]
 mindctrl = "mindctrl.cli:cli"

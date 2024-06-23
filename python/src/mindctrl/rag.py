@@ -1,10 +1,11 @@
+import json
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from fastapi import Request
-import json
-from pydantic import BaseModel
 from itertools import islice
+
+from fastapi import Request
+from pydantic import BaseModel
 
 
 class EventType(Enum):
