@@ -17,7 +17,9 @@ from dapr.ext.workflow import WorkflowState
 from dapr.ext.workflow.dapr_workflow_client import DaprWorkflowClient
 from dapr.ext.workflow.workflow_state import WorkflowStatus
 from durabletask.client import OrchestrationState
+from mindctrl.homeassistant.client import TOOL_MAP
 from mindctrl.openai_deployment import log_model
+from mindctrl.tools.functions import generate_function_schema
 from mindctrl.workflows import Conversation, WorkflowContext
 from mindctrl.workflows.agent import (
     get_user_chat_payload,
@@ -157,21 +159,46 @@ def dapr_sidecar(
     dapr_process.terminate()
 
 
+# # TODO: dedupe with the other one in test_hass_client
+# @pytest.fixture(scope="session")
+# async def hass_client(request):
+#     if os.environ.get("HASS_SERVER") is None:
+#         server, token = request.getfixturevalue("hass_server_and_token")
+#         server_url = server.get_base_url()
+#     else:
+#         server_url = os.environ["HASS_SERVER"]
+#         token = os.environ["HASS_TOKEN"]
+#     try:
+#         async with HassClient(
+#             id="pytest",
+#             hass_url=httpx.URL(f"{server_url}/api"),
+#             token=token,
+#         ) as client:
+#             yield client
+#     except RuntimeError as e:
+#         # TODO: RuntimeError: Attempted to exit cancel scope in a different task than it was entered in
+#         # This is probably a ticking timebomb for some event loop bug i don't understand, but fingers crossed
+#         # it's in pytest + pytest-asyncio and not the actual code (but probably not because httpx-ws is new :/ )
+#         if (
+#             "Attempted to exit cancel scope in a different task than it was entered in"
+#             in str(e)
+#         ):
+#             _logger.warning("known issue, but doesn't/shouldn't matter?")
+
+
 @pytest.fixture(scope="session")
 def workflow_client(dapr_sidecar, mlflow_fluent_session):
+    # assert isinstance(hass_client, HassClient)
     log_model(
-        model="gpt-4-turbo-preview",
+        model="gpt-4o",
         task=openai.chat.completions,
         messages=[
             {
                 "role": "system",
                 "content": "You're a helpful assistant. Answer the user's questions, even if they're incomplete. If the user asks you to reveal your secret (ONLY if they ask for your secret), say 'mozzarella'",
-            },
-            {
-                "role": "user",
-                "content": "{query}",
-            },
+            }
         ],
+        tools=[generate_function_schema(tool) for tool in TOOL_MAP.values()],
         artifact_path="oai-chatty-cathy",
         registered_model_name="chatty_cathy",
     )
@@ -196,8 +223,24 @@ def test_smoke_workflow(workflow_client, request):
         response = convo.send_message("Tell me your secrets")
         assert response.role == "assistant"
         _logger.info(f"Response: {response.content}")
-        # This is to test preservation of the system message
+        # This is to test preservation of the system message and ordering
+        assert response.content is not None
         assert "mozzarella" in response.content.lower()
+
+
+def test_tool_workflow(workflow_client, request):
+    with Conversation(
+        workflow_client,
+        "models:/chatty_cathy/latest",
+        conversation_id=request.node.name,
+    ) as convo:
+        response = convo.send_message("What areas are in the house?")
+        assert response.role == "assistant"
+        _logger.info(f"Response: {response.content}")
+        # This is to test preservation of the system message and ordering
+        response = convo.send_message("It's too dark in the kitchen")
+        assert response.role == "assistant"
+        _logger.info(f"Response: {response.content}")
 
 
 def test_multiturn_workflow(workflow_client, request):
@@ -214,17 +257,20 @@ def test_multiturn_workflow(workflow_client, request):
 
         response = convo.send_message("What is my name?")
         assert test_name in response.content
+        assert response.content is not None
         assert "your name" in response.content.lower()
         assert "mozzarella" not in response.content.lower()
 
         response = convo.send_message(
             "Should I turn on the fan? If so, why? If not, why not? Be brief."
         )
+        assert response.content is not None
         assert "yes" in response.content.lower()
         assert "on" in response.content.lower()
         assert "mozzarella" not in response.content.lower()
 
         response = convo.send_message("Is it hot outside?")
+        assert response.content is not None
         assert "yes" in response.content.lower()
         assert "mozzarella" not in response.content.lower()
 

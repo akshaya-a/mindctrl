@@ -9,6 +9,7 @@ import subprocess
 import sys
 from typing import List, Literal, Optional, Union
 
+from pydantic import Field
 import vcr
 import vcr.stubs.aiohttp_stubs
 from aiohttp import hdrs
@@ -125,8 +126,24 @@ def create_app_from_env() -> GatewayAPI:
         # mctrl_header = {"User-Agent": f"mindctrl/{mindctrl.__version__}"}
         mctrl_header = {"User-Agent": "mindctrl/0.1.0"}
 
-        from mlflow.gateway.base_models import ResponseModel
+        from mlflow.gateway.base_models import ResponseModel, RequestModel
+        from mlflow.gateway.schemas.chat import (
+            BaseRequestPayload,
+            _REQUEST_PAYLOAD_EXTRA_SCHEMA,
+        )
         from mlflow.gateway.providers.utils import send_request
+
+        class RequestMessage(RequestModel):
+            role: str
+            content: Optional[str] = None
+            tool_call_id: Optional[str] = None
+            name: Optional[str] = None
+
+        class RequestPayload(BaseRequestPayload):
+            messages: List[RequestMessage] = Field(..., min_length=1)
+
+            class Config:
+                json_schema_extra = _REQUEST_PAYLOAD_EXTRA_SCHEMA
 
         class Function(ResponseModel):
             name: str
@@ -163,6 +180,7 @@ def create_app_from_env() -> GatewayAPI:
         async def chat_with_tools(self, payload):
             from fastapi.encoders import jsonable_encoder
 
+            print("AI REQUEST", payload)
             payload = jsonable_encoder(payload, exclude_none=True)
             self.check_for_model_field(payload)
             all_headers = {**self._request_headers, **mctrl_header}
@@ -172,7 +190,7 @@ def create_app_from_env() -> GatewayAPI:
                 path="chat/completions",
                 payload=self._add_model_to_payload_if_necessary(payload),
             )
-            print(resp)
+            print("AI RESPONSE", resp)
 
             return ResponsePayload(
                 id=resp["id"],
@@ -184,7 +202,7 @@ def create_app_from_env() -> GatewayAPI:
                         index=idx,
                         message=ResponseMessage(
                             role=c["message"]["role"],
-                            content=c["message"]["content"] or "",
+                            content=c["message"].get("content", ""),
                             tool_calls=c["message"].get("tool_calls"),  # type: ignore
                         ),
                         finish_reason=c["finish_reason"],
@@ -200,6 +218,8 @@ def create_app_from_env() -> GatewayAPI:
 
         import mlflow.gateway.schemas.chat
 
+        mlflow.gateway.schemas.chat.RequestMessage = RequestMessage
+        mlflow.gateway.schemas.chat.RequestPayload = RequestPayload
         mlflow.gateway.schemas.chat.ResponseMessage = ResponseMessage
         mlflow.gateway.schemas.chat.ResponsePayload = ResponsePayload
         mlflow.gateway.schemas.chat.Choice = Choice

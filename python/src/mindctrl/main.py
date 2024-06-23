@@ -5,7 +5,7 @@ import os
 
 # Eventing - move this to plugin
 from contextlib import asynccontextmanager
-from functools import lru_cache, partial
+from functools import partial
 
 import mlflow
 
@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse
 
 from mindctrl.workflows import WorkflowContext
 
-from .config import AppSettings
+from .config import AppSettings, get_settings
 from .const import ROUTE_PREFIX
 from .db.setup import insert_summary, insert_summary_dummy, setup_db
 from .mlflow_bridge import connect_to_mlflow, poll_registry
@@ -34,12 +34,6 @@ def write_healthcheck_file(settings: AppSettings):
     if notification_fd:
         os.write(int(notification_fd), b"\n")
         os.close(int(notification_fd))
-
-
-@lru_cache
-def get_settings():
-    # env vars can populate the settings
-    return AppSettings()  # pyright: ignore
 
 
 @asynccontextmanager

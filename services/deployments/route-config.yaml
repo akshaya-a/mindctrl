@@ -23,6 +23,14 @@ endpoints:
       config:
         openai_api_key: $OPENAI_API_KEY
 
+  - name: chat4o
+    endpoint_type: llm/v1/chat
+    model:
+      provider: openai
+      name: gpt-4o
+      config:
+        openai_api_key: $OPENAI_API_KEY
+
   - name: embeddings
     endpoint_type: llm/v1/embeddings
     model:

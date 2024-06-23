@@ -3,7 +3,7 @@
 import json
 import logging
 import uuid
-from typing import Optional
+from typing import Callable, Optional
 
 import mlflow.pyfunc
 from dapr.ext.workflow import WorkflowRuntime
@@ -16,6 +16,7 @@ from .agent import (
     append_message,
     conversation_turn_workflow,
     invoke_model,
+    invoke_tool,
 )
 from .deployer import (
     check_deployment_status,
@@ -94,6 +95,7 @@ class WorkflowContext:
         _logger.info("Registering activities")
         self._workflow_runtime.register_activity(append_message)
         self._workflow_runtime.register_activity(invoke_model)
+        self._workflow_runtime.register_activity(invoke_tool)
 
     def _register_deployer_workflow(self):
         _logger.info("Registering deployer workflows")
@@ -117,12 +119,18 @@ class Conversation:
         self.conversation_id: str = conversation_id or uuid.uuid4().hex
         self.client = client
         self.turn_ids: list[str] = []
+        self.tools: list[Callable] = []
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+    # TODO: Fix the mlflow model predict API to allow dynamic tool input
+    # not at log_model time.
+    def add_tool(self, tool):
+        self.tools.append(tool)
 
     def send_message(self, message: str) -> Message:
         turn_id = f"{self.conversation_id}-{len(self.turn_ids)}"

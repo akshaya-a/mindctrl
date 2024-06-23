@@ -172,6 +172,7 @@ def postgres(deploy_mode: DeployMode):
             result = connection.execute(sqlalchemy.text("select version()"))
             (version,) = result.fetchone()  # pyright: ignore
             _logger.info(version)
+
         yield p
         dump_container_logs(p, debug=True)
 
